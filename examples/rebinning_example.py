@@ -15,26 +15,19 @@ import natsort
 import glob
 import mcnptools.mcnpio as io
 
-file1V1 = glob.glob('../../BECA-simulations/MCNP-BECA/detector-response/SSW-SSR/many/out/02-*.o')
-file1V2 = glob.glob('../../BECA-simulations/MCNP-BECA/detector-response/SSW-SSR/many/out2/02-*.o')
-file1 = file1V1 + file1V2
-files1 = natsort.natsorted(file1)
 
-## read file 1
-## read file 3
-cts_sum = 0
-for f in files1:
-    df1 = io.read_output(f, tally=8, n=1, tally_type='e', particle='p')
-    cts_sum = cts_sum + df1['cts']   
-df1['cts'] = cts_sum
+file = "data/SSR-mcnp.hdf"
+df = pd.read_hdf(file, key='data')
 
-df1.set_index("energy", inplace=True)
+# delete first (large) bin
+df = df.iloc[1:,:]
 
-cts_np= df1.to_numpy()[:,0]
-
+cts_np = df.cts.to_numpy() * 1e8
+erg = np.array(df.index)
+chan = np.arange(0,len(cts_np),1)
 
 # instantiate a Spectrum object and rebin by 2
-spect = sp.Spectrum(counts=cts_np, energies=df1.index)
+spect = sp.Spectrum(counts=cts_np, energies=erg)
 ener2, cts2 = spect.rebin()
 
 spect4 = sp.Spectrum(counts=cts2, energies=ener2)
@@ -42,7 +35,7 @@ ener4, cts4 = spect4.rebin()
 
 
 plt.figure()
-plt.plot(df1.index, df1.cts, label="Original")
+plt.plot(erg, cts_np, label="Original")
 plt.plot(ener2, cts2, label="Rebinned by 2")
 plt.plot(ener4, cts4, label="Rebinned by 4")
 plt.yscale("log")
@@ -53,12 +46,12 @@ plt.xlabel("Energy [MeV]")
 
 ## smoothing
 
-spect_mv = sp.Spectrum(counts=cts_np, energies=df1.index)
-cts_mv = spect_mv.smooth(num=5)
+spect_mv = sp.Spectrum(counts=cts_np, energies=erg)
+cts_mv = spect_mv.smooth(num=8)
 
 plt.figure()
-plt.plot(df1.index, df1.cts, label="Original")
-plt.plot(df1.index, cts_mv, label="Smoothing by 5")
+plt.plot(erg, cts_np, label="Original")
+plt.plot(erg, cts_mv, label="Smoothing by 5")
 plt.yscale("log")
 plt.legend()
 plt.ylabel("cts/s/MeV")
