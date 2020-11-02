@@ -221,7 +221,80 @@ class PeakFit:
             t.auto_set_font_size(False)
             t.set_fontsize(14)
             f_ax3.axis('off')
+
+def ecalibration(mean_vals, erg, channels, n=1):
+    y0 = np.array(erg, dtype=float)
+    x0 = np.array(mean_vals, dtype=float)
+    poly_mod = lmfit.models.PolynomialModel(degree=n)
+    pars = poly_mod.guess(y0, x=x0)
+    model = poly_mod
+    fit = model.fit(y0, params=pars, x=x0)
+    predicted = fit.eval(x=channels)
+    return predicted, fit
+
+
+class GaussianComponents:
+    def __init__(self, fit_obj_lst=None, df_peak=None):
+        self.fit_obj_lst = fit_obj_lst
+        self.df_peak = df_peak
+        self.npeaks = 0
+        self.mean = []
+        self.area = []
+        self.fwhm = []
+        self.gauss = []
+        self.x_data = []
+        if fit_obj_lst is not None:
+            self.gauss_peakfit()
+        elif df_peak is not None:
+            self.gauss_df()
+            
+    def gauss_peakfit(self):
+        for fit_obj in self.fit_obj_lst:
+            npeaks = len(fit_obj.peak_info)
+            self.npeaks = npeaks
+            comps = fit_obj.fit_result.eval_components()
+            for i in range(npeaks):
+                x_data = fit_obj.x_data
+                self.x_data.append(x_data)
+                m = list(fit_obj.peak_info[i].keys())[0]
+                a = list(fit_obj.peak_info[i].keys())[0]
+                f = list(fit_obj.peak_info[i].keys())[0]
+                mean = fit_obj.peak_info[i][m]
+                area = fit_obj.peak_info[i][a]
+                fwhm = fit_obj.peak_info[i][f]
+                g = list(fit_obj.fit_result.eval_components().keys())[i+1]
+                gauss = comps[g]
+                self.mean.append(mean)
+                self.area.append(area)
+                self.fwhm.append(fwhm)
+                self.gauss.append(gauss)
         
+    def gauss_df(self):
+        self.npeaks = self.df_peak.index.shape[0]
+        for i in self.df_peak.index:
+            self.x_data.append(self.df_peak.loc[i,"x_data"])
+            self.gauss.append(self.df_peak.loc[i, "gauss"])
+            self.mean.append( self.df_peak.loc[i,"mean"])
+            self.area.append(self.df_peak.loc[i,"area"])
+            self.fwhm.append(self.df_peak.loc[i,"fwhm"])
+                
+    def plot_gauss(self):
+        plt.figure(figsize=(10,8))
+        for i in range(self.npeaks):
+            x = self.x_data[i]
+            y = self.gauss[i]
+            plt.fill_between(x, 0, y, alpha=0.5) 
+            x0 = round(self.mean[i], 2)
+            y0 = y.max()
+            a = round(self.area[i], 2)
+            str0 = f"mean={x0} \narea={a}"
+            plt.text(x0,y0, str0)
+        plt.xlabel("Channels")
+        plt.ylabel("a.u")
+        
+            
+    
+            
             
 class AddPeaks:
     
@@ -248,10 +321,16 @@ class AddPeaks:
         npeaks = len(fit_obj.peak_info)
         
         # save to pandas dataframe
+        x_data = fit_obj.x_data
+        y_data = fit_obj.y_data
+        best_fit = fit_obj.fit_result.best_fit
+        redchi = fit_obj.fit_result.redchi
+        bkg = list(fit_obj.fit_result.eval_components().keys())[0]
+        comps = fit_obj.fit_result.eval_components()
+        uncertainty = fit_obj.fit_result.eval_uncertainty()
+        bkg = fit_obj.bkg
         for i in range(npeaks):
-            x_data = fit_obj.x_data
             self.df.loc[self.n, 'x_data'] = x_data
-            y_data = fit_obj.y_data
             self.df.loc[self.n, 'y_data'] = y_data
             mean = list(fit_obj.peak_info[i].keys())[0]
             self.df.loc[self.n, 'mean'] = fit_obj.peak_info[i][mean]
@@ -259,18 +338,12 @@ class AddPeaks:
             self.df.loc[self.n, 'area'] = fit_obj.peak_info[i][area]
             fwhm = list(fit_obj.peak_info[i].keys())[2]
             self.df.loc[self.n, 'fwhm'] = fit_obj.peak_info[i][fwhm]
-            best_fit = fit_obj.fit_result.best_fit
             self.df.loc[self.n, 'best_fit'] = best_fit
-            redchi = fit_obj.fit_result.redchi
             self.df.loc[self.n, 'redchi'] = redchi
-            bkg = list(fit_obj.fit_result.eval_components().keys())[0]
-            comps = fit_obj.fit_result.eval_components()
             self.df.loc[self.n, 'bkg'] = comps[bkg]
             gauss = list(fit_obj.fit_result.eval_components().keys())[i+1]
             self.df.loc[self.n, 'gauss'] = comps[gauss]
-            uncertainty = fit_obj.fit_result.eval_uncertainty()
             self.df.loc[self.n, 'uncertainty'] = uncertainty
-            bkg = fit_obj.bkg
             self.df.loc[self.n, 'bkg_type'] = bkg
             self.n += 1
         self.df.to_hdf(f"{self.filename}.hdf", key="data")
@@ -337,9 +410,6 @@ def auto_scan(search, lst=None, plot=False, save_to_hdf=False):
         fits.append(fitx)
     return fits
    
-
-    
-    
     
     
     
