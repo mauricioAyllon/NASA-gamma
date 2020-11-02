@@ -162,7 +162,7 @@ class PeakSearch:
             else:
                 x0 = self.spectrum.energies[xc]
             plt.axvline(x=x0, color='red', linestyle='-', alpha=0.5)
-        plt.legend()
+        plt.legend(loc=1)
         plt.title(f"SNR > {self.min_snr}")
         plt.ylim(1e-1)
         plt.ylabel("Cts/MeV/s")
@@ -176,7 +176,7 @@ class PeakSearch:
             x = self.spectrum.energies
         plt.rc("font", size=14) 
         plt.style.use("seaborn-darkgrid")
-        plt.figure()
+        plt.figure(figsize=(10,6))
         plt.plot(x, self.spectrum.counts, label='Raw spectrum')
         plt.plot(x, self.peak_plus_bkg.clip(1e-1), label='Peaks+Continuum')
         plt.plot(x, self.bkg.clip(1e-1), label='Continuum')
@@ -185,9 +185,9 @@ class PeakSearch:
         plt.yscale('log')
         #plt.xlim(0, len(spec))
         plt.ylim(3e-1)
-        #plt.xlabel('Channels')
+        plt.xlabel(self.spectrum.x_units)
         plt.ylabel('Counts')
-        plt.legend()
+        plt.legend(loc=1)
         plt.style.use("default")
 
         
