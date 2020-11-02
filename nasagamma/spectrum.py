@@ -36,8 +36,10 @@ class Spectrum():
             channels = np.arange(0,len(counts)+1,1)
         if energies is not None:
             self.energies = np.array(energies, dtype=float)
+            self.x_units = "Energy"
         else:
             self.energies = energies
+            self.x_units = "Channels"
 
         self.counts = np.array(counts, dtype=float)
         self.channels = np.array(channels, dtype=int)
@@ -89,7 +91,7 @@ class Spectrum():
             en = (en0 + en1) / 2
             return en, y
     
-    def plot(self):
+    def plot(self, scale='log'):
         x = self.channels[:-1]
         y = self.counts
         integral = round(y.sum())
@@ -98,7 +100,7 @@ class Spectrum():
         plt.figure()
         plt.fill_between(x, 0, y, alpha=0.5, color="C0", step="pre")
         plt.plot(x,y, drawstyle="steps")
-        plt.yscale("log")
+        plt.yscale(scale)
         plt.title(f"Raw Spectrum. Integral = {integral}")
         plt.xlabel("Channels")
         plt.ylabel("a.u")
@@ -112,7 +114,7 @@ class Spectrum():
             plt.figure()
             plt.fill_between(x, 0, y, alpha=0.5, color="C1", step="pre")
             plt.plot(x,y, color="C1", drawstyle="steps")
-            plt.yscale("log")
+            plt.yscale(scale)
             plt.title(f"Raw Spectrum. Integral = {integral}")
             plt.xlabel("Energy")
             plt.ylabel("a.u")
