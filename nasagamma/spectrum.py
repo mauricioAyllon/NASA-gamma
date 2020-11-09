@@ -13,33 +13,41 @@ class Spectrum():
     Initialize a Spectrum.
 
     Data Attributes:
-      counts: counts per bin, or cps
+      counts: counts per bin, or count rate
       channels: np.array of raw/uncalibrated bin edges
       energies: np.array of energy bin edges, if calibrated
      
     """
 
-    def __init__(self, counts=None, channels=None, energies=None):
+    def __init__(self, counts=None, channels=None, energies=None,
+                 e_units=None):
         """Initialize the spectrum.
 
-        cpb is the only required input parameter
+        counts is the only required input parameter
 
         Args:
           counts: counts per bin, or cps
           channels (optional): array of bin edges. If None, assume based on
           counts
-          energies (optional): an array of bin edge energies
+          energies (optional): an array of energy values
+          e_units (optional): a string of energy units
         """
         if counts is None:
             print("ERROR: Must specify counts")
         if channels is None:
             channels = np.arange(0,len(counts)+1,1)
+        
         if energies is not None:
             self.energies = np.array(energies, dtype=float)
-            self.x_units = "Energy"
+            if e_units is None:
+                self.x_units = "Energy"
+            else:
+                self.x_units = f"Energy [{e_units}]"
+            
         else:
             self.energies = energies
             self.x_units = "Channels"
+        
 
         self.counts = np.array(counts, dtype=float)
         self.channels = np.array(channels, dtype=int)
@@ -92,6 +100,19 @@ class Spectrum():
             return en, y
     
     def plot(self, scale='log'):
+        '''
+        Plot spectrum object using channels and energies (if not None)
+
+        Parameters
+        ----------
+        scale : string, optional
+            DESCRIPTION. Either 'linear' or 'log'. The default is 'log'.
+
+        Returns
+        -------
+        None.
+
+        '''
         x = self.channels[:-1]
         y = self.counts
         integral = round(y.sum())
@@ -103,7 +124,7 @@ class Spectrum():
         plt.yscale(scale)
         plt.title(f"Raw Spectrum. Integral = {integral}")
         plt.xlabel("Channels")
-        plt.ylabel("a.u")
+        #plt.ylabel("a.u")
         plt.style.use("default")
         
         if self.energies is not None:
@@ -116,8 +137,8 @@ class Spectrum():
             plt.plot(x,y, color="C1", drawstyle="steps")
             plt.yscale(scale)
             plt.title(f"Raw Spectrum. Integral = {integral}")
-            plt.xlabel("Energy")
-            plt.ylabel("a.u")
+            plt.xlabel(self.x_units)
+            #plt.ylabel("a.u")
             plt.style.use("default")
             
         
