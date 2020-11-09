@@ -11,30 +11,58 @@ import lmfit
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# need to check if search is a PeakSearch object
 
 class PeakFit:
     
     def __init__(self, search, xrange, bkg='linear'):
-        """Initialize with a peaksearch object."""
+        '''
+        Use the package LMfit to fit and plot peaks with Gaussians for a given
+        background. It must be initialized with a PeakSearch object.
+
+        Parameters
+        ----------
+        search : PeakSearch object.
+            from peaksearch.py.
+        xrange : list
+            range of 2 x-values where the fit is attempted. Can be either in
+            energy values or channels depending on how the search object
+            was initialized.
+        bkg : string, optional
+            Can be 'linear', 'quadratic', 'exponential' or 'polyn', where n
+            is any degree polynomial. The default is 'linear'.
+
+        Raises
+        ------
+        Exception
+            'search' must be a PeakSearch object.
+
+        Returns
+        -------
+        None.
+
+        '''
         
+        if type(search) != ps.PeakSearch:
+            raise Exception("'search' must be a PeakSearch object")
         self.search = search
         self.xrange = xrange
         self.bkg = bkg
         self.x_data = 0
         self.y_data = 0
         self.peak_info = []
+        self.peak_err = []
         self.fit_result = 0
+        self.x_units = search.spectrum.x_units
         if search.spectrum.energies is None:
             print("Working with channel numbers")
             self.x = search.spectrum.channels[0:-1]
             self.chan = search.spectrum.channels[0:-1]
-            self.x_units = "Channels"
+            
         else:
             print("Working with energy values")
             self.x = search.spectrum.energies
             self.chan = search.spectrum.channels[0:-1]
-            self.x_units = "Energy"
+            
         
         self.gaussians_bkg()
     
@@ -114,6 +142,7 @@ class PeakFit:
         self.fit_result = fit0
         
         # save some extra info
+        epar = fit0.params
         for i in range(npeaks):
             mean0 = fit0.best_values[f"g{i+1}_center"]
             g0 = components[f"g{i+1}_"]
@@ -122,6 +151,14 @@ class PeakFit:
             dict_peak_info = {f'mean{i+1}': mean0, f'area{i+1}': area0,
                               f'fwhm{i+1}': fwhm0}
             self.peak_info.append(dict_peak_info)
+            # errors
+            mean_err = epar[f"g{i+1}_center"].stderr
+            area_err = np.sqrt(area0)
+            fwhm_err = epar[f"g{i+1}_fwhm"].stderr
+            dict_peak_err = {f'mean_err{i+1}': mean_err,
+                             f'area_err{i+1}': area_err,
+                             f'fwhm_err{i+1}': fwhm_err}
+            self.peak_err.append(dict_peak_err)
             
     def plot(self, plot_type="simple", legend="on"):
         x = self.x_data
@@ -175,7 +212,7 @@ class PeakFit:
             colors = [['lightblue']*len(cols)]*len(rs)
             plt.rc("font", size=14)
             plt.style.use("seaborn-darkgrid")
-            fig = plt.figure(constrained_layout=False, figsize=(14,8))
+            fig = plt.figure(constrained_layout=False, figsize=(16,8))
             gs = fig.add_gridspec(2, 2, width_ratios=[5,1],
                                    height_ratios=[1,4])
             f_ax1 = fig.add_subplot(gs[0, 0])
@@ -222,7 +259,33 @@ class PeakFit:
             t.set_fontsize(14)
             f_ax3.axis('off')
 
-def ecalibration(mean_vals, erg, channels, n=1):
+def ecalibration(mean_vals, erg, channels, n=1, e_units="keV", plot=False):
+    '''
+    Perform energy calibration with LMfit. Polynomial degree = n.
+
+    Parameters
+    ----------
+    mean_vals : list or numpy array
+        mean values of fitted peaks (in channel numbers).
+    erg : list or numpy array
+        energy values corresponding to mean_vals.
+    channels : list or numpy array
+        channel values.
+    n : integer, optional
+        polynomial degree. The default is 1.
+    e_units : string, optional
+        energy units. The default is "keV".
+    plot : bool, optional
+        plot calibration curve and calibration points. The default is False.
+
+    Returns
+    -------
+    predicted : numpy array
+        predicted energy values spanning all channel values.
+    fit : LMfit object.
+        curve fit.
+
+    '''
     y0 = np.array(erg, dtype=float)
     x0 = np.array(mean_vals, dtype=float)
     poly_mod = lmfit.models.PolynomialModel(degree=n)
@@ -230,11 +293,56 @@ def ecalibration(mean_vals, erg, channels, n=1):
     model = poly_mod
     fit = model.fit(y0, params=pars, x=x0)
     predicted = fit.eval(x=channels)
+    ye = fit.eval_uncertainty()
+    if plot:
+        x_offset = 100
+        plt.rc("font", size=14)
+        plt.style.use("seaborn-darkgrid")
+        fig = plt.figure(constrained_layout=False, figsize=(12,8))
+        gs = fig.add_gridspec(2, 1, height_ratios=[1,4])
+        f_ax1 = fig.add_subplot(gs[0, 0])
+        f_ax1.plot(mean_vals, fit.residual, '.', ms=15, alpha=0.5, color="red")
+        f_ax1.hlines(y=0, xmin=min(channels)-x_offset,
+                     xmax=max(channels), lw=3)
+        f_ax1.set_ylabel("Residual")
+        f_ax1.set_xlim([min(channels)-x_offset, max(channels)])
+        f_ax1.set_xticks([])
+        f_ax2 = fig.add_subplot(gs[1, 0])
+        f_ax2.set_title("Energy calibration")
+        f_ax2.errorbar(mean_vals, erg, yerr=ye, ecolor='red', elinewidth=5,
+                       capsize=12, capthick=3, marker="s", mfc="black",
+                       mec="black", markersize=7, ls="--", lw=3,
+                       label="Best fit")
+        f_ax2.plot(channels, predicted, ls="--", lw=3, color="green",
+                         label="Predicted")
+        f_ax2.set_xlim([min(channels)-x_offset, max(channels)])
+        f_ax2.set_xlabel("Channels")
+        f_ax2.set_ylabel(f"Energy [{e_units}]")
+        plt.legend()
+        plt.style.use("default")
     return predicted, fit
 
 
 class GaussianComponents:
+    
     def __init__(self, fit_obj_lst=None, df_peak=None):
+        '''
+        Extract background subtracted Gaussian components and plot them
+        together with a table of relevant values and uncertainties.
+
+        Parameters
+        ----------
+        fit_obj_lst : list, optional
+            list of FitPeak objects. The default is None.
+        df_peak : pandas dataframe, optional
+            dataframe of peak info as saved by using the class AddPEaks.
+            The default is None.
+
+        Returns
+        -------
+        None.
+
+        '''
         self.fit_obj_lst = fit_obj_lst
         self.df_peak = df_peak
         self.npeaks = 0
@@ -243,22 +351,26 @@ class GaussianComponents:
         self.fwhm = []
         self.gauss = []
         self.x_data = []
+        self.peak_err = []
         if fit_obj_lst is not None:
+            self.x_units = fit_obj_lst[0].x_units
             self.gauss_peakfit()
         elif df_peak is not None:
+            self.x_units = df_peak.loc[0,"x_units"]
             self.gauss_df()
             
     def gauss_peakfit(self):
         for fit_obj in self.fit_obj_lst:
             npeaks = len(fit_obj.peak_info)
-            self.npeaks = npeaks
+            self.npeaks += npeaks
             comps = fit_obj.fit_result.eval_components()
             for i in range(npeaks):
+                self.peak_err.append(fit_obj.peak_err[i])
                 x_data = fit_obj.x_data
                 self.x_data.append(x_data)
                 m = list(fit_obj.peak_info[i].keys())[0]
-                a = list(fit_obj.peak_info[i].keys())[0]
-                f = list(fit_obj.peak_info[i].keys())[0]
+                a = list(fit_obj.peak_info[i].keys())[1]
+                f = list(fit_obj.peak_info[i].keys())[2]
                 mean = fit_obj.peak_info[i][m]
                 area = fit_obj.peak_info[i][a]
                 fwhm = fit_obj.peak_info[i][f]
@@ -277,38 +389,122 @@ class GaussianComponents:
             self.mean.append( self.df_peak.loc[i,"mean"])
             self.area.append(self.df_peak.loc[i,"area"])
             self.fwhm.append(self.df_peak.loc[i,"fwhm"])
+            dict_err = {}
+            dict_err["mean_err"] = self.df_peak.loc[i, 'mean_err']
+            dict_err["area_err"] = self.df_peak.loc[i, 'area_err']
+            dict_err["fwhm_err"] = self.df_peak.loc[i, 'fwhm_err']
+            self.peak_err.append(dict_err)
+            
+            
                 
-    def plot_gauss(self):
-        plt.figure(figsize=(10,8))
-        for i in range(self.npeaks):
-            x = self.x_data[i]
-            y = self.gauss[i]
-            plt.fill_between(x, 0, y, alpha=0.5) 
-            x0 = round(self.mean[i], 2)
-            y0 = y.max()
-            a = round(self.area[i], 2)
-            str0 = f"mean={x0} \narea={a}"
-            plt.text(x0,y0, str0)
-        plt.xlabel("Channels")
-        plt.ylabel("a.u")
+    def plot_gauss(self, plot_type="simple", table_scale=[1,3]):
+        if plot_type == "simple":
+            plt.rc("font", size=14)
+            plt.style.use("seaborn-darkgrid")
+            plt.figure(figsize=(12,8))
+            for i in range(self.npeaks):
+                x = self.x_data[i]
+                y = self.gauss[i]
+                plt.fill_between(x, 0, y, alpha=0.5) 
+                x0 = round(self.mean[i], 2)
+                y0 = y.max()
+                a = round(self.area[i], 2)
+                str0 = f"mean={x0} \narea={a}"
+                plt.text(x0,y0, str0)
+            plt.xlabel(self.x_units)
+            plt.ylabel("Cts")
+            plt.style.use("default")
+            
+        elif plot_type == "full":
+            cols = ["Mean", "Net_Area", "FWHM"]
+            mean = self.mean
+            area = self.area
+            fwhm = self.fwhm
+            rs = np.array([mean, area, fwhm]).T
+            rs = np.round(rs, decimals=2)
+            plt.rc("font", size=14)
+            plt.style.use("seaborn-darkgrid")
+            fig = plt.figure(constrained_layout=False, figsize=(18,8))
+            gs = fig.add_gridspec(1, 2, width_ratios=[3,2.5]) # 5 , 3
+            f_ax1 = fig.add_subplot(gs[0, 0])
+            for i in range(self.npeaks):
+                            x = self.x_data[i]
+                            y = self.gauss[i]
+                            f_ax1.fill_between(x, 0, y, alpha=0.5) 
+                            x0 = mean[i]
+                            y0 = y.max()
+                            a = area[i]
+                            f_ax1.text(x0,y0, int(i+1),
+                                       bbox=dict(facecolor='red', alpha=0.1),
+                                       weight="bold")
+            f_ax1.set_xlabel(self.x_units)
+            f_ax1.set_ylabel("Cts")
+            f_ax1.set_title("Gaussian Components")
+            
+            f_ax2 = fig.add_subplot(gs[0:, 1:])
+            cols.insert(0,"Peak_N")
+            colors = [['lightblue']*len(cols)]*len(rs)
+            
+            # errors
+            vals_lst = []
+            for element in self.peak_err:
+                vals_lst.append(list(element.values()))
+            maf = [float(item) for sublist in vals_lst for item in sublist]
+            
+            lst1 = []
+            n = 1
+            n2 = 0
+            for i in rs:
+                lst0 = []
+                for j in i:
+                    str0 = f"{round(j,2)} +/- {round(maf[n2],2)}"
+                    lst0.append(str0)
+                    n2 += 1
+                lst0.insert(0,n)
+                lst1.append(lst0)
+                n += 1
+            
+            df = pd.DataFrame(lst1, columns=cols)
+            
+            t = f_ax2.table(cellText=df.values, colLabels=cols,loc='center',
+                              cellLoc='center', 
+                              colWidths=[1/8,1/3,1/3,1/3],
+                              colColours =["palegreen"] * len(cols),
+                              cellColours=colors)
+            t.scale(table_scale[0], table_scale[1])
+            t.auto_set_font_size(False)
+            t.set_fontsize(12)
+            f_ax2.axis('off')
+            plt.style.use("default")
+            
         
-            
-    
-            
-            
 class AddPeaks:
     
     def __init__(self, filename, n=0):
-        # add option to save to hdf file
-        """Add peak fit objects for further analysis."""
+        '''
+        Save peak fit objects to a pandas dataframe for further analysis.
+
+        Parameters
+        ----------
+        filename : string.
+            filename to save peak info as hdf.
+        n : integer, optional
+            Add peaks to an existing hdf file with n being the row number
+            to append peaks. The default is 0.
+
+        Returns
+        -------
+        None.
+
+        '''
         
         self.filename = filename
         self.all_peaks = []
         self.n = n
         if n == 0:
             cols = ['x_data', 'y_data', 'mean', 'area', 'fwhm', 'best_fit',
-                    'redchi', 'gauss', 'uncertainty', 'bkg', 'bkg_type']
-            #cols = ['x_data', 'y_data', 'mean']
+                    'redchi', 'gauss', 'uncertainty', 'bkg', 'bkg_type',
+                    'mean_err', 'area_err', 'fwhm_err', 'x_units']
             self.df = pd.DataFrame(columns=cols)
             self.df.to_hdf(f"{filename}.hdf", key="data")
         else:
@@ -328,7 +524,7 @@ class AddPeaks:
         bkg = list(fit_obj.fit_result.eval_components().keys())[0]
         comps = fit_obj.fit_result.eval_components()
         uncertainty = fit_obj.fit_result.eval_uncertainty()
-        bkg = fit_obj.bkg
+        bkg_type = fit_obj.bkg
         for i in range(npeaks):
             self.df.loc[self.n, 'x_data'] = x_data
             self.df.loc[self.n, 'y_data'] = y_data
@@ -344,7 +540,14 @@ class AddPeaks:
             gauss = list(fit_obj.fit_result.eval_components().keys())[i+1]
             self.df.loc[self.n, 'gauss'] = comps[gauss]
             self.df.loc[self.n, 'uncertainty'] = uncertainty
-            self.df.loc[self.n, 'bkg_type'] = bkg
+            self.df.loc[self.n, 'bkg_type'] = bkg_type
+            mean_err = list(fit_obj.peak_err[i].keys())[0]
+            self.df.loc[self.n, 'mean_err'] = fit_obj.peak_err[i][mean_err]
+            area_err = list(fit_obj.peak_err[i].keys())[1]
+            self.df.loc[self.n, 'area_err'] = fit_obj.peak_err[i][area_err]
+            fwhm_err = list(fit_obj.peak_err[i].keys())[2]
+            self.df.loc[self.n, 'fwhm_err'] = fit_obj.peak_err[i][fwhm_err]
+            self.df.loc[self.n, 'x_units'] = fit_obj.x_units
             self.n += 1
         self.df.to_hdf(f"{self.filename}.hdf", key="data")
             
@@ -383,31 +586,62 @@ def auto_range(search, fwhm_factor):
             
     return ranges
         
-def auto_scan(search, lst=None, plot=False, save_to_hdf=False):
+def auto_scan(search, xlst=None, bkglst=None, plot=False, save_to_hdf=False):
+    '''
+    scan a PeakSearch object either automatically or with given xrange and bkg
+    lists
+
+    Parameters
+    ----------
+    search : PeakSearch object
+        from peaksearch.py.
+    xlst : list, optional
+        list of x ranges either in channels or energies
+        (as defined by the search object). The default is None.
+    bkglst : list, optional
+        list of strings specifying the background type for each xrange in
+        xlst (e.g. poly3). The default is None.
+    plot : bool, optional
+        plot each PeakFit object. The default is False.
+    save_to_hdf : bool, optional
+        Save to an hdf file (not yet implemented). The default is False.
+
+    Returns
+    -------
+    fits : list
+        PeakFit objects.
+
+    '''
     #TODO: optimize bkg, save to hdf (using AddPeaks),
     # add checks (fit message, positive area, etc)
     fits = []
-    if lst is None:
+    if xlst is None and bkglst is None:
         ranges = auto_range(search, 2)
-    else:
-        ranges = lst
-    
-    bkgs = ["poly1", "poly2"]
-    for rg in ranges:
-        redchi = 1e10
-        for bk in bkgs:
+        bkgs = ["poly1", "poly2"]
+        for rg in ranges:
+            redchi = 1e10
+            for bk in bkgs:
+                fit0 = PeakFit(search, rg, bkg=bk)
+                if "Fit succeeded." != fit0.fit_result.message:
+                    next
+                elif fit0.fit_result.redchi < redchi:
+                    fitx = fit0
+                    redchi = fitx.fit_result.redchi 
+                else:
+                    fitx = 0
+                
+            if plot and fitx != 0:
+                fitx.plot(plot_type="full")
+            fits.append(fitx)
+    elif xlst is not None and bkglst is not None:
+        ranges = xlst
+        bkgs = bkglst
+        for rg, bk in zip(ranges, bkgs):
             fit0 = PeakFit(search, rg, bkg=bk)
-            if "Fit succeeded." != fit0.fit_result.message:
-                next
-            elif fit0.fit_result.redchi < redchi:
-                fitx = fit0
-                redchi = fitx.fit_result.redchi 
-            else:
-                fitx = 0
             
-        if plot and fitx != 0:
-            fitx.plot(plot_type="full")
-        fits.append(fitx)
+            if plot:
+                fit0.plot(plot_type="full")
+            fits.append(fit0)
     return fits
    
     
