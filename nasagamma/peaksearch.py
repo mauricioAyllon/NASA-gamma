@@ -9,27 +9,83 @@ from . import spectrum as sp
 from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 
-# need to check that spectrum is a spectrum object
  
 def gaussian0(x, mean, sigma):
-    """Gaussian function."""
+    '''
+    Gaussian function.
+
+    Parameters
+    ----------
+    x : numpy array.
+        x-values.
+    mean : float or int.
+        mean of distribution.
+    sigma : float or int.
+        standard deviation.
+
+    Returns
+    -------
+    numpy array.
+        Gaussian distribution.
+    '''
     z = (x - mean) / sigma
     return np.exp(-z**2 / 2.)
 
 def gaussian1(x, mean, sigma):
-    """First derivative of a gaussian."""
+    '''
+    First derivative of a Gaussian.
+
+    Parameters
+    ----------
+    x : numpy array.
+        x-values.
+    mean : float or int.
+        mean of distribution.
+    sigma : float or int.
+        standard deviation.
+
+    Returns
+    -------
+    numpy array
+        first derivaive of a Gaussian.
+
+    '''
     z = (x - mean)
     return -1 * z * gaussian0(x, mean, sigma)
 
-class PeakSearchError(Exception):
-    """Base class for errors in PeakSearch."""
-    pass
 
 class PeakSearch:
     
     def __init__(self, spectrum, ref_x, ref_fwhm, fwhm_at_0=1.0, min_snr=2):
-        """Initialize with a spectrum object."""
-        
+        '''
+        Find peaks in a Spectrum object and decompose specrum into components
+        using a Gaussian kernel deconvolution technique.
+
+        Parameters
+        ----------
+        spectrum : Spectrum object.
+            previously initialized spectrum object.
+        ref_x : int
+            reference x-value (in channels) corresponding to ref_fwhm.
+        ref_fwhm : int or float.
+            fwhm value (in channels) corresponding to ref_x.
+        fwhm_at_0 : int or float, optional
+            fwhm value at channel = 0. The default is 1.0.
+        min_snr : int or float, optional
+            minimum SNR to look for releant peaks. The default is 2.
+
+        Raises
+        ------
+        Exception
+            'spectrum' must be a Spectrum object.
+
+        Returns
+        -------
+        None.
+
+        '''
+        if type(spectrum) != sp.Spectrum:
+            raise Exception("'spectrum' must be a Spectrum object")
         self.ref_x = ref_x
         self.ref_fwhm = ref_fwhm
         self.fwhm_at_0 = fwhm_at_0
@@ -50,7 +106,20 @@ class PeakSearch:
         #self.backgrounds = []
 
     def fwhm(self, x):
-        """Calculate the expected FWHM at the given x value."""
+        '''
+        Calculate the expected FWHM at the given x value
+
+        Parameters
+        ----------
+        x : numpy array
+            x-values.
+
+        Returns
+        -------
+        numpy array.
+            expected FWHM values.
+
+        '''
         # f(x)^2 = f0^2 + k x^2
         # f1^2 = f0^2 + k x1^2
         # k = (f1^2 - f0^2) / x1^2
@@ -101,9 +170,6 @@ class PeakSearch:
     def calculate(self):
         """Calculate the convolution of the spectrum with the kernel."""
         
-        # if not isinstance(self.spectrum, Spectrum):
-        #     raise PeakFinderError(
-        #         'Argument must be a Spectrum, not {}'.format(type(self.spectrum)))
         
         snr = np.zeros(len(self.spectrum.counts))
         chan = self.spectrum.channels
@@ -125,7 +191,7 @@ class PeakSearch:
         #self.reset()
         
     def plot_kernel(self):
-        """Plot the matrix of kernels evaluated across the x values."""
+        """Plot the 3D matrix of kernels evaluated across the x values."""
         edges = self.spectrum.channels
         n_channels = len(edges) - 1
         kern_mat = self.kernel_matrix(edges)
@@ -145,17 +211,33 @@ class PeakSearch:
         plt.gca().set_aspect('equal')
         plt.title("Kernel Matrix")
         
-    def plot_peaks(self):
+    def plot_peaks(self, yscale='log'):
+        '''
+        Plot spectrum and their found peak positions.
+
+        Parameters
+        ----------
+        scale : string, optional
+            Either 'log' or 'linear'. The default is 'log'.
+
+        Returns
+        -------
+        None.
+
+        '''
         if self.spectrum.energies is None:
             x = self.spectrum.channels[:-1]
         else:
             x = self.spectrum.energies
         plt.rc("font", size=14)  
         plt.style.use("seaborn-darkgrid")
-        plt.figure("peak-search")
+        plt.figure(figsize=(10,6))
         plt.plot(x, self.snr, label="SNR all")
         plt.plot(x, self.spectrum.counts, label="Raw spectrum")
-        plt.yscale("log")
+        if yscale == 'log':
+            plt.yscale("log")
+        else:
+            plt.yscale("linear")
         for xc in self.peaks_idx:
             if self.spectrum.energies is None:
                 x0 = xc
@@ -165,11 +247,24 @@ class PeakSearch:
         plt.legend(loc=1)
         plt.title(f"SNR > {self.min_snr}")
         plt.ylim(1e-1)
-        plt.ylabel("Cts/MeV/s")
-        plt.xlabel("Energy [MeV]")
+        plt.ylabel("Cts")
+        plt.xlabel(self.spectrum.x_units)
         plt.style.use("default")
     
-    def plot_components(self):
+    def plot_components(self, yscale='log'):
+        '''
+        Plot spectrum components after decomposition.
+
+        Parameters
+        ----------
+        yscale : string, optional
+            Either 'log' or 'linear'. The default is 'log'.
+
+        Returns
+        -------
+        None.
+
+        '''
         if self.spectrum.energies is None:
             x = self.spectrum.channels[:-1]
         else:
@@ -182,11 +277,14 @@ class PeakSearch:
         plt.plot(x, self.bkg.clip(1e-1), label='Continuum')
         plt.plot(x, self.signal.clip(1e-1), label='Peaks')
         plt.plot(x, self.noise.clip(1e-1), label='noise')
-        plt.yscale('log')
+        if yscale == "log":
+            plt.yscale("log")
+        else:
+            plt.yscale("linear")
         #plt.xlim(0, len(spec))
         plt.ylim(3e-1)
         plt.xlabel(self.spectrum.x_units)
-        plt.ylabel('Counts')
+        plt.ylabel('Cts')
         plt.legend(loc=1)
         plt.style.use("default")
 
