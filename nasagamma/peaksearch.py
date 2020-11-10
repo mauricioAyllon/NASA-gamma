@@ -99,6 +99,7 @@ class PeakSearch:
         self.peaks_idx = []
         self.fwhm_guess = []
         self.calculate()
+        
         #self.centroids = []
         #self.snrs = []
         #self.fwhms = []
@@ -170,18 +171,15 @@ class PeakSearch:
     def calculate(self):
         """Calculate the convolution of the spectrum with the kernel."""
         
-        
         snr = np.zeros(len(self.spectrum.counts))
-        chan = self.spectrum.channels
+        edg = np.append(self.spectrum.channels, self.spectrum.channels[-1]+1)
         # calculate the convolution
         peak_plus_bkg, bkg, signal, noise, snr = \
-            self.convolve(chan, self.spectrum.counts)
+            self.convolve(edg, self.spectrum.counts)
         # find peak indices
         peaks_idx = find_peaks(snr.clip(0), height=self.min_snr)[0]
         
-        #for pk in peaks_idx:
         self.fwhm_guess = self.fwhm(peaks_idx)
-        
         self.peak_plus_bkg = peak_plus_bkg
         self.bkg = bkg
         self.signal = signal
@@ -192,7 +190,8 @@ class PeakSearch:
         
     def plot_kernel(self):
         """Plot the 3D matrix of kernels evaluated across the x values."""
-        edges = self.spectrum.channels
+        #edges = self.spectrum.channels
+        edges = np.append(self.spectrum.channels, self.spectrum.channels[-1]+1)
         n_channels = len(edges) - 1
         kern_mat = self.kernel_matrix(edges)
         kern_min = kern_mat.min()
@@ -226,7 +225,8 @@ class PeakSearch:
 
         '''
         if self.spectrum.energies is None:
-            x = self.spectrum.channels[:-1]
+            #x = self.spectrum.channels[:-1]
+            x = self.spectrum.channels
         else:
             x = self.spectrum.energies
         plt.rc("font", size=14)  
@@ -266,7 +266,7 @@ class PeakSearch:
 
         '''
         if self.spectrum.energies is None:
-            x = self.spectrum.channels[:-1]
+            x = self.spectrum.channels
         else:
             x = self.spectrum.energies
         plt.rc("font", size=14) 
