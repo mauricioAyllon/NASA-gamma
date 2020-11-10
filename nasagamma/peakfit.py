@@ -53,17 +53,15 @@ class PeakFit:
         self.peak_err = []
         self.fit_result = 0
         self.x_units = search.spectrum.x_units
+        self.chan = search.spectrum.channels
         if search.spectrum.energies is None:
             print("Working with channel numbers")
-            self.x = search.spectrum.channels[0:-1]
-            self.chan = search.spectrum.channels[0:-1]
-            
+            self.x = search.spectrum.channels
+              
         else:
             print("Working with energy values")
             self.x = search.spectrum.energies
-            self.chan = search.spectrum.channels[0:-1]
-            
-        
+          
         self.gaussians_bkg()
     
     def find_peaks_range(self):
@@ -80,8 +78,6 @@ class PeakFit:
         return mask, pidx
         
     def init_values(self):
-        # chan = self.search.spectrum.channels[0:-1]
-        # erg = self.search.spectrum.energies
         cts = self.search.spectrum.counts
         m = np.polyfit(self.chan, self.x, 1)[0] # energy/channel
         left = cts[np.where(self.x > self.xrange[0])[0][0]]
