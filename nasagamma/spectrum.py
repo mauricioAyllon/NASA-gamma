@@ -35,7 +35,7 @@ class Spectrum():
         if counts is None:
             print("ERROR: Must specify counts")
         if channels is None:
-            channels = np.arange(0,len(counts)+1,1)
+            channels = np.arange(0,len(counts),1)
         
         if energies is not None:
             self.energies = np.array(energies, dtype=float)
@@ -113,7 +113,7 @@ class Spectrum():
         None.
 
         '''
-        x = self.channels[:-1]
+        x = self.channels
         y = self.counts
         integral = round(y.sum())
         plt.rc("font", size=14)  
