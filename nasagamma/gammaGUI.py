@@ -38,12 +38,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.widgets import SpanSelector
-from . import spectrum as sp
-from . import peaksearch as ps
-from . import peakfit as pf
-# from nasagamma import spectrum as sp
-# from nasagamma import peaksearch as ps
-# from nasagamma import peakfit as pf
+# from . import spectrum as sp
+# from . import peaksearch as ps
+# from . import peakfit as pf
+from nasagamma import spectrum as sp
+from nasagamma import peaksearch as ps
+from nasagamma import peakfit as pf
 from matplotlib.widgets import Button
 
 df = pd.read_csv(file_name)
