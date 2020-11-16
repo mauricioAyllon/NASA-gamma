@@ -41,7 +41,7 @@ xrange = [2.6, 4]
 #xrange = [5, 6.3]
 #xrange = [5, 7.5]
 #xrange = [1.65, 4]
-xrange = [6.75, 7.25]
+#xrange = [6.75, 7.25]
 fit = pf.PeakFit(search, xrange, bkg=bkg0)
 
 res = fit.fit_result
@@ -50,5 +50,5 @@ res = fit.fit_result
 
 # search.plot_peaks()
 
-fit.plot(plot_type="full", legend='on')
+fit.plot(plot_type="full", legend='on', table_scale=[2, 2.3])
 
