@@ -156,7 +156,8 @@ class PeakFit:
                              f'fwhm_err{i+1}': fwhm_err}
             self.peak_err.append(dict_peak_err)
             
-    def plot(self, plot_type="simple", legend="on"):
+    def plot(self, plot_type="simple", legend="on", table_scale=[2,2.3],
+             fig=None, ax_res=None, ax_fit=None, ax_tab=None):
         x = self.x_data
         y = self.y_data
         #init_fit = self.fit_result.init_fit
@@ -208,52 +209,78 @@ class PeakFit:
             colors = [['lightblue']*len(cols)]*len(rs)
             plt.rc("font", size=14)
             plt.style.use("seaborn-darkgrid")
-            fig = plt.figure(constrained_layout=False, figsize=(16,8))
-            gs = fig.add_gridspec(2, 2, width_ratios=[5,1],
-                                   height_ratios=[1,4])
-            f_ax1 = fig.add_subplot(gs[0, 0])
-            f_ax1.plot(x, res.residual, '.', ms=10, alpha=0.5)
-            f_ax1.hlines(y=0, xmin=x.min(), xmax=x.max(), lw=3)
-            f_ax1.set_ylabel("Residual")
-            f_ax1.set_xlim([x.min(), x.max()])
-            f_ax1.set_xticks([])
-            # f_ax1.set_yticks(np.arange(min(res.residual),
-            #                            max(res.residual)+1, 4.0))
-            f_ax2 = fig.add_subplot(gs[1, 0])
-            f_ax2.set_title(f"Reduced $\chi^2$ = {round(res.redchi,4)}")
-            f_ax2.plot(x,y,'bo', alpha=0.5, label="data")
-            f_ax2.plot(x, best_fit, 'r', lw=3, alpha=0.5, label="Best fit")
+
+            if fig is None:
+                fig = plt.figure(constrained_layout=True, figsize=(16,8))
+                gs = fig.add_gridspec(2, 2, width_ratios=[3,1],
+                                   height_ratios=[1,4]) 
+            if ax_res is None:
+                ax_res = fig.add_subplot(gs[0, 0])
+            if ax_fit is None:
+                ax_fit = fig.add_subplot(gs[1, 0])
+            if ax_tab is None:
+                ax_tab = fig.add_subplot(gs[0:, 1:])
+                
+            ax_res.plot(x, res.residual, '.', ms=10, alpha=0.5)
+            ax_res.hlines(y=0, xmin=x.min(), xmax=x.max(), lw=3)
+            ax_res.set_ylabel("Residual")
+            ax_res.set_xlim([x.min(), x.max()])
+            ax_res.set_xticks([])
+            
+            ax_fit.set_title(f"Reduced $\chi^2$ = {round(res.redchi,4)}")
+            ax_fit.plot(x,y,'bo', alpha=0.5, label="data")
+            ax_fit.plot(x, best_fit, 'r', lw=3, alpha=0.5, label="Best fit")
             m = 1
             for cp in range(len(comps)-1):
                 if m == 1:
-                    f_ax2.plot(x, comps[f'{bkg_label}'] + comps[f'g{cp+1}_'],
+                    ax_fit.plot(x, comps[f'{bkg_label}'] + comps[f'g{cp+1}_'],
                             'k--', lw=2,
                             label=f'Gaussian {cp+1} + {bkg_label}: n={n}')
-                    f_ax2.plot(x, comps[f'{bkg_label}'], 'g--', label="bkg")
+                    ax_fit.plot(x, comps[f'{bkg_label}'], 'g--', label="bkg")
                 else:
-                    f_ax2.plot(x, comps[f'{bkg_label}'] + comps[f'g{cp+1}_'],
+                    ax_fit.plot(x, comps[f'{bkg_label}'] + comps[f'g{cp+1}_'],
                             'k--', lw=2)
-                    f_ax2.plot(x, comps[f'{bkg_label}'], 'g--')
+                    ax_fit.plot(x, comps[f'{bkg_label}'], 'g--')
                 m = 0
                     
             dely = res.eval_uncertainty(sigma=3)
-            f_ax2.fill_between(x, res.best_fit-dely, res.best_fit+dely,
+            ax_fit.fill_between(x, res.best_fit-dely, res.best_fit+dely,
                              color="#ABABAB",
                              label='3-$\sigma$ uncertainty band')
-            f_ax2.set_xlabel(self.x_units)
+            ax_fit.set_xlabel(self.x_units)
             if legend == 'on':
-                f_ax2.legend()
-            plt.style.use("default")
+                ax_fit.legend(loc="best", ncol=2)
             
-            f_ax3 = fig.add_subplot(gs[0:, 1:])
-            t = f_ax3.table(cellText=rs,colLabels=cols,loc='center',
+            # errors
+            vals_lst = []
+            for element in self.peak_err:
+                vals_lst.append(list(element.values()))
+            maf = [float(item) for sublist in vals_lst for item in sublist]
+            
+            lst1 = []
+            n = 1
+            n2 = 0
+            for i in rs:
+                lst0 = []
+                for j in i:
+                    str0 = f"{round(j,2)} +/- {round(maf[n2],2)}"
+                    lst0.append(str0)
+                    n2 += 1
+                #lst0.insert(0,n)
+                lst1.append(lst0)
+                n += 1
+    
+            df = pd.DataFrame(lst1, columns=cols)
+            
+            t = ax_tab.table(cellText=df.values, colLabels=cols,loc='center',
                              cellLoc='center', 
                              colColours =["palegreen"] * len(cols),
                              cellColours=colors)
-            t.scale(1.8, 4)
+            t.scale(table_scale[0], table_scale[1])
             t.auto_set_font_size(False)
             t.set_fontsize(14)
-            f_ax3.axis('off')
+            ax_tab.axis('off')
+            #plt.style.use("default")
 
 def ecalibration(mean_vals, erg, channels, n=1, e_units="keV", plot=False):
     '''
