@@ -1,3 +1,4 @@
+
 """
 Usage:
   gammaGUI.py <file_name> [options]
@@ -13,15 +14,17 @@ Usage:
       
   
 
-Reads a csv file with the following column format: counts | energy_EUNITS, where
-EUNITS can be for examle keV or MeV. No need to have channels because they are
-automatically infered starting from channel = 0.
+Reads a csv file with the following column format: counts | energy_EUNITS,
+where EUNITS can be for examle keV or MeV. No need to have channels because
+they are automatically infered starting from channel = 0.
 
 If detector type is defined e.g. --cebr then the code guesses the x_ref and
 fwhm_ref based on the known detector characteristics.
+
+Note that the detector types input parameters must be changed depending on the 
+particular gain used. The examples here are for our specific detector settings.
 """
 ## run gammaGUI.py gui_test_data.csv --min_snr=3 --cebr
-
 
 import docopt
 if __name__ == "__main__":
@@ -38,11 +41,11 @@ if commands["--cebr"]:
 elif commands["--labr"]:
     fwhm_at_0 = 1.0
     ref_x = 427
-    ref_fwhm = 12
+    ref_fwhm = 8
 elif commands["--hpge"]:
     fwhm_at_0 = 0.1
     ref_x = 948
-    ref_fwhm = 4.4
+    ref_fwhm = 3
 else:
     fwhm_at_0 = float(commands["--fwhm_at_0"])
     ref_x = float(commands["--ref_x"])
@@ -58,7 +61,7 @@ else:
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.widgets import SpanSelector
+from matplotlib.widgets import SpanSelector, TextBox
 from nasagamma import spectrum as sp
 from nasagamma import peaksearch as ps
 from nasagamma import peakfit as pf
@@ -89,6 +92,8 @@ fig = plt.figure(constrained_layout=True, figsize=(16,8))
 
 gs = fig.add_gridspec(4, 4, width_ratios=[1,0.33,0.33,0.33],
                        height_ratios=[0.2,1.2,0.1,1])
+
+# axes
 ax_s = fig.add_subplot(gs[:, 0])
 ax_res = fig.add_subplot(gs[0, 1:])
 ax_fit = fig.add_subplot(gs[1, 1:])
@@ -96,58 +101,38 @@ ax_b1 = fig.add_subplot(gs[2, 1])
 ax_b2 = fig.add_subplot(gs[2, 2])
 ax_b3 = fig.add_subplot(gs[2, 3])
 ax_tab = fig.add_subplot(gs[3, 1:])
+ax_log = plt.axes([0.38, 0.85, 0.1, 0.05])
+#ax_snr = plt.axes([0.25, 0.90, 0.03, 0.05])
 
 # buttons
 bpoly1 = Button(ax_b1, 'poly1', color="yellow", hovercolor="lightgreen")
 bpoly2 = Button(ax_b2, 'poly2', color="yellow", hovercolor="lightgreen")
 bexp = Button(ax_b3, 'exp', color="yellow", hovercolor="lightgreen")
-
-ax_log = plt.axes([0.38, 0.85, 0.1, 0.05])
 blog = Button(ax_log, "log-lin", color="yellow", hovercolor="lightgreen")
-
 bpoly1.label.set_fontsize(16)
 bpoly2.label.set_fontsize(16)
 bexp.label.set_fontsize(16)
 
+# textbox (SNR)
+# initial_snr = "1"
+# text_box = TextBox(ax_snr, 'SNR < ', initial=initial_snr)
 
-# spectrum with peaksearch
+# plot spectrum with peaksearch
 scale = "log"
-ax_s.plot(x, spect.counts, label="Raw spectrum")
-ax_s.set_yscale(scale)
+search.plot_peaks(yscale=scale, snrs="off", fig=fig, ax=ax_s)
 
-for xc in search.peaks_idx:
-    if spect.energies is None:
-        x0 = xc
-    else:
-        x0 = spect.energies[xc]
-    ax_s.axvline(x=x0, color='red', linestyle='-', alpha=0.2)
-ax_s.legend(loc=1)
-ax_s.set_title(f"SNR > {search.min_snr}")
-ax_s.set_ylim(1e-1)
-ax_s.set_ylabel("Cts")
-ax_s.set_xlabel(spect.x_units)
-
-# peak
+# peak fit
 ax_fit.set_xticks([])
 ax_fit.set_yticks([])
 
 # residual
-ax_res.set_ylabel("Residual")
 ax_res.set_xticks([])
 ax_res.set_yticks([])
 
 # table
-cols = ["mean", "net_area", "fwhm"]
-#rs = np.array([mean, area, fwhm]).T
-colors = [['lightblue']*len(cols)]
-t = ax_tab.table(colLabels=cols,loc='center',
-                cellLoc='center', 
-                colColours =["palegreen"] * len(cols),
-                cellColours=colors)
-t.scale(1, 1.8)
-t.auto_set_font_size(False)
-t.set_fontsize(14)
-ax_tab.axis('off')
+ax_tab.set_xticks([])
+ax_tab.set_yticks([])
+
 
 list_xrange = []
 def xSelect(xmin, xmax):
@@ -210,10 +195,21 @@ def click_log(event):
         ax_s.set_yscale("log")
         scale = "log"
     fig.canvas.draw_idle()
+
+# def submit_snr(text):
+#     global search
+#     global scale
+#     ax_s.clear()
+#     min_snr = eval(text)
+#     search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
+#     search.plot_peaks(yscale=scale, snrs="off", fig=fig, ax=ax_s)
+#     fig.canvas.draw_idle()
     
+
 bpoly1.on_clicked(click_button1)   
 bpoly2.on_clicked(click_button2)  
 bexp.on_clicked(click_button3)   
 blog.on_clicked(click_log) 
+#text_box.on_submit(submit_snr)
 plt.show()    
     
