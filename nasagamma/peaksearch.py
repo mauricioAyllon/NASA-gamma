@@ -210,7 +210,7 @@ class PeakSearch:
         plt.gca().set_aspect('equal')
         plt.title("Kernel Matrix")
         
-    def plot_peaks(self, yscale='log'):
+    def plot_peaks(self, yscale='log', snrs="on", fig=None, ax=None):
         '''
         Plot spectrum and their found peak positions.
 
@@ -224,32 +224,37 @@ class PeakSearch:
         None.
 
         '''
+        plt.rc("font", size=14)  
+        plt.style.use("seaborn-darkgrid")
         if self.spectrum.energies is None:
             #x = self.spectrum.channels[:-1]
             x = self.spectrum.channels
         else:
             x = self.spectrum.energies
-        plt.rc("font", size=14)  
-        plt.style.use("seaborn-darkgrid")
-        plt.figure(figsize=(10,6))
-        plt.plot(x, self.snr, label="SNR all")
-        plt.plot(x, self.spectrum.counts, label="Raw spectrum")
+        if fig is None:
+            fig = plt.figure(figsize=(10,6))
+        if ax is None:
+            ax = fig.add_subplot()
+        
+        if snrs == "on":
+            ax.plot(x, self.snr, label="SNR all")
+        ax.plot(x, self.spectrum.counts, label="Raw spectrum")
         if yscale == 'log':
-            plt.yscale("log")
+            ax.set_yscale("log")
         else:
-            plt.yscale("linear")
+            ax.set_yscale("linear")
         for xc in self.peaks_idx:
             if self.spectrum.energies is None:
                 x0 = xc
             else:
                 x0 = self.spectrum.energies[xc]
-            plt.axvline(x=x0, color='red', linestyle='-', alpha=0.5)
-        plt.legend(loc=1)
-        plt.title(f"SNR > {self.min_snr}")
-        plt.ylim(1e-1)
-        plt.ylabel("Cts")
-        plt.xlabel(self.spectrum.x_units)
-        plt.style.use("default")
+            ax.axvline(x=x0, color='red', linestyle='-', alpha=0.2)
+        ax.legend(loc=1)
+        ax.set_title(f"SNR > {self.min_snr}")
+        ax.set_ylim(1e-1)
+        ax.set_ylabel("Cts")
+        ax.set_xlabel(self.spectrum.x_units)
+        #plt.style.use("default")
     
     def plot_components(self, yscale='log'):
         '''
