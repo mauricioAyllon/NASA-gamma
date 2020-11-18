@@ -282,7 +282,8 @@ class PeakFit:
             ax_tab.axis('off')
             #plt.style.use("default")
 
-def ecalibration(mean_vals, erg, channels, n=1, e_units="keV", plot=False):
+def ecalibration(mean_vals, erg, channels, n=1, e_units="keV", plot=False,
+                 residual=True, fig=None, ax_fit=None, ax_res=None):
     '''
     Perform energy calibration with LMfit. Polynomial degree = n.
 
@@ -318,31 +319,44 @@ def ecalibration(mean_vals, erg, channels, n=1, e_units="keV", plot=False):
     predicted = fit.eval(x=channels)
     ye = fit.eval_uncertainty()
     if plot:
-        x_offset = 100
         plt.rc("font", size=14)
         plt.style.use("seaborn-darkgrid")
-        fig = plt.figure(constrained_layout=False, figsize=(12,8))
-        gs = fig.add_gridspec(2, 1, height_ratios=[1,4])
-        f_ax1 = fig.add_subplot(gs[0, 0])
-        f_ax1.plot(mean_vals, fit.residual, '.', ms=15, alpha=0.5, color="red")
-        f_ax1.hlines(y=0, xmin=min(channels)-x_offset,
-                     xmax=max(channels), lw=3)
-        f_ax1.set_ylabel("Residual")
-        f_ax1.set_xlim([min(channels)-x_offset, max(channels)])
-        f_ax1.set_xticks([])
-        f_ax2 = fig.add_subplot(gs[1, 0])
-        f_ax2.set_title("Energy calibration")
-        f_ax2.errorbar(mean_vals, erg, yerr=ye, ecolor='red', elinewidth=5,
+        x_offset = 100
+        if fig is None:
+            fig = plt.figure(constrained_layout=False, figsize=(12,8))  
+        if residual:
+            gs = fig.add_gridspec(2, 1, height_ratios=[1,4])
+            if ax_res is None:
+                ax_res = fig.add_subplot(gs[0, 0])
+                ax_res.plot(mean_vals, fit.residual, '.', ms=15, alpha=0.5,
+                            color="red")
+                ax_res.hlines(y=0, xmin=min(channels)-x_offset,
+                             xmax=max(channels), lw=3)
+                ax_res.set_ylabel("Residual")
+                ax_res.set_xlim([min(channels)-x_offset, max(channels)])
+                ax_res.set_xticks([])
+        else:
+            gs = fig.add_gridspec(1, 1)
+            
+        if ax_fit is None:
+            if residual:
+                ax_fit = fig.add_subplot(gs[1, 0])
+            else:
+                ax_fit = fig.add_subplot(gs[0, 0])
+        
+
+        ax_fit.set_title("Energy calibration")
+        ax_fit.errorbar(mean_vals, erg, yerr=ye, ecolor='red', elinewidth=5,
                        capsize=12, capthick=3, marker="s", mfc="black",
                        mec="black", markersize=7, ls="--", lw=3,
                        label="Best fit")
-        f_ax2.plot(channels, predicted, ls="--", lw=3, color="green",
+        ax_fit.plot(channels, predicted, ls="--", lw=3, color="green",
                          label="Predicted")
-        f_ax2.set_xlim([min(channels)-x_offset, max(channels)])
-        f_ax2.set_xlabel("Channels")
-        f_ax2.set_ylabel(f"Energy [{e_units}]")
-        plt.legend()
-        plt.style.use("default")
+        ax_fit.set_xlim([min(channels)-x_offset, max(channels)])
+        ax_fit.set_xlabel("Channels")
+        ax_fit.set_ylabel(f"Energy [{e_units}]")
+        ax_fit.legend()
+        #plt.style.use("default")
     return predicted, fit
 
 
