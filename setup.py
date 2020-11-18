@@ -9,5 +9,5 @@ setup(
     author="Mauricio Ayllon Unzueta",
     author_email="mauri.ayllon12@gmail.com",
     packages=["nasagamma"],
-    scripts=["gammaGUI"],
+    scripts=["gammaGUI", "ecalGUI"],
 )
