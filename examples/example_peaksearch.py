@@ -20,18 +20,17 @@ df = df.iloc[1:,:]
 
 cts_np = df.cts.to_numpy() * 1e8
 erg = np.array(df.index)
-chan = np.arange(0,len(cts_np),1)
 
 # instantiate a Spectrum object
 spect = sp.Spectrum(counts=cts_np, energies=erg)
 
 # Required input parameters (in channels)
-fwhm_at_0 = 1.0
+fwhm_at_0 = 1
 ref_fwhm = 35
 ref_x = 1220
 
 # instantiate a peaksearch object
-search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=1)
+search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=0.1)
 
 search.plot_kernel()
 
