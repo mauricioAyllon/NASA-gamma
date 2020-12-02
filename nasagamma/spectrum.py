@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 """
 Created on Wed Sep 30 10:14:25 2020
 
@@ -9,34 +9,34 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 class Spectrum():
-    """
-    Initialize a Spectrum.
-
-    Data Attributes:
-      counts: counts per bin, or count rate
-      channels: np.array of raw/uncalibrated bin edges
-      energies: np.array of energy bin edges, if calibrated
-     
-    """
 
     def __init__(self, counts=None, channels=None, energies=None,
                  e_units=None):
-        """Initialize the spectrum.
+        '''
+        Initialize the spectrum.
 
-        counts is the only required input parameter
+        Parameters
+        ----------
+        counts : numpy array, pandas series, or list.
+            counts per bin or count rate. This is the only 
+            required input parameter.
+        channels : numpy array, pandas series, or list. Optional
+            array of bin edges. If None, assume based on counts.
+            The default is None.
+        energies : numpy array, pandas series, or list. Optional
+            energy values. The default is None.
+        e_units : string, optional
+            string of energy units e.g. "MeV". The default is None.
 
-        Args:
-          counts: counts per bin, or cps
-          channels (optional): array of bin edges. If None, assume based on
-          counts
-          energies (optional): an array of energy values
-          e_units (optional): a string of energy units
-        """
+        Returns
+        -------
+        None.
+
+        '''
         if counts is None:
             print("ERROR: Must specify counts")
         if channels is None:
             channels = np.arange(0,len(counts),1)
-        
         if energies is not None:
             self.energies = np.array(energies, dtype=float)
             if e_units is None:
@@ -48,7 +48,6 @@ class Spectrum():
             self.energies = energies
             self.x_units = "Channels"
         
-
         self.counts = np.array(counts, dtype=float)
         self.channels = np.array(channels, dtype=int)
         
