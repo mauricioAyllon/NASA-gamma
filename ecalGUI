@@ -26,7 +26,7 @@ fwhm_ref based on the known detector characteristics.
 Note that the detector types input parameters must be changed depending on the 
 particular gain used. The examples here are for our specific detector settings.
 """
-## run gammaGUI.py gui_test_data.csv --min_snr=3 --cebr
+## run ecalGUI.py gui_test_data.csv --min_snr=3 --cebr
 
 import docopt
 if __name__ == "__main__":
