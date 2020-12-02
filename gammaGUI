@@ -74,7 +74,12 @@ if df.shape[1] == 2:
     col_lst = list(df.columns)
     erg = [s for s in col_lst if "energy" in s][0]
     e_units = erg[7:]
-    spect = sp.Spectrum(counts=df["counts"], energies=df.iloc[:,1],
+    cts_idx = col_lst.index("counts")
+    if cts_idx == 0:
+        col_idx = 1
+    else:
+        col_idx = 0
+    spect = sp.Spectrum(counts=df["counts"], energies=df.iloc[:,col_idx],
                     e_units=e_units)
     x = spect.energies
 elif df.shape[1] == 1:
