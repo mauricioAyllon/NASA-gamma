@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 """
 Created on Wed Sep 30 15:08:07 2020
 
@@ -10,7 +10,7 @@ from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 
  
-def gaussian0(x, mean, sigma):
+def gaussian(x, mean, sigma):
     '''
     Gaussian function.
 
@@ -31,7 +31,7 @@ def gaussian0(x, mean, sigma):
     z = (x - mean) / sigma
     return np.exp(-z**2 / 2.)
 
-def gaussian1(x, mean, sigma):
+def gaussian_derivative(x, mean, sigma):
     '''
     First derivative of a Gaussian.
 
@@ -51,7 +51,7 @@ def gaussian1(x, mean, sigma):
 
     '''
     z = (x - mean)
-    return -1 * z * gaussian0(x, mean, sigma)
+    return -1 * z * gaussian(x, mean, sigma)
 
 
 class PeakSearch:
@@ -59,7 +59,8 @@ class PeakSearch:
     def __init__(self, spectrum, ref_x, ref_fwhm, fwhm_at_0=1.0, min_snr=2):
         '''
         Find peaks in a Spectrum object and decompose specrum into components
-        using a Gaussian kernel deconvolution technique.
+        using a Gaussian kernel deconvolution technique. Most of this 
+        functionality was adapted from https://github.com/lbl-anp/becquerel
 
         Parameters
         ----------
@@ -99,12 +100,6 @@ class PeakSearch:
         self.peaks_idx = []
         self.fwhm_guess = []
         self.calculate()
-        
-        #self.centroids = []
-        #self.snrs = []
-        #self.fwhms = []
-        #self.integrals = []
-        #self.backgrounds = []
 
     def fwhm(self, x):
         '''
@@ -121,22 +116,22 @@ class PeakSearch:
             expected FWHM values.
 
         '''
-        # f(x)^2 = f0^2 + k x^2
-        # f1^2 = f0^2 + k x1^2
-        # k = (f1^2 - f0^2) / x1^2
-        # f(x)^2 = f0^2 + (f1^2 - f0^2) (x/x1)^2
+        # f(x) = k * sqrt(x) + b
+        # b = f(0)
+        # k = f1/sqrt(x1)
         f0 = self.fwhm_at_0
         f1 = self.ref_fwhm
         x1 = self.ref_x
-        fwhm_sqr = f0**2 + (f1**2 - f0**2) * (x / x1)**2
-        return np.sqrt(fwhm_sqr)
+        # fwhm_sqr = np.sqrt(f0**2 + (f1**2 - f0**2) * (x / x1)**2)
+        fwhm_sqr = (f1/np.sqrt(x1)) * np.sqrt(x) + f0
+        return fwhm_sqr
     
     def kernel(self, x, edges):
         """Generate the kernel for the given x value."""
         fwhm1 = self.fwhm(x)
         sigma = fwhm1 / 2.355
-        g1_x0 = gaussian1(edges[:-1], x, sigma)
-        g1_x1 = gaussian1(edges[1:], x, sigma)
+        g1_x0 = gaussian_derivative(edges[:-1], x, sigma)
+        g1_x1 = gaussian_derivative(edges[1:], x, sigma)
         kernel = g1_x0 - g1_x1
         return kernel
     
@@ -153,9 +148,8 @@ class PeakSearch:
         kmat = kern_pos - kern_neg
         return kmat
     
-    # now convolve the spectrum with the kernel
     def convolve(self, edges, data):
-        """Convolve this kernel with the data."""
+        """Convolve kernel with the data."""
         kern_mat = self.kernel_matrix(edges)
         kern_mat_pos = +1 * kern_mat.clip(0, np.inf)
         kern_mat_neg = -1 * kern_mat.clip(-np.inf, 0)
@@ -163,7 +157,9 @@ class PeakSearch:
         bkg = np.dot(kern_mat_neg, data)
         signal = np.dot(kern_mat, data)
         noise = np.dot(kern_mat**2, data)
-        noise = np.array([np.sqrt(x) for x in noise])
+        #print("other")
+        #noise = np.array([np.sqrt(x) for x in noise])
+        noise = np.sqrt(noise)
         snr = np.zeros_like(signal)
         snr[noise > 0] = signal[noise > 0] / noise[noise > 0]
         return peak_plus_bkg, bkg, signal, noise, snr
