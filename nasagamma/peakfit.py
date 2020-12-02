@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 """
 Created on Wed Oct 14 14:46:23 2020
 
@@ -16,8 +16,8 @@ class PeakFit:
     
     def __init__(self, search, xrange, bkg='linear'):
         '''
-        Use the package LMfit to fit and plot peaks with Gaussians for a given
-        background. It must be initialized with a PeakSearch object.
+        Use the package LMfit to fit and plot peaks with Gaussians with a 
+        given background. It must be initialized with a PeakSearch object.
 
         Parameters
         ----------
@@ -43,7 +43,7 @@ class PeakFit:
         '''
         
         if type(search) != ps.PeakSearch:
-            raise Exception("'search' must be a PeakSearch object")
+            raise Exception("'search must be a PeakSearch object")
         self.search = search
         self.xrange = xrange
         self.bkg = bkg
@@ -65,8 +65,20 @@ class PeakFit:
         self.gaussians_bkg()
     
     def find_peaks_range(self):
+        '''
+        Find data points within xrange where peaks were found
+        with peaksearch
+
+        Returns
+        -------
+        mask : numpy array
+            array of booleans where fit is performed.
+        pidx : numpy array
+            peak indices as found with peaksearch.
+
+        '''
         
-        mask = mask = (self.x[self.search.peaks_idx] > self.xrange[0])*\
+        mask = (self.x[self.search.peaks_idx] > self.xrange[0])*\
                 (self.x[self.search.peaks_idx] < self.xrange[1])
        
         if sum(mask) == 0:
@@ -78,6 +90,25 @@ class PeakFit:
         return mask, pidx
         
     def init_values(self):
+        '''
+        Try to find suitable initial value guesses for the fit. This works
+        for a linear background only, and it should be attempted when the
+        automatic guess from LMfit fails.
+
+        Returns
+        -------
+        m0 : float
+            slope guess for linear background.
+        b0 : float
+            y-intercept guess for linear background.
+        amp0 : float
+            Gaussian amplitude guess.
+        erg0 : float
+            Gaussian mean guess.
+        sig0 : float
+            Gaussian sigma guess.
+
+        '''
         cts = self.search.spectrum.counts
         m = np.polyfit(self.chan, self.x, 1)[0] # energy/channel
         left = cts[np.where(self.x > self.xrange[0])[0][0]]
@@ -94,6 +125,14 @@ class PeakFit:
     
        
     def gaussians_bkg(self):
+        '''
+        Fit one or multiple Gaussians with a given background.
+
+        Returns
+        -------
+        None.
+
+        '''
         
         maskx = (self.x > self.xrange[0]) * (self.x < self.xrange[1])
         m,b,amp,erg,sig = self.init_values()
@@ -138,6 +177,7 @@ class PeakFit:
         self.fit_result = fit0
         
         # save some extra info
+        # such as mean, net area, fwhm, and corresponding errors
         epar = fit0.params
         for i in range(npeaks):
             mean0 = fit0.best_values[f"g{i+1}_center"]
@@ -158,6 +198,32 @@ class PeakFit:
             
     def plot(self, plot_type="simple", legend="on", table_scale=[2,2.3],
              fig=None, ax_res=None, ax_fit=None, ax_tab=None):
+        '''
+        Plot the data points, best fit, fit components, residual,
+        n-sigma band, and table with the means, net areas, and fwhms.
+
+        Parameters
+        ----------
+        plot_type : string, optional
+            Either "simple" or "full". The default is "simple".
+        legend : string, optional
+            Either "on" or "off". The default is "on".
+        table_scale : list, optional
+            [length, width] of table. The default is [2,2.3].
+        fig : matplotlib figure object, optional
+            plotting figure. The default is None.
+        ax_res : axis object, optional
+            axis or residual plot. The default is None.
+        ax_fit : axis object, optional
+            axis for the best-fit plot. The default is None.
+        ax_tab : axis object, optional
+            axis for the table plot. The default is None.
+
+        Returns
+        -------
+        None.
+
+        '''
         x = self.x_data
         y = self.y_data
         #init_fit = self.fit_result.init_fit
