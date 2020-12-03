@@ -14,8 +14,8 @@ from nasagamma import peakfit as pf
 
 # dataset 1
 file = "data/SSR-mcnp.hdf"
-df = pd.read_hdf(file, key='data')
-df = df.iloc[1:,:]
+df = pd.read_hdf(file, key="data")
+df = df.iloc[1:, :]
 
 
 cts_np = df.cts.to_numpy() * 1e8
@@ -34,21 +34,20 @@ spect = sp.Spectrum(counts=cts_np, energies=erg)
 search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
 
 # peakfit class
-bkg0 = 'poly1'
+bkg0 = "poly1"
 xrange = [1.46, 1.86]
-#xrange = [2.1, 2.3]
+# xrange = [2.1, 2.3]
 xrange = [2.6, 4]
-#xrange = [5, 6.3]
-#xrange = [5, 7.5]
-#xrange = [1.65, 4]
-#xrange = [6.75, 7.25]
+# xrange = [5, 6.3]
+# xrange = [5, 7.5]
+# xrange = [1.65, 4]
+# xrange = [6.75, 7.25]
 fit = pf.PeakFit(search, xrange, bkg=bkg0)
 
 res = fit.fit_result
 
-#print(res.fit_report())
+# print(res.fit_report())
 
 # search.plot_peaks()
 
-fit.plot(plot_type="full", legend='on', table_scale=[2, 2.3])
-
+fit.plot(plot_type="full", legend="on", table_scale=[2, 2.3])

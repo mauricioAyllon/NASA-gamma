@@ -13,10 +13,10 @@ from nasagamma import peaksearch as ps
 
 # dataset 1
 file = "data/SSR-mcnp.hdf"
-df = pd.read_hdf(file, key='data')
+df = pd.read_hdf(file, key="data")
 
 # delete first (large) bin
-df = df.iloc[1:,:]
+df = df.iloc[1:, :]
 
 cts_np = df.cts.to_numpy() * 1e8
 erg = np.array(df.index)
@@ -37,4 +37,3 @@ search.plot_kernel()
 search.plot_peaks()
 
 search.plot_components()
-

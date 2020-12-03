@@ -1,4 +1,3 @@
-
 """
 Created on Wed Sep 30 10:14:25 2020
 
@@ -8,17 +7,16 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-class Spectrum():
 
-    def __init__(self, counts=None, channels=None, energies=None,
-                 e_units=None):
-        '''
+class Spectrum:
+    def __init__(self, counts=None, channels=None, energies=None, e_units=None):
+        """
         Initialize the spectrum.
 
         Parameters
         ----------
         counts : numpy array, pandas series, or list.
-            counts per bin or count rate. This is the only 
+            counts per bin or count rate. This is the only
             required input parameter.
         channels : numpy array, pandas series, or list. Optional
             array of bin edges. If None, assume based on counts.
@@ -32,27 +30,27 @@ class Spectrum():
         -------
         None.
 
-        '''
+        """
         if counts is None:
             print("ERROR: Must specify counts")
         if channels is None:
-            channels = np.arange(0,len(counts),1)
+            channels = np.arange(0, len(counts), 1)
         if energies is not None:
             self.energies = np.array(energies, dtype=float)
             if e_units is None:
                 self.x_units = "Energy"
             else:
                 self.x_units = f"Energy [{e_units}]"
-            
+
         else:
             self.energies = energies
             self.x_units = "Channels"
-        
+
         self.counts = np.array(counts, dtype=float)
         self.channels = np.array(channels, dtype=int)
-        
+
     def smooth(self, num=4):
-        '''
+        """
         Parameters
         ----------
         num : integer, optional
@@ -63,14 +61,14 @@ class Spectrum():
         numpy array
             moving average of counts.
 
-        '''
+        """
         df = pd.DataFrame(data=self.counts, columns=["cts"])
         mav = df.cts.rolling(window=num, center=True).mean()
         mav.fillna(0, inplace=True)
         return np.array(mav)
-    
+
     def rebin(self):
-        '''
+        """
         Rebins data by adding two adjacent bins at a time.
 
         Returns
@@ -80,7 +78,7 @@ class Spectrum():
         If energies are passed, returns both rebinned counts and average
         energies
 
-        '''
+        """
         arr_cts = self.counts
         if arr_cts.shape[0] % 2 != 0:
             arr_cts = arr_cts[:-1]
@@ -97,9 +95,9 @@ class Spectrum():
             en1 = erg[1::2]
             en = (en0 + en1) / 2
             return en, y
-    
-    def plot(self, scale='log'):
-        '''
+
+    def plot(self, scale="log"):
+        """
         Plot spectrum object using channels and energies (if not None)
 
         Parameters
@@ -111,34 +109,31 @@ class Spectrum():
         -------
         None.
 
-        '''
+        """
         x = self.channels
         y = self.counts
         integral = round(y.sum())
-        plt.rc("font", size=14)  
+        plt.rc("font", size=14)
         plt.style.use("seaborn-darkgrid")
         plt.figure()
         plt.fill_between(x, 0, y, alpha=0.5, color="C0", step="pre")
-        plt.plot(x,y, drawstyle="steps")
+        plt.plot(x, y, drawstyle="steps")
         plt.yscale(scale)
         plt.title(f"Raw Spectrum. Integral = {integral}")
         plt.xlabel("Channels")
-        #plt.ylabel("a.u")
+        # plt.ylabel("a.u")
         plt.style.use("default")
-        
+
         if self.energies is not None:
             x = self.energies
-            y= self.counts
-            plt.rc("font", size=14)  
+            y = self.counts
+            plt.rc("font", size=14)
             plt.style.use("seaborn-darkgrid")
             plt.figure()
             plt.fill_between(x, 0, y, alpha=0.5, color="C1", step="pre")
-            plt.plot(x,y, color="C1", drawstyle="steps")
+            plt.plot(x, y, color="C1", drawstyle="steps")
             plt.yscale(scale)
             plt.title(f"Raw Spectrum. Integral = {integral}")
             plt.xlabel(self.x_units)
-            #plt.ylabel("a.u")
+            # plt.ylabel("a.u")
             plt.style.use("default")
-            
-        
-       
