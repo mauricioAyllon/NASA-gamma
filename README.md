@@ -1,4 +1,3 @@
-![gammaGUI](figs/gammaGUI.png)
 # NASA-gamma
 Gamma spectrocopy tools and visualizations. Some of its capabilitis include:
 
@@ -23,3 +22,5 @@ Try running the following from the "examples" file:
 or the following for the calibration GUI:
 "ecalGUI data/gui_test_data_labr_uncalibrated.csv --e_units="MeV" --labr"
 
+![gammaGUI](figs/gammaGUI.png)
+![ecalGUI](figs/ecalGUI.png)
