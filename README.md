@@ -1,3 +1,4 @@
+![gammaGUI](figs/gammaGUI.png)
 # NASA-gamma
 Gamma spectrocopy tools and visualizations. Some of its capabilitis include:
 
