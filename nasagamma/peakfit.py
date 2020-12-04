@@ -1,14 +1,13 @@
 """
-Created on Wed Oct 14 14:46:23 2020
-
-@author: mauricio
 Peak fit class: Gaussian + Linear fit
 """
-import numpy as np
-from . import peaksearch as ps
+
 import lmfit
-import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+from . import peaksearch as ps
 
 
 class PeakFit:
@@ -40,7 +39,7 @@ class PeakFit:
 
         """
 
-        if type(search) != ps.PeakSearch:
+        if not isinstance(search, ps.PeakSearch):
             raise Exception("'search must be a PeakSearch object")
         self.search = search
         self.xrange = xrange

@@ -1,11 +1,9 @@
 """
-Created on Wed Sep 30 10:14:25 2020
-
-@author: mauricio
 """
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 
 class Spectrum:
@@ -36,7 +34,7 @@ class Spectrum:
         if channels is None:
             channels = np.arange(0, len(counts), 1)
         if energies is not None:
-            self.energies = np.array(energies, dtype=float)
+            self.energies = np.asarray(energies, dtype=float)
             if e_units is None:
                 self.x_units = "Energy"
             else:
@@ -46,8 +44,8 @@ class Spectrum:
             self.energies = energies
             self.x_units = "Channels"
 
-        self.counts = np.array(counts, dtype=float)
-        self.channels = np.array(channels, dtype=int)
+        self.counts = np.asarray(counts, dtype=float)
+        self.channels = np.asarray(channels, dtype=int)
 
     def smooth(self, num=4):
         """
@@ -85,16 +83,17 @@ class Spectrum:
         y0 = arr_cts[::2]
         y1 = arr_cts[1::2]
         y = y0 + y1
+
         if self.energies is None:
             return y
-        else:
-            erg = self.energies
-            if erg.shape[0] % 2 != 0:
-                erg = erg[:-1]
-            en0 = erg[::2]
-            en1 = erg[1::2]
-            en = (en0 + en1) / 2
-            return en, y
+
+        erg = self.energies
+        if erg.shape[0] % 2 != 0:
+            erg = erg[:-1]
+        en0 = erg[::2]
+        en1 = erg[1::2]
+        en = (en0 + en1) / 2
+        return en, y
 
     def plot(self, scale="log"):
         """

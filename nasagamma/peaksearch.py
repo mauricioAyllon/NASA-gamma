@@ -1,12 +1,11 @@
 """
-Created on Wed Sep 30 15:08:07 2020
-
-@author: mauricio
 """
-import numpy as np
-from . import spectrum as sp
-from scipy.signal import find_peaks
+
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import find_peaks
+
+from . import spectrum as sp
 
 
 def gaussian(x, mean, sigma):
@@ -84,7 +83,7 @@ class PeakSearch:
         None.
 
         """
-        if type(spectrum) != sp.Spectrum:
+        if not isinstance(spectrum, sp.Spectrum):
             raise Exception("'spectrum' must be a Spectrum object")
         self.ref_x = ref_x
         self.ref_fwhm = ref_fwhm
@@ -152,10 +151,10 @@ class PeakSearch:
         kern_mat = self.kernel_matrix(edges)
         kern_mat_pos = +1 * kern_mat.clip(0, np.inf)
         kern_mat_neg = -1 * kern_mat.clip(-np.inf, 0)
-        peak_plus_bkg = np.dot(kern_mat_pos, data)
-        bkg = np.dot(kern_mat_neg, data)
-        signal = np.dot(kern_mat, data)
-        noise = np.dot(kern_mat ** 2, data)
+        peak_plus_bkg = kern_mat_pos @ data
+        bkg = kern_mat_neg @ data
+        signal = kern_mat @ data
+        noise = (kern_mat ** 2) @ data
         # print("other")
         # noise = np.array([np.sqrt(x) for x in noise])
         noise = np.sqrt(noise)
