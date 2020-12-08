@@ -1,0 +1,23 @@
+[build-system]
+module = "nasagamma"
+author = "Mauricio Ayllon Unzueta"
+author-email = "mauri.ayllon12@gmail.com"
+home-page = "https://github.com/mauricioAyllon/NASA-gamma"
+requires = [
+    "pandas",
+    "numpy",
+    "matplotlib",
+    "scipy",
+    "lmfit",
+    "setuptools>=42",
+    "wheel",
+    "setuptools_scm[toml]>=3.4"
+]
+description-file="README.md"
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[tool.setuptools_scm]
+write_to = "nasagamma/version.py"
