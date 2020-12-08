@@ -249,7 +249,7 @@ class PeakSearch:
             ax.axvline(x=x0, color="red", linestyle="-", alpha=0.2)
         ax.legend(loc=1)
         ax.set_title(f"SNR > {self.min_snr}")
-        ax.set_ylim(1e-1)
+        # ax.set_ylim(1e-1)
         ax.set_ylabel("Cts")
         ax.set_xlabel(self.spectrum.x_units)
         # plt.style.use("default")
