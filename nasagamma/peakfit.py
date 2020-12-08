@@ -43,6 +43,7 @@ class PeakFit:
             raise Exception("'search must be a PeakSearch object")
         self.search = search
         self.xrange = xrange
+        self.continuum = 0
         self.bkg = bkg
         self.x_data = 0
         self.y_data = 0
@@ -141,9 +142,11 @@ class PeakFit:
         self.y_data = y0
         self.x_data = x0
 
+        # For the linear and quadratic models below, we manually guess
+        # the initial parameters. For the others, we have LMfit
+        # guess for us
         if self.bkg == "linear":
-            # here we guess the slope and the intercept
-            lin_mod = lmfit.models.LinearModel()
+            lin_mod = lmfit.models.LinearModel(prefix="linear")
             pars = lin_mod.make_params(slope=m, itercept=b)
             model = lin_mod
         elif self.bkg == "quadratic":
@@ -174,7 +177,9 @@ class PeakFit:
         self.fit_result = fit0
 
         # save some extra info
-        # such as mean, net area, fwhm, and corresponding errors
+        # such as mean, net area, fwhm, continuum, and corresponding errors
+        bkg_key = list(components.keys())[0]
+        self.continuum = components[bkg_key].sum()
         epar = fit0.params
         for i in range(npeaks):
             mean0 = fit0.best_values[f"g{i+1}_center"]
