@@ -117,6 +117,7 @@ ax_b33 = fig.add_subplot(gs[3, 3])
 ax_log = plt.axes([0.39, 0.85, 0.1, 0.05])
 ax_add = plt.axes([0.39, 0.32, 0.1, 0.05])
 ax_reset = plt.axes([0.89, 0.6, 0.1, 0.05])
+ax_orig = plt.axes([0.89, 0.67, 0.1, 0.05])
 
 # buttons
 blin = Button(ax_b1, "linear", color="turquoise", hovercolor="lightgreen")
@@ -130,6 +131,7 @@ bpoly1.label.set_fontsize(16)
 bpoly2.label.set_fontsize(16)
 bexp.label.set_fontsize(16)
 breset = Button(ax_reset, "RESET", color="C1", hovercolor="lightgreen")
+borig = Button(ax_orig, "Origin YES/NO", color="C8", hovercolor="lightblue")
 
 # textbox (add to calibration)
 initial_e = " "
@@ -276,14 +278,16 @@ def submit_e(text):
     for d in fit.peak_info:
         keys = list(d)
         mean_ch = d[keys[0]]
-        mean_vals.append(mean_ch)
+        if mean_ch not in mean_vals:
+            mean_vals.append(mean_ch)
     en = eval(text)
     if type(en) == tuple:
         en = list(en)
     else:
         en = [en]
     for e in en:
-        e_vals.append(e)
+        if e not in e_vals:
+            e_vals.append(e)
     print("ch: ", mean_vals)
     print("energies: ", e_vals)
     mean_vals.sort()
@@ -364,6 +368,33 @@ def click_button7(event):
     fig.canvas.draw_idle()
 
 
+def click_button8(event):
+    global pred_erg
+    global mean_vals
+    global e_vals
+    ax_cal.clear()
+    if 0 in mean_vals:
+        mean_vals.pop(0)
+        e_vals.pop(0)
+    else:
+        mean_vals.insert(0, 0)
+        e_vals.insert(0, 0)
+
+    if len(mean_vals) > 1:
+        pred_erg, efit = pf.ecalibration(
+            mean_vals=mean_vals,
+            erg=e_vals,
+            channels=x,
+            n=1,
+            e_units=eunits,
+            plot=True,
+            residual=False,
+            fig=fig,
+            ax_fit=ax_cal,
+        )
+        fig.canvas.draw_idle()
+
+
 bpoly1.on_clicked(click_button1)
 bpoly2.on_clicked(click_button2)
 bexp.on_clicked(click_button3)
@@ -373,5 +404,6 @@ breset.on_clicked(click_button4)
 bsave.on_clicked(click_button5)
 blin.on_clicked(click_button6)
 bquad.on_clicked(click_button7)
+borig.on_clicked(click_button8)
 plt.ioff()
 plt.show()
