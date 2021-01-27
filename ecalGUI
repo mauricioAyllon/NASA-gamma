@@ -16,19 +16,21 @@ Usage:
       
   
 
-Reads a csv file with only one columns titled "counts".
+Reads a csv file with only one column named "counts".
 No need to have channels because they are automatically infered starting
 from channel = 0.
 
 If detector type is defined e.g. --cebr then the code guesses the x_ref and
 fwhm_ref based on the known detector characteristics.
 
-Note that the detector types input parameters must be changed depending on the 
-particular gain used. The examples here are for our specific detector settings.
+Note that the detector type input parameters must be changed depending on the 
+particular electronic gain used. The examples here are for our specific
+detector configurations.
 """
 ## run ecalGUI.py gui_test_data.csv --min_snr=3 --cebr
 
 import docopt
+
 if __name__ == "__main__":
     commands = docopt.docopt(__doc__)
 print(commands)
@@ -39,11 +41,11 @@ file_name = commands["<file_name>"]
 if commands["--cebr"]:
     fwhm_at_0 = 1.0
     ref_x = 1317
-    ref_fwhm = 41    
+    ref_fwhm = 41
 elif commands["--labr"]:
     fwhm_at_0 = 1.0
     ref_x = 427
-    ref_fwhm = 12
+    ref_fwhm = 10
 elif commands["--hpge"]:
     fwhm_at_0 = 0.1
     ref_x = 948
@@ -52,8 +54,8 @@ else:
     fwhm_at_0 = float(commands["--fwhm_at_0"])
     ref_x = float(commands["--ref_x"])
     ref_fwhm = float(commands["--ref_fwhm"])
-        
-    
+
+
 if commands["--min_snr"] is None:
     min_snr = 1.0
 else:
@@ -88,13 +90,14 @@ else:
 # peaksearch class
 search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
 
-## initialize figure 
+## initialize figure
 plt.rc("font", size=14)
 plt.style.use("seaborn-darkgrid")
-fig = plt.figure(constrained_layout=True, figsize=(17,9))
+fig = plt.figure(constrained_layout=True, figsize=(17, 9))
 
-gs = fig.add_gridspec(4, 4, width_ratios=[1,0.33,0.33,0.33],
-                       height_ratios=[1,0.15,0.7,0.15])
+gs = fig.add_gridspec(
+    4, 4, width_ratios=[1, 0.33, 0.33, 0.33], height_ratios=[1, 0.15, 0.7, 0.15]
+)
 
 # axes
 ax_s = fig.add_subplot(gs[0, 0])
@@ -111,15 +114,15 @@ ax_b33 = fig.add_subplot(gs[3, 3])
 
 ax_log = plt.axes([0.39, 0.85, 0.1, 0.05])
 ax_add = plt.axes([0.39, 0.32, 0.1, 0.05])
-ax_reset= plt.axes([0.7, 0.9, 0.1, 0.05])
+ax_reset = plt.axes([0.89, 0.6, 0.1, 0.05])
 
 # buttons
-blin = Button(ax_b1, 'linear', color="turquoise", hovercolor="lightgreen")
-bquad = Button(ax_b2, 'quadratic', color="turquoise", hovercolor="lightgreen")
-bsave = Button(ax_b3, 'save', color="silver", hovercolor="lightblue")
-bpoly1 = Button(ax_b11, 'poly1', color="yellow", hovercolor="lightgreen")
-bpoly2 = Button(ax_b22, 'poly2', color="yellow", hovercolor="lightgreen")
-bexp = Button(ax_b33, 'exp', color="yellow", hovercolor="lightgreen")
+blin = Button(ax_b1, "linear", color="turquoise", hovercolor="lightgreen")
+bquad = Button(ax_b2, "quadratic", color="turquoise", hovercolor="lightgreen")
+bsave = Button(ax_b3, "save", color="silver", hovercolor="lightblue")
+bpoly1 = Button(ax_b11, "poly1", color="yellow", hovercolor="lightgreen")
+bpoly2 = Button(ax_b22, "poly2", color="yellow", hovercolor="lightgreen")
+bexp = Button(ax_b33, "exp", color="yellow", hovercolor="lightgreen")
 blog = Button(ax_log, "log-lin", color="yellow", hovercolor="lightgreen")
 bpoly1.label.set_fontsize(16)
 bpoly2.label.set_fontsize(16)
@@ -128,7 +131,7 @@ breset = Button(ax_reset, "RESET", color="C1", hovercolor="lightgreen")
 
 # textbox (add to calibration)
 initial_e = " "
-text_box = TextBox(ax_add, 'Energy: ', initial=initial_e, color="lightblue")
+text_box = TextBox(ax_add, "Energy: ", initial=initial_e, color="lightblue")
 
 
 # plot spectrum with peaksearch
@@ -153,61 +156,99 @@ ax_tab.set_yticks([])
 
 
 list_xrange = []
+
+
 def xSelect(xmin, xmax):
     global fit
     idxmin = round(xmin, 4)
     idxmax = round(xmax, 4)
     xrange = [idxmin, idxmax]
     list_xrange.append(xrange)
-    print('xmin: ', idxmin)
-    print('xmax: ', idxmax)
+    print("xmin: ", idxmin)
+    print("xmax: ", idxmax)
     ax_res.clear()
     ax_fit.clear()
     ax_tab.clear()
     fit = pf.PeakFit(search, xrange, bkg="poly1")
-    #plot_fit(fit)
-    fit.plot(plot_type="full", table_scale=[1, 1.8], legend="off",
-             fig=fig, ax_res=ax_res, ax_fit=ax_fit, ax_tab=ax_tab)
+    # plot_fit(fit)
+    fit.plot(
+        plot_type="full",
+        table_scale=[1, 1.8],
+        legend="off",
+        fig=fig,
+        ax_res=ax_res,
+        ax_fit=ax_fit,
+        ax_tab=ax_tab,
+    )
     fig.canvas.draw_idle()
     xspan.span_stays
 
+
 # set useblit True on gtkagg for enhanced performance
-xspan = SpanSelector(ax_s, xSelect, 'horizontal', useblit=True,
-                     span_stays=True,
-                     rectprops=dict(alpha=0.3, facecolor='green'))
+xspan = SpanSelector(
+    ax_s,
+    xSelect,
+    "horizontal",
+    useblit=True,
+    span_stays=True,
+    rectprops=dict(alpha=0.3, facecolor="green"),
+)
 
 
-def click_button1(event): 
+def click_button1(event):
     global fit
     fit = pf.PeakFit(search, list_xrange[-1], bkg="poly1")
     ax_res.clear()
     ax_fit.clear()
     ax_tab.clear()
-    fit.plot(plot_type="full", table_scale=[1, 1.8], legend="off",
-              fig=fig, ax_res=ax_res, ax_fit=ax_fit, ax_tab=ax_tab)
+    fit.plot(
+        plot_type="full",
+        table_scale=[1, 1.8],
+        legend="off",
+        fig=fig,
+        ax_res=ax_res,
+        ax_fit=ax_fit,
+        ax_tab=ax_tab,
+    )
     fig.canvas.draw_idle()
-    
-def click_button2(event): 
+
+
+def click_button2(event):
     global fit
     fit = pf.PeakFit(search, list_xrange[-1], bkg="poly2")
     ax_res.clear()
     ax_fit.clear()
     ax_tab.clear()
-    fit.plot(plot_type="full", table_scale=[1, 1.8], legend="off",
-              fig=fig, ax_res=ax_res, ax_fit=ax_fit, ax_tab=ax_tab)
+    fit.plot(
+        plot_type="full",
+        table_scale=[1, 1.8],
+        legend="off",
+        fig=fig,
+        ax_res=ax_res,
+        ax_fit=ax_fit,
+        ax_tab=ax_tab,
+    )
     fig.canvas.draw_idle()
 
-def click_button3(event): 
+
+def click_button3(event):
     global fit
     fit = pf.PeakFit(search, list_xrange[-1], bkg="exponential")
     ax_res.clear()
     ax_fit.clear()
     ax_tab.clear()
-    fit.plot(plot_type="full", table_scale=[1, 1.8], legend="off",
-              fig=fig, ax_res=ax_res, ax_fit=ax_fit, ax_tab=ax_tab)
+    fit.plot(
+        plot_type="full",
+        table_scale=[1, 1.8],
+        legend="off",
+        fig=fig,
+        ax_res=ax_res,
+        ax_fit=ax_fit,
+        ax_tab=ax_tab,
+    )
     fig.canvas.draw_idle()
 
-   
+
 def click_log(event):
     global scale
     if scale == "log":
@@ -218,9 +259,12 @@ def click_log(event):
         scale = "log"
     fig.canvas.draw_idle()
 
+
 mean_vals = [0]
 e_vals = [0]
 pred_erg = 0
+
+
 def submit_e(text):
     global fit
     global pred_erg
@@ -242,13 +286,22 @@ def submit_e(text):
     print("energies: ", e_vals)
     mean_vals.sort()
     e_vals.sort()
-    pred_erg, efit = pf.ecalibration(mean_vals=mean_vals, erg=e_vals,
-                                     channels=x, n=1, e_units=eunits,
-                                     plot=True, residual=False, fig=fig,
-                                     ax_fit=ax_cal)
+    pred_erg, efit = pf.ecalibration(
+        mean_vals=mean_vals,
+        erg=e_vals,
+        channels=x,
+        n=1,
+        e_units=eunits,
+        plot=True,
+        residual=False,
+        fig=fig,
+        ax_fit=ax_cal,
+    )
+
     fig.canvas.draw_idle()
-    
-def click_button4(event): 
+
+
+def click_button4(event):
     global pred_erg
     global mean_vals
     global e_vals
@@ -256,8 +309,9 @@ def click_button4(event):
     mean_vals = [0]
     e_vals = [0]
     ax_cal.clear()
-    
-def click_button5(event): 
+
+
+def click_button5(event):
     global pred_erg
     global mean_vals
     global e_vals
@@ -268,40 +322,54 @@ def click_button5(event):
     now = datetime.now()
     dt_string = now.strftime("%d-%m-%Y-%H-%M-%S")
     df2.to_csv(f"{dt_string}.csv", index=False)
-    
+
+
 def click_button6(event):
     global pred_erg
     global mean_vals
     global e_vals
     ax_cal.clear()
-    pred_erg, efit = pf.ecalibration(mean_vals=mean_vals, erg=e_vals,
-                                     channels=x, n=1, e_units=eunits,
-                                     plot=True, residual=False, fig=fig,
-                                     ax_fit=ax_cal)
+    pred_erg, efit = pf.ecalibration(
+        mean_vals=mean_vals,
+        erg=e_vals,
+        channels=x,
+        n=1,
+        e_units=eunits,
+        plot=True,
+        residual=False,
+        fig=fig,
+        ax_fit=ax_cal,
+    )
     fig.canvas.draw_idle()
-  
+
 
 def click_button7(event):
     global pred_erg
     global mean_vals
     global e_vals
     ax_cal.clear()
-    pred_erg, efit = pf.ecalibration(mean_vals=mean_vals, erg=e_vals,
-                                     channels=x, n=2, e_units=eunits,
-                                     plot=True, residual=False, fig=fig,
-                                     ax_fit=ax_cal)
+    pred_erg, efit = pf.ecalibration(
+        mean_vals=mean_vals,
+        erg=e_vals,
+        channels=x,
+        n=2,
+        e_units=eunits,
+        plot=True,
+        residual=False,
+        fig=fig,
+        ax_fit=ax_cal,
+    )
     fig.canvas.draw_idle()
-      
 
-bpoly1.on_clicked(click_button1)   
-bpoly2.on_clicked(click_button2)  
-bexp.on_clicked(click_button3)   
-blog.on_clicked(click_log) 
+
+bpoly1.on_clicked(click_button1)
+bpoly2.on_clicked(click_button2)
+bexp.on_clicked(click_button3)
+blog.on_clicked(click_log)
 text_box.on_submit(submit_e)
 breset.on_clicked(click_button4)
 bsave.on_clicked(click_button5)
 blin.on_clicked(click_button6)
 bquad.on_clicked(click_button7)
 plt.ioff()
-plt.show()    
-    
+plt.show()
