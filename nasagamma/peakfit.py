@@ -431,6 +431,12 @@ def ecalibration(
     fit = model.fit(y0, params=pars, x=x0)
     predicted = fit.eval(x=channels)
     ye = fit.eval_uncertainty()
+    coeffs = list(fit.best_values.values())
+    terms = [f"${round(coeffs[0],3)}$", f"${round(coeffs[1],3)}x$"]
+    for i, c in enumerate(coeffs):
+        if i >= 2:
+            terms.append(f"${round(c,3)}x^{i}$")
+    equation = " + ".join(terms)
     if plot:
         plt.rc("font", size=14)
         plt.style.use("seaborn-darkgrid")
@@ -475,7 +481,12 @@ def ecalibration(
             label="Best fit",
         )
         ax_fit.plot(
-            channels, predicted, ls="--", lw=3, color="green", label="Predicted"
+            channels,
+            predicted,
+            ls="--",
+            lw=3,
+            color="green",
+            label=f"Predicted: {equation}",
         )
         ax_fit.set_xlim([min(channels) - x_offset, max(channels)])
         ax_fit.set_xlabel("Channels")
