@@ -81,10 +81,12 @@ from datetime import datetime
 df = pd.read_csv(file_name)
 
 if df.shape[1] != 1:
-    print("ERROR: data file must have only one column")
+    print("ERROR: data file must have only one column named 'counts'")
 else:
     e_units = "channels"
-    spect = sp.Spectrum(counts=df["counts"], e_units=e_units)
+    col_lst = list(df.columns)
+    cts_col = [s for s in col_lst if "counts" in s.lower()][0]
+    spect = sp.Spectrum(counts=df[cts_col], e_units=e_units)
     x = spect.channels
 
 # peaksearch class
@@ -315,7 +317,7 @@ def click_button5(event):
     global pred_erg
     global mean_vals
     global e_vals
-    cts = df["counts"]
+    cts = df[cts_col]
     data = np.array((cts, pred_erg)).T
     cols = ["counts", f"energy_{eunits}"]
     df2 = pd.DataFrame(data=data, columns=cols)
