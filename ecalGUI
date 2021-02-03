@@ -80,16 +80,23 @@ from datetime import datetime
 # read in csv file
 df = pd.read_csv(file_name)
 
-name_lst = ["counts", "cts", "data"]
+name_lst = ["count", "counts", "cts", "data"]
 
-if df.shape[1] != 1:
-    print("ERROR: data file must have only one column named 'counts'")
-else:
-    e_units = "channels"
-    col_lst = list(df.columns)
-    cts_col = [s for s in col_lst if "counts" in s.lower()][0]
-    spect = sp.Spectrum(counts=df[cts_col], e_units=e_units)
-    x = spect.channels
+if df.shape[1] > 1:
+    print("WARNING: using only 1 column named 'counts'")
+
+e_units = "channels"
+col_lst = list(df.columns)
+cts_col = 0
+# cts_col = [s for s in col_lst if "counts" in s.lower()][0]
+for s in col_lst:
+    s2 = s.lower()
+    if s2 in name_lst:
+        cts_col = s
+if cts_col == 0:
+    print("ERROR: no column named with keyword e.g counts")
+spect = sp.Spectrum(counts=df[cts_col], e_units=e_units)
+x = spect.channels
 
 # peaksearch class
 search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
