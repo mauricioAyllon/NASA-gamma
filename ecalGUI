@@ -80,6 +80,8 @@ from datetime import datetime
 # read in csv file
 df = pd.read_csv(file_name)
 
+name_lst = ["counts", "cts", "data"]
+
 if df.shape[1] != 1:
     print("ERROR: data file must have only one column named 'counts'")
 else:
@@ -280,14 +282,16 @@ def submit_e(text):
         mean_ch = d[keys[0]]
         if mean_ch not in mean_vals:
             mean_vals.append(mean_ch)
-    en = eval(text)
-    if type(en) == tuple:
-        en = list(en)
-    else:
-        en = [en]
-    for e in en:
-        if e not in e_vals:
-            e_vals.append(e)
+    en = text.split(",")
+    for i, e in enumerate(en):
+        e2 = e.strip()  # remove white spaces
+        if e2 == "_" or e2 == "-":
+            mean_vals.pop(-i - 1)
+        else:
+            num = float(e2)
+            if num not in e_vals:
+                e_vals.append(num)
+
     print("ch: ", mean_vals)
     print("energies: ", e_vals)
     mean_vals.sort()
