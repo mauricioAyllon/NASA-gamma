@@ -41,7 +41,7 @@ file_name = commands["<file_name>"]
 if commands["--cebr"]:
     fwhm_at_0 = 1.0
     ref_x = 1317
-    ref_fwhm = 30  # 41
+    ref_fwhm = 41  # 41
 elif commands["--labr"]:
     fwhm_at_0 = 1.0
     ref_x = 427
@@ -72,13 +72,14 @@ from nasagamma import peakfit as pf
 
 
 df = pd.read_csv(file_name)
+
+col_lst = list(df.columns)
+cts = [s for s in col_lst if "counts" in s.lower()][0]
+cts_idx = col_lst.index(cts)
 if df.shape[1] == 2:
     print("working with energy values")
-    col_lst = list(df.columns)
     erg = [s for s in col_lst if "energy" in s.lower()][0]
     e_units = erg[7:]
-    cts = [s for s in col_lst if "counts" in s.lower()][0]
-    cts_idx = col_lst.index(cts)
     if cts_idx == 0:
         col_idx = 1
     else:
