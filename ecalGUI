@@ -164,6 +164,15 @@ ax_tab.set_yticks([])
 list_xrange = []
 
 
+def get_mean_vals(fit):
+    mean_lst = []
+    for d in fit.peak_info:
+        keys = list(d)
+        mean_ch = d[keys[0]]
+        mean_lst.append(mean_ch)
+    return mean_lst
+
+
 def xSelect(xmin, xmax):
     global fit
     idxmin = round(xmin, 4)
@@ -277,20 +286,18 @@ def submit_e(text):
     global mean_vals
     global e_vals
     ax_cal.clear()
-    for d in fit.peak_info:
-        keys = list(d)
-        mean_ch = d[keys[0]]
-        if mean_ch not in mean_vals:
-            mean_vals.append(mean_ch)
     en = text.split(",")
-    for i, e in enumerate(en):
+    mean_lst = get_mean_vals(fit)
+
+    for ch, e in zip(mean_lst, en):
         e2 = e.strip()  # remove white spaces
         if e2 == "_" or e2 == "-":
-            mean_vals.pop(-i - 1)
+            next
         else:
-            num = float(e2)
-            if num not in e_vals:
-                e_vals.append(num)
+            num_e = float(e2)
+            if num_e not in e_vals and ch not in mean_vals:
+                e_vals.append(num_e)
+                mean_vals.append(ch)
 
     print("ch: ", mean_vals)
     print("energies: ", e_vals)
