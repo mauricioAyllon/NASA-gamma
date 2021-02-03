@@ -432,7 +432,7 @@ def ecalibration(
     predicted = fit.eval(x=channels)
     ye = fit.eval_uncertainty()
     coeffs = list(fit.best_values.values())
-    terms = [f"${round(coeffs[0],3)}$", f"${round(coeffs[1],3)}x$"]
+    terms = [f"${round(coeffs[0],4)}$", f"${round(coeffs[1],4)}x$"]
     for i, c in enumerate(coeffs):
         if i >= 2:
             terms.append(f"${round(c,3)}x^{i}$")
