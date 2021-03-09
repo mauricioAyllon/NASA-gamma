@@ -70,6 +70,7 @@ from nasagamma import spectrum as sp
 from nasagamma import peaksearch as ps
 from nasagamma import peakfit as pf
 import re
+from datetime import datetime
 
 
 df = pd.read_csv(file_name)
@@ -125,7 +126,8 @@ ax_b2 = fig.add_subplot(gs[2, 2])
 ax_b3 = fig.add_subplot(gs[2, 3])
 ax_tab = fig.add_subplot(gs[3, 1:])
 ax_log = plt.axes([0.38, 0.85, 0.1, 0.05])
-# ax_snr = plt.axes([0.25, 0.90, 0.03, 0.05])
+ax_save = plt.axes([0.225, 0.9, 0.1, 0.05])
+ax_snr = plt.axes([0.27, 0.85, 0.05, 0.03])
 
 # buttons
 bpoly1 = Button(ax_b1, "poly1", color="yellow", hovercolor="lightgreen")
@@ -135,10 +137,11 @@ blog = Button(ax_log, "log-lin", color="yellow", hovercolor="lightgreen")
 bpoly1.label.set_fontsize(16)
 bpoly2.label.set_fontsize(16)
 bexp.label.set_fontsize(16)
+bsave = Button(ax_save, "Save fit report", color="C9", hovercolor="lightblue")
+bsave.label.set_fontsize(16)
 
-# textbox (SNR)
-# initial_snr = "1"
-# text_box = TextBox(ax_snr, 'SNR < ', initial=initial_snr)
+# textbox
+text_snr = TextBox(ax_snr, "SNR > ", color="lightgoldenrodyellow")
 
 # plot spectrum with peaksearch
 scale = "log"
@@ -161,6 +164,7 @@ list_xrange = []
 
 
 def xSelect(xmin, xmax):
+    global fit
     idxmin = round(xmin, 4)
     idxmax = round(xmax, 4)
     xrange = [idxmin, idxmax]
@@ -254,19 +258,47 @@ def click_log(event):
     fig.canvas.draw_idle()
 
 
-# def submit_snr(text):
-#     global search
-#     global scale
-#     ax_s.clear()
-#     min_snr = eval(text)
-#     search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
-#     search.plot_peaks(yscale=scale, snrs="off", fig=fig, ax=ax_s)
-#     fig.canvas.draw_idle()
+def click_save(event):
+    global fit
+    res = fit.fit_result
+    report = res.fit_report()
+    now = datetime.now()
+    dt_string = now.strftime("%d-%m-%Y-%H-%M-%S")
+    with open(f"Fit_report_{dt_string}.txt", "w") as text_file:
+        text_file.write(report)
+
+
+def update_snr(text):
+    global search
+    global min_snr
+    global scale
+    ax_s.clear()
+    min_snr = float(text)
+    search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
+    # update figure
+    search.plot_peaks(yscale=scale, snrs="off", fig=fig, ax=ax_s)
+    fig.canvas.draw_idle()
+
+
+text_snr.on_submit(update_snr)
+
+# def onPressKey(event):
+#     print('you pressed key {0} in ax {1}'.format( event.key, event.inaxes ))
+#     if event.inaxes in [ax_s]:
+#         print("in ax")
+#     elif event.inaxes in [fig.axes[1]]:
+#         print("in cid1")
+#     else:
+#         print("outside")
+
+
+# fig.canvas.mpl_connect('key_press_event', onPressKey)
 
 
 bpoly1.on_clicked(click_button1)
 bpoly2.on_clicked(click_button2)
 bexp.on_clicked(click_button3)
 blog.on_clicked(click_log)
+bsave.on_clicked(click_save)
 # text_box.on_submit(submit_snr)
 plt.show()
