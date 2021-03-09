@@ -13,16 +13,15 @@ from nasagamma import peakfit as pf
 import matplotlib.pyplot as plt
 import numpy as np
 
-file = "data/10-23-2020-800-3.csv"
+file = "data/gui_test_data_cebr.csv"
 # the columns are not in a 'nice' format (blank spaces)
 # so, rename them
-dict0 = {" Energy (keV)": "Energy", " Counts": "Counts"}
+# dict0 = {" Energy (keV)": "Energy", " Counts": "Counts"}
 
-dfi = pd.read_csv(file, nrows=5)
-df = pd.read_csv(file, header=6)
-df = df.rename(columns=dict0)
 
-spect = sp.Spectrum(counts=df.Counts)
+df = pd.read_csv(file)
+
+spect = sp.Spectrum(counts=df.counts)
 fwhm_at_0 = 1.0
 ref_x = 1315
 ref_fwhm = 42
@@ -34,7 +33,7 @@ fit = pf.PeakFit(search, xrange=xrange, bkg=bkg)
 fit.plot(plot_type="full")
 
 # energy calibration
-ch = df.Channel.to_numpy(dtype=int)
+ch = spect.channels
 peak_info = fit.peak_info
 mean_values = [peak_info[0]["mean1"], peak_info[1]["mean2"]]
 mean_values.insert(0, 0)  # add the origin
@@ -46,5 +45,15 @@ pred_erg, efit = pf.ecalibration(
 
 pred_erg[0] = 0  # because negative entry
 
-spect2 = sp.Spectrum(counts=df.Counts, energies=pred_erg, e_units="keV")
+spect2 = sp.Spectrum(counts=df.counts, energies=pred_erg, e_units="keV")
 spect2.plot()
+
+## test table
+# def cal_table(ch_lst, e_lst, sig_lst, e_units=None, ax=None, fig=None):
+
+ergs = efit.data
+chs = mean_values
+sigs = efit.eval_uncertainty()
+pf.cal_table(
+    ch_lst=chs, e_lst=ergs, sig_lst=sigs, t_scale=[1, 1.8], decimals=3, e_units="keV"
+)
