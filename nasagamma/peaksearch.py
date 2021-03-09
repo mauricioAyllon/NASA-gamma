@@ -236,7 +236,8 @@ class PeakSearch:
 
         if snrs == "on":
             ax.plot(x, self.snr, label="SNR all")
-        ax.plot(x, self.spectrum.counts, label="Raw spectrum")
+        # ax.plot(x, self.spectrum.counts, label="Raw spectrum")
+        self.spectrum.plot(fig=fig, ax=ax)
         if yscale == "log":
             ax.set_yscale("log")
         else:
