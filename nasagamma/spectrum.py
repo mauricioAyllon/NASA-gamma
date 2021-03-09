@@ -35,6 +35,7 @@ class Spectrum:
             channels = np.arange(0, len(counts), 1)
         if energies is not None:
             self.energies = np.asarray(energies, dtype=float)
+            self.x = self.energies
             if e_units is None:
                 self.x_units = "Energy"
             else:
@@ -42,6 +43,7 @@ class Spectrum:
 
         else:
             self.energies = energies
+            self.x = channels
             self.x_units = "Channels"
 
         self.counts = np.asarray(counts, dtype=float)
@@ -95,7 +97,7 @@ class Spectrum:
         en = (en0 + en1) / 2
         return en, y
 
-    def plot(self, scale="log"):
+    def plot(self, fig=None, ax=None, scale="log"):
         """
         Plot spectrum object using channels and energies (if not None)
 
@@ -109,30 +111,21 @@ class Spectrum:
         None.
 
         """
-        x = self.channels
-        y = self.counts
-        integral = round(y.sum())
         plt.rc("font", size=14)
         plt.style.use("seaborn-darkgrid")
-        plt.figure()
-        plt.fill_between(x, 0, y, alpha=0.5, color="C0", step="pre")
-        plt.plot(x, y, drawstyle="steps")
-        plt.yscale(scale)
-        plt.title(f"Raw Spectrum. Integral = {integral}")
-        plt.xlabel("Channels")
-        # plt.ylabel("a.u")
-        plt.style.use("default")
 
-        if self.energies is not None:
-            x = self.energies
-            y = self.counts
-            plt.rc("font", size=14)
-            plt.style.use("seaborn-darkgrid")
-            plt.figure()
-            plt.fill_between(x, 0, y, alpha=0.5, color="C1", step="pre")
-            plt.plot(x, y, color="C1", drawstyle="steps")
-            plt.yscale(scale)
-            plt.title(f"Raw Spectrum. Integral = {integral}")
-            plt.xlabel(self.x_units)
-            # plt.ylabel("a.u")
-            plt.style.use("default")
+        if fig is None:
+            fig = plt.figure(figsize=(10, 6))
+        if ax is None:
+            ax = fig.add_subplot()
+
+        integral = round(self.counts.sum())
+        set_label = f"Raw Spectrum.\nTotal = {integral:.3E}"
+
+        ax.fill_between(self.x, 0, self.counts, alpha=0.2, color="C1", step="pre")
+        ax.plot(self.x, self.counts, drawstyle="steps", label=set_label)
+        ax.set_yscale(scale)
+        ax.set_xlabel(self.x_units)
+        ax.set_ylabel("Cts")
+        ax.legend()
+        plt.show()
