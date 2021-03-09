@@ -1,6 +1,5 @@
 from setuptools import setup
-
-# import os
+import os
 
 setup(
     name="nasagamma",
@@ -10,5 +9,10 @@ setup(
     author="Mauricio Ayllon Unzueta",
     author_email="mauri.ayllon12@gmail.com",
     packages=["nasagamma"],
-    scripts=["gammaGUI", "ecalGUI"],
+    scripts=["gammaGUI", "ecalGUI", "gammaGUI-qt"],
+    package_data={
+        "": [
+            os.path.join("qt_gui.ui"),
+        ]
+    },
 )
