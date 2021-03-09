@@ -1,0 +1,585 @@
+#!/usr/bin/env python3
+"""
+Usage:
+  gammaGUI-qt <file_name> [options]
+  gammaGUI-qt [options]
+  
+  options:
+      -o                        open a blank window
+      --fwhm_at_0=<fwhm0>       fwhm value at x=0
+      --min_snr=<msnr>          min SNR
+      --ref_x=<xref>            x reference for fwhm_ref
+      --ref_fwhm=<ref_fwhm>     fwhm ref corresponding to x_ref
+      --cebr                    detector type (cerium bromide)
+      --labr                    detector type (lanthanum broide)
+      --hpge                    detector type (HPGe)
+      
+  
+
+Reads a csv file with the following column format: counts | energy_EUNITS,
+where EUNITS can be for examle keV or MeV. It can also read a CSV file with a 
+single column named "counts". No need to have channels because
+they are automatically infered starting from channel = 0.
+
+If detector type is defined e.g. --cebr then the code guesses the x_ref and
+fwhm_ref based on the known detector characteristics.
+
+Note that the detector type input parameters must be changed depending on the 
+particular electronic gain used. The examples here are for our specific
+detector configurations.
+"""
+import docopt
+import pandas as pd
+import numpy as np
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QKeySequence, QIcon, QPixmap
+from PyQt5.uic import loadUi
+
+# from PyQt5.QtCore import Qt
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.widgets import SpanSelector
+from param_handle import get_spect_search, read_file
+from nasagamma import peakfit as pf
+from nasagamma import peaksearch as ps
+from nasagamma import spectrum as sp
+import pkg_resources
+
+
+class NasaGammaApp(QMainWindow):
+    def __init__(self, commands):
+        QMainWindow.__init__(self)
+        ui_file = pkg_resources.resource_filename("nasagamma", "qt_gui.ui")
+        loadUi(ui_file, self)
+        # self.setMinimumSize(1800, 900)
+        # pixmap = QPixmap("figs/nasa-logo.jpg")
+        # self.label_nasa.setPixmap(pixmap)
+        self.resize(1800, 900)
+        self.setWindowTitle("NASA-gamma")
+        self.scale = "log"
+        self.pushButton_scale.clicked.connect(self.update_scale)
+        self.pushButton_scale.setStyleSheet("background-color : lightgoldenrodyellow")
+        # push buttons
+        self.bg = "poly1"
+        self.pushButton_poly1.setStyleSheet("background-color : lightgreen")
+        self.pushButton_poly1.setCheckable(True)
+
+        self.pushButton_poly2.setStyleSheet("background-color : lightgreen")
+        self.pushButton_poly2.setCheckable(True)
+
+        self.pushButton_exp.setStyleSheet("background-color : lightgreen")
+        self.pushButton_exp.setCheckable(True)
+
+        self.btn_grp = QButtonGroup()
+        self.btn_grp.setExclusive(True)
+        self.btn_grp.addButton(self.pushButton_poly1)
+        self.btn_grp.addButton(self.pushButton_poly2)
+        self.btn_grp.addButton(self.pushButton_exp)
+        self.btn_grp.buttonClicked.connect(self.update_poly)
+
+        self.button_apply.setStyleSheet("background-color : lightblue")
+        self.button_remove_cal.setStyleSheet("background-color : lightcoral")
+
+        # textbox
+        self.e_units = "Type energy units"
+        self.button_apply.clicked.connect(self.apply_params)
+        self.text_units.setText(self.e_units)
+        self.text_units.returnPressed.connect(self.onPressed)
+
+        # navigation toolbars
+        self.toolbar0 = NavigationToolbar(self.main_plot.canvas, self)
+        self.addToolBar(self.toolbar0)
+
+        self.toolbar1 = NavigationToolbar(self.cal_plot.canvas, self)
+        self.addToolBar(self.toolbar1)
+        self.toolbar1.setVisible(False)
+
+        self.tabWidget.currentChanged.connect(self.switch_toolbar)
+
+        # menu bar
+        self.saveFitReport.triggered.connect(self.saveReport)
+        self.openFile.triggered.connect(self.open_file)
+        self.saveSpect.triggered.connect(self.save_spect)
+
+        self.fig = self.main_plot.canvas.figure
+        self.fig.clear()
+        self.fig.set_constrained_layout(True)
+        gs = self.fig.add_gridspec(
+            3, 2, width_ratios=[0.5, 0.5], height_ratios=[0.3, 1.5, 1]
+        )
+
+        # axes
+        self.ax_main = self.fig.add_subplot(gs[:, 0])
+        self.ax_res = self.fig.add_subplot(gs[0, 1])
+        self.ax_fit = self.fig.add_subplot(gs[1, 1])
+        self.ax_tab = self.fig.add_subplot(gs[2, 1])
+        # remove ticks
+        self.ax_res.set_xticks([])
+        self.ax_res.set_yticks([])
+        self.ax_fit.set_xticks([])
+        self.ax_fit.set_yticks([])
+        self.ax_tab.set_xticks([])
+        self.ax_tab.set_yticks([])
+
+        txt1 = "Load a csv file (File -> Open)"
+        self.ax_fit.text(
+            0.27,
+            0.5,
+            txt1,
+            style="italic",
+            bbox={"facecolor": "peachpuff", "alpha": 1, "pad": 20},
+        )
+
+        self.list_xrange = []
+        self.commands = commands
+
+        get_input = get_spect_search(self.commands)
+        if get_input is not None:
+            (
+                self.spect,
+                self.search,
+                self.e_units,
+                self.x,
+                self.ref_x,
+                self.fwhm_at_0,
+                self.ref_fwhm,
+            ) = get_input
+            self.create_graph(fit=True)
+
+        try:
+            self.min_snr = float(self.commands["--min_snr"])
+        except:
+            pass
+
+        self.button_remove_cal.clicked.connect(self.remove_cal)
+
+        ## energy calibration
+        self.mean_vals = [0]
+        self.e_vals = [0]
+        self.pred_erg = 0
+        # push butons
+        self.button_add_cal.setStyleSheet("background-color : lightblue")
+        self.button_origin.setStyleSheet("background-color : lightgoldenrodyellow")
+        self.button_apply_cal.setStyleSheet("background-color : sandybrown")
+        self.button_reset_cal.setStyleSheet("background-color : lightcoral")
+        self.button_cal1.setStyleSheet("background-color : lightgreen")
+        self.button_cal2.setStyleSheet("background-color : lightgreen")
+        self.button_cal3.setStyleSheet("background-color : lightgreen")
+        self.button_origin.clicked.connect(self.set_origin)
+
+        self.button_cal1.setCheckable(True)
+        self.button_cal2.setCheckable(True)
+        self.button_cal3.setCheckable(True)
+
+        self.btn_grp2 = QButtonGroup()
+        self.btn_grp2.setExclusive(True)
+        self.btn_grp2.addButton(self.button_cal1)
+        self.btn_grp2.addButton(self.button_cal2)
+        self.btn_grp2.addButton(self.button_cal3)
+        self.btn_grp2.buttonClicked.connect(self.update_cal)
+        self.n = 1
+
+        self.fig_cal = self.cal_plot.canvas.figure
+        self.fig_cal.clear()
+        self.fig_cal.set_constrained_layout(True)
+        gs2 = self.fig_cal.add_gridspec(
+            1, 2, width_ratios=[0.5, 0.5], height_ratios=[1]
+        )
+
+        # axes
+        self.ax_cal = self.fig_cal.add_subplot(gs2[:, 0])
+        self.ax_cal_tab = self.fig_cal.add_subplot(gs2[:, 1])
+
+        # remove ticks
+        self.ax_cal.set_xticks([])
+        self.ax_cal.set_yticks([])
+        self.ax_cal_tab.set_xticks([])
+        self.ax_cal_tab.set_yticks([])
+
+        txt00 = "for peaks that you do not wish to include."
+        txt0 = f"Separate peak energy values with commas and use '-'\n{txt00}"
+        txt = f"Select and add peaks in the 'Spectrum' tab.\n{txt0}"
+        self.ax_cal.text(
+            0.27,
+            0.5,
+            txt,
+            style="italic",
+            bbox={"facecolor": "blue", "alpha": 0.3, "pad": 20},
+        )
+
+        # energy textbox
+        self.button_add_cal.clicked.connect(self.add_cal)
+        # reset calibration
+        self.button_reset_cal.clicked.connect(self.reset_cal)
+        # apply calibration
+        self.button_apply_cal.clicked.connect(self.apply_cal)
+
+    def switch_toolbar(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.toolbar0.setVisible(True)
+            self.toolbar1.setVisible(False)
+        elif self.tabWidget.currentIndex() == 1:
+            self.toolbar1.setVisible(True)
+            self.toolbar0.setVisible(False)
+
+    def create_graph(self, fit=True):
+        # plot spectrum with peaksearch
+        self.ax_main.clear()
+        self.ax_res.clear()
+        self.ax_fit.clear()
+        self.ax_tab.clear()
+        self.ax_res.set_xticks([])
+        self.ax_res.set_yticks([])
+        self.ax_fit.set_xticks([])
+        self.ax_fit.set_yticks([])
+        self.ax_tab.set_xticks([])
+        self.ax_tab.set_yticks([])
+        if fit:
+            self.search.plot_peaks(
+                yscale=self.scale, snrs="off", fig=self.fig, ax=self.ax_main
+            )
+            self.span_select()
+            txt = "Drag mouse across peak(s) for fitting"
+            self.ax_fit.text(
+                0.27,
+                0.5,
+                txt,
+                style="italic",
+                bbox={"facecolor": "green", "alpha": 0.5, "pad": 20},
+            )
+        else:
+            self.spect.plot(fig=self.fig, ax=self.ax_main)
+
+        self.fig.canvas.draw_idle()
+
+    def update_scale(self):
+        if self.scale == "log":
+            self.ax_main.set_yscale("linear")
+            self.scale = "linear"
+        else:
+            self.ax_main.set_yscale("log")
+            self.scale = "log"
+        self.fig.canvas.draw_idle()
+
+    def which_button(self):
+        if self.pushButton_poly1.isChecked():
+            self.bg = "poly1"
+        elif self.pushButton_poly2.isChecked():
+            self.bg = "poly2"
+        elif self.pushButton_exp.isChecked():
+            self.bg = "exponential"
+
+    def update_poly(self):
+        if len(self.list_xrange) != 0:
+            self.which_button()
+            self.fit = pf.PeakFit(self.search, self.list_xrange[-1], bkg=self.bg)
+            self.ax_res.clear()
+            self.ax_fit.clear()
+            self.ax_tab.clear()
+            self.fit.plot(
+                plot_type="full",
+                table_scale=[1, 1.8],
+                fig=self.fig,
+                ax_res=self.ax_res,
+                ax_fit=self.ax_fit,
+                ax_tab=self.ax_tab,
+            )
+            self.fig.canvas.draw_idle()
+
+    def span_select(self):
+        self.span = SpanSelector(
+            self.ax_main,
+            self.onselect,
+            "horizontal",
+            useblit=True,
+            span_stays=True,
+            rectprops=dict(alpha=0.3, facecolor="green"),
+        )
+
+    def onselect(self, xmin, xmax):
+        idxmin = round(xmin, 4)
+        idxmax = round(xmax, 4)
+        xrange = [idxmin, idxmax]
+        self.list_xrange.append(xrange)
+        print("xmin: ", idxmin)
+        print("xmax: ", idxmax)
+        self.ax_res.clear()
+        self.ax_fit.clear()
+        self.ax_tab.clear()
+        self.fit = pf.PeakFit(self.search, xrange, bkg=self.bg)
+        # plot_fit(fit)
+        self.fit.plot(
+            plot_type="full",
+            table_scale=[1, 1.8],
+            fig=self.fig,
+            ax_res=self.ax_res,
+            ax_fit=self.ax_fit,
+            ax_tab=self.ax_tab,
+        )
+        self.fig.canvas.draw_idle()
+
+    def remove_cal(self):
+        try:
+            if self.e_units != "channels":
+                self.e_units == "channels"
+                self.spect = sp.Spectrum(counts=self.spect.counts, e_units=self.e_units)
+                self.search = ps.PeakSearch(
+                    self.spect,
+                    self.ref_x,
+                    self.ref_fwhm,
+                    self.fwhm_at_0,
+                    min_snr=self.min_snr,
+                )
+
+                self.create_graph(fit=True)
+        except:
+            pass
+
+    ## calibration
+    @staticmethod
+    def get_mean_vals(fit):
+        mean_lst = []
+        for d in fit.peak_info:
+            keys = list(d)
+            mean_ch = d[keys[0]]
+            mean_lst.append(mean_ch)
+        return mean_lst
+
+    def add_cal(self):
+        try:
+            self.ax_cal.clear()
+            en = self.text_add_cal.text().split(",")
+            print(en)
+            mean_lst = self.get_mean_vals(self.fit)
+            print(mean_lst)
+
+            for ch, e in zip(mean_lst, en):
+                e2 = e.strip()  # remove white spaces
+                if e2 == "_" or e2 == "-":
+                    next
+                else:
+                    num_e = float(e2)
+                    if num_e not in self.e_vals and ch not in self.mean_vals:
+                        self.e_vals.append(num_e)
+                        self.mean_vals.append(ch)
+
+            print("ch: ", self.mean_vals)
+            print("energies: ", self.e_vals)
+            self.mean_vals.sort()
+            self.e_vals.sort()
+            self.pred_erg, self.efit = pf.ecalibration(
+                mean_vals=self.mean_vals,
+                erg=self.e_vals,
+                channels=self.x,
+                n=self.n,
+                e_units=self.e_units,
+                plot=True,
+                residual=False,
+                fig=self.fig_cal,
+                ax_fit=self.ax_cal,
+            )
+
+            self.update_cal_table()
+            self.fig_cal.canvas.draw_idle()
+        except:
+            pass
+
+    def update_cal_table(self):
+        self.ax_cal_tab.clear()
+        ergs = self.efit.data
+        chs = self.mean_vals
+        sigs = self.efit.eval_uncertainty()
+        pf.cal_table(
+            ch_lst=chs,
+            e_lst=ergs,
+            sig_lst=sigs,
+            t_scale=[1, 2],
+            decimals=3,
+            e_units=self.e_units,
+            fig=self.fig_cal,
+            ax=self.ax_cal_tab,
+        )
+        self.fig_cal.canvas.draw_idle()
+
+    def onPressed(self):
+        self.e_units = self.text_units.text()
+        self.ax_cal.set_ylabel(f"Energy [{self.e_units}]")
+        self.spect.x_units = f"Energy [{self.e_units}]"
+        self.update_cal_table()
+        self.fig_cal.canvas.draw_idle()
+
+    def set_origin(self):
+        self.ax_cal.clear()
+        if 0 in self.mean_vals:
+            self.mean_vals.pop(0)
+            self.e_vals.pop(0)
+        else:
+            self.mean_vals.insert(0, 0)
+            self.e_vals.insert(0, 0)
+
+        if len(self.mean_vals) > 1:
+            self.pred_erg, self.efit = pf.ecalibration(
+                mean_vals=self.mean_vals,
+                erg=self.e_vals,
+                channels=self.x,
+                n=self.n,
+                e_units=self.e_units,
+                plot=True,
+                residual=False,
+                fig=self.fig_cal,
+                ax_fit=self.ax_cal,
+            )
+            self.update_cal_table()
+            self.fig_cal.canvas.draw_idle()
+
+    def which_button_cal(self):
+        if self.button_cal1.isChecked():
+            self.n = 1
+        elif self.button_cal2.isChecked():
+            self.n = 2
+        elif self.button_cal3.isChecked():
+            self.n = 3
+
+    def update_cal(self):
+        try:
+            self.which_button_cal()
+            self.ax_cal.clear()
+            self.pred_erg, self.efit = pf.ecalibration(
+                mean_vals=self.mean_vals,
+                erg=self.e_vals,
+                channels=self.x,
+                n=self.n,
+                e_units=self.e_units,
+                plot=True,
+                residual=False,
+                fig=self.fig_cal,
+                ax_fit=self.ax_cal,
+            )
+
+            self.fig_cal.canvas.draw_idle()
+        except:
+            pass
+
+    def reset_cal(self):
+        print("Reseting calibration")
+        self.ax_cal_tab.clear()
+        self.ax_cal.clear()
+        self.pred_erg = 0
+        self.mean_vals = [0]
+        self.e_vals = [0]
+        # remove ticks
+        self.ax_cal.set_xticks([])
+        self.ax_cal.set_yticks([])
+        self.ax_cal_tab.set_xticks([])
+        self.ax_cal_tab.set_yticks([])
+        self.fig_cal.canvas.draw_idle()
+
+    def apply_cal(self):
+        try:
+            self.spect = sp.Spectrum(
+                counts=self.spect.counts, energies=self.pred_erg, e_units=self.e_units
+            )
+            self.search = ps.PeakSearch(
+                self.spect,
+                self.ref_x,
+                self.ref_fwhm,
+                self.fwhm_at_0,
+                min_snr=self.min_snr,
+            )
+
+            self.create_graph(fit=True)
+        except:
+            pass
+
+    ## menu bar
+    def apply_params(self):
+        self.ax_main.clear()
+        self.min_snr = float(self.text_snr.text())
+        self.ref_x = float(self.text_ref_ch.text())
+        self.ref_fwhm = float(self.text_ref_fwhm.text())
+        self.fwhm_at_0 = 1
+
+        self.search = ps.PeakSearch(
+            self.spect, self.ref_x, self.ref_fwhm, self.fwhm_at_0, min_snr=self.min_snr
+        )
+
+        self.create_graph(fit=True)
+
+    def saveReport(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getSaveFileName(
+            self, "Save", "", "All Files (*);;Text Files (*.txt)", options=options
+        )
+        if fileName and len(self.list_xrange) != 0:
+            print(fileName)
+            self.save_fit(fileName)
+
+    def save_fit(self, fileName):
+        res = self.fit.fit_result
+        report = res.fit_report()
+
+        with open(f"{fileName}", "w") as text_file:
+            text_file.write(report)
+
+    def save_spect(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getSaveFileName(
+            self, "Save", "", "All Files (*);;Text Files (*.txt)", options=options
+        )
+
+        print(fileName)
+        cts = self.spect.counts
+        if self.spect.energies is not None:
+            cols = ["counts", f"{self.spect.x_units}"]
+            data = np.array((cts, self.spect.x)).T
+        else:
+            cols = ["counts"]
+            data = cts
+
+        df = pd.DataFrame(data=data, columns=cols)
+        if ".csv" in fileName:
+            df.to_csv(f"{fileName}", index=False)
+        else:
+            df.to_csv(f"{fileName}.csv", index=False)
+
+    def open_file(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getOpenFileName(
+            self,
+            "QFileDialog.getOpenFileName()",
+            "",
+            "All Files (*);;",
+            options=options,
+        )
+
+        print(fileName)
+
+        self.e_units, self.spect, self.x = read_file(fileName)
+        self.create_graph(fit=False)
+        txt = "Add parameters in 'Parameters' tab for fitting"
+        self.ax_fit.text(
+            0.27,
+            0.5,
+            txt,
+            style="italic",
+            bbox={"facecolor": "orange", "alpha": 0.5, "pad": 20},
+        )
+        self.fig.canvas.draw_idle()
+
+
+if __name__ == "__main__":
+    commands = docopt.docopt(__doc__)
+    print(commands)
+
+    # initialize figure
+    plt.rc("font", size=14)
+    plt.style.use("seaborn-darkgrid")
+
+    # initialize app
+    app = QApplication([])
+    window = NasaGammaApp(commands)
+    window.show()
+    app.exec_()
