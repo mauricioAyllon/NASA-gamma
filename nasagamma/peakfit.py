@@ -319,6 +319,7 @@ class PeakFit:
             ax_fit.set_title(f"Reduced $\chi^2$ = {round(res.redchi,4)}")
             ax_fit.plot(x, y, "bo", alpha=0.5, label="data")
             ax_fit.plot(x, best_fit, "r", lw=3, alpha=0.5, label="Best fit")
+            # ax_fit.set_xlim([x.min(), x.max()])
             m = 1
             for cp in range(len(comps) - 1):
                 if m == 1:
@@ -494,6 +495,47 @@ def ecalibration(
         ax_fit.legend()
         # plt.style.use("default")
     return predicted, fit
+
+
+def cal_table(
+    ch_lst,
+    e_lst,
+    sig_lst,
+    t_scale=[1, 1.8],
+    decimals=3,
+    e_units=None,
+    ax=None,
+    fig=None,
+):
+    if fig is None:
+        fig = plt.figure(constrained_layout=False, figsize=(12, 8))
+    if ax is None:
+        ax = fig.add_subplot()
+
+    chs = np.round(np.array(ch_lst), decimals=decimals)
+    ergs = np.round(np.array(e_lst), decimals=decimals)
+    sigs = np.round(np.array(sig_lst), decimals=decimals)
+    cols = ["N", "centroid", f"energy [{e_units}]", f"sigma [{e_units}]"]
+    N = np.arange(1, len(chs) + 1, 1)
+    rs = np.array([N, chs, ergs, sigs]).T
+    colors = [["lightblue"] * len(cols)] * len(rs)
+    df = pd.DataFrame(rs, columns=cols)
+    df = df.astype({"N": "int32"})
+    df = df.astype({"N": "str"})
+
+    t = ax.table(
+        cellText=df.values,
+        colLabels=cols,
+        loc="center",
+        cellLoc="center",
+        colWidths=[1 / 8, 1 / 3, 1 / 3, 1 / 3],
+        colColours=["palegreen"] * len(cols),
+        cellColours=colors,
+    )
+    t.scale(t_scale[0], t_scale[1])
+    t.auto_set_font_size(False)
+    t.set_fontsize(14)
+    ax.axis("off")
 
 
 class GaussianComponents:
