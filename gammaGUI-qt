@@ -249,6 +249,14 @@ class NasaGammaApp(QMainWindow):
             )
         else:
             self.spect.plot(fig=self.fig, ax=self.ax_main)
+            txt = "Add parameters in 'Parameters' tab for fitting"
+            self.ax_fit.text(
+                0.27,
+                0.5,
+                txt,
+                style="italic",
+                bbox={"facecolor": "orange", "alpha": 0.5, "pad": 20},
+            )
 
         self.fig.canvas.draw_idle()
 
@@ -321,6 +329,7 @@ class NasaGammaApp(QMainWindow):
     def remove_cal(self):
         try:
             if self.e_units != "channels":
+                print(self.e_units)
                 self.e_units == "channels"
                 self.spect = sp.Spectrum(counts=self.spect.counts, e_units=self.e_units)
                 self.search = ps.PeakSearch(
@@ -330,9 +339,14 @@ class NasaGammaApp(QMainWindow):
                     self.fwhm_at_0,
                     min_snr=self.min_snr,
                 )
+                print("Here")
 
                 self.create_graph(fit=True)
-        except:
+        except AttributeError:
+            self.e_units == "channels"
+            self.spect = sp.Spectrum(counts=self.spect.counts, e_units=self.e_units)
+            self.create_graph(fit=False)
+        else:
             pass
 
     ## calibration
@@ -559,15 +573,6 @@ class NasaGammaApp(QMainWindow):
 
         self.e_units, self.spect, self.x = read_file(fileName)
         self.create_graph(fit=False)
-        txt = "Add parameters in 'Parameters' tab for fitting"
-        self.ax_fit.text(
-            0.27,
-            0.5,
-            txt,
-            style="italic",
-            bbox={"facecolor": "orange", "alpha": 0.5, "pad": 20},
-        )
-        self.fig.canvas.draw_idle()
 
 
 if __name__ == "__main__":
