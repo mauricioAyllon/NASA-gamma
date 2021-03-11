@@ -101,25 +101,7 @@ class NasaGammaApp(QMainWindow):
         self.openFile.triggered.connect(self.open_file)
         self.saveSpect.triggered.connect(self.save_spect)
 
-        self.fig = self.main_plot.canvas.figure
-        self.fig.clear()
-        self.fig.set_constrained_layout(True)
-        gs = self.fig.add_gridspec(
-            3, 2, width_ratios=[0.5, 0.5], height_ratios=[0.3, 1.5, 1]
-        )
-
-        # axes
-        self.ax_main = self.fig.add_subplot(gs[:, 0])
-        self.ax_res = self.fig.add_subplot(gs[0, 1])
-        self.ax_fit = self.fig.add_subplot(gs[1, 1])
-        self.ax_tab = self.fig.add_subplot(gs[2, 1])
-        # remove ticks
-        self.ax_res.set_xticks([])
-        self.ax_res.set_yticks([])
-        self.ax_fit.set_xticks([])
-        self.ax_fit.set_yticks([])
-        self.ax_tab.set_xticks([])
-        self.ax_tab.set_yticks([])
+        self.reset_main_figure()
 
         txt1 = "Load a csv file (File -> Open)"
         self.ax_fit.text(
@@ -179,22 +161,7 @@ class NasaGammaApp(QMainWindow):
         self.btn_grp2.buttonClicked.connect(self.update_cal)
         self.n = 1
 
-        self.fig_cal = self.cal_plot.canvas.figure
-        self.fig_cal.clear()
-        self.fig_cal.set_constrained_layout(True)
-        gs2 = self.fig_cal.add_gridspec(
-            1, 2, width_ratios=[0.5, 0.5], height_ratios=[1]
-        )
-
-        # axes
-        self.ax_cal = self.fig_cal.add_subplot(gs2[:, 0])
-        self.ax_cal_tab = self.fig_cal.add_subplot(gs2[:, 1])
-
-        # remove ticks
-        self.ax_cal.set_xticks([])
-        self.ax_cal.set_yticks([])
-        self.ax_cal_tab.set_xticks([])
-        self.ax_cal_tab.set_yticks([])
+        self.reset_cal_figure()
 
         txt00 = "for peaks that you do not wish to include."
         txt0 = f"Separate peak energy values with commas and use '-'\n{txt00}"
@@ -224,16 +191,17 @@ class NasaGammaApp(QMainWindow):
 
     def create_graph(self, fit=True):
         # plot spectrum with peaksearch
-        self.ax_main.clear()
-        self.ax_res.clear()
-        self.ax_fit.clear()
-        self.ax_tab.clear()
-        self.ax_res.set_xticks([])
-        self.ax_res.set_yticks([])
-        self.ax_fit.set_xticks([])
-        self.ax_fit.set_yticks([])
-        self.ax_tab.set_xticks([])
-        self.ax_tab.set_yticks([])
+        # self.ax_main.clear()
+        # self.ax_res.clear()
+        # self.ax_fit.clear()
+        # self.ax_tab.clear()
+        # self.ax_res.set_xticks([])
+        # self.ax_res.set_yticks([])
+        # self.ax_fit.set_xticks([])
+        # self.ax_fit.set_yticks([])
+        # self.ax_tab.set_xticks([])
+        # self.ax_tab.set_yticks([])
+        self.reset_main_figure()
         if fit:
             self.search.plot_peaks(
                 yscale=self.scale, snrs="off", fig=self.fig, ax=self.ax_main
@@ -257,8 +225,46 @@ class NasaGammaApp(QMainWindow):
                 style="italic",
                 bbox={"facecolor": "orange", "alpha": 0.5, "pad": 20},
             )
-
         self.fig.canvas.draw_idle()
+
+    def reset_main_figure(self):
+        self.fig = self.main_plot.canvas.figure
+        self.fig.clear()
+        self.fig.set_constrained_layout(True)
+        gs = self.fig.add_gridspec(
+            3, 2, width_ratios=[0.5, 0.5], height_ratios=[0.3, 1.5, 1]
+        )
+
+        # axes
+        self.ax_main = self.fig.add_subplot(gs[:, 0])
+        self.ax_res = self.fig.add_subplot(gs[0, 1])
+        self.ax_fit = self.fig.add_subplot(gs[1, 1])
+        self.ax_tab = self.fig.add_subplot(gs[2, 1])
+        # remove ticks
+        self.ax_res.set_xticks([])
+        self.ax_res.set_yticks([])
+        self.ax_fit.set_xticks([])
+        self.ax_fit.set_yticks([])
+        self.ax_tab.set_xticks([])
+        self.ax_tab.set_yticks([])
+
+    def reset_cal_figure(self):
+        self.fig_cal = self.cal_plot.canvas.figure
+        self.fig_cal.clear()
+        self.fig_cal.set_constrained_layout(True)
+        gs2 = self.fig_cal.add_gridspec(
+            1, 2, width_ratios=[0.5, 0.5], height_ratios=[1]
+        )
+
+        # axes
+        self.ax_cal = self.fig_cal.add_subplot(gs2[:, 0])
+        self.ax_cal_tab = self.fig_cal.add_subplot(gs2[:, 1])
+
+        # remove ticks
+        self.ax_cal.set_xticks([])
+        self.ax_cal.set_yticks([])
+        self.ax_cal_tab.set_xticks([])
+        self.ax_cal_tab.set_yticks([])
 
     def update_scale(self):
         if self.scale == "log":
@@ -329,9 +335,8 @@ class NasaGammaApp(QMainWindow):
     def remove_cal(self):
         try:
             if self.e_units != "channels":
-                print(self.e_units)
-                self.e_units == "channels"
-                self.spect = sp.Spectrum(counts=self.spect.counts, e_units=self.e_units)
+                self.e_units = "channels"
+                self.spect = sp.Spectrum(counts=self.spect.counts)
                 self.search = ps.PeakSearch(
                     self.spect,
                     self.ref_x,
@@ -339,12 +344,10 @@ class NasaGammaApp(QMainWindow):
                     self.fwhm_at_0,
                     min_snr=self.min_snr,
                 )
-                print("Here")
 
                 self.create_graph(fit=True)
         except AttributeError:
-            self.e_units == "channels"
-            self.spect = sp.Spectrum(counts=self.spect.counts, e_units=self.e_units)
+            self.spect = sp.Spectrum(counts=self.spect.counts)
             self.create_graph(fit=False)
         else:
             pass
@@ -359,9 +362,23 @@ class NasaGammaApp(QMainWindow):
             mean_lst.append(mean_ch)
         return mean_lst
 
+    def perform_cal(self):
+        self.pred_erg, self.efit = pf.ecalibration(
+            mean_vals=self.mean_vals,
+            erg=self.e_vals,
+            channels=self.spect.channels,
+            n=self.n,
+            e_units=self.e_units,
+            plot=True,
+            residual=False,
+            fig=self.fig_cal,
+            ax_fit=self.ax_cal,
+        )
+
     def add_cal(self):
         try:
             self.ax_cal.clear()
+            # self.reset_cal_figure()
             en = self.text_add_cal.text().split(",")
             print(en)
             mean_lst = self.get_mean_vals(self.fit)
@@ -381,18 +398,7 @@ class NasaGammaApp(QMainWindow):
             print("energies: ", self.e_vals)
             self.mean_vals.sort()
             self.e_vals.sort()
-            self.pred_erg, self.efit = pf.ecalibration(
-                mean_vals=self.mean_vals,
-                erg=self.e_vals,
-                channels=self.x,
-                n=self.n,
-                e_units=self.e_units,
-                plot=True,
-                residual=False,
-                fig=self.fig_cal,
-                ax_fit=self.ax_cal,
-            )
-
+            self.perform_cal()
             self.update_cal_table()
             self.fig_cal.canvas.draw_idle()
         except:
@@ -432,17 +438,7 @@ class NasaGammaApp(QMainWindow):
             self.e_vals.insert(0, 0)
 
         if len(self.mean_vals) > 1:
-            self.pred_erg, self.efit = pf.ecalibration(
-                mean_vals=self.mean_vals,
-                erg=self.e_vals,
-                channels=self.x,
-                n=self.n,
-                e_units=self.e_units,
-                plot=True,
-                residual=False,
-                fig=self.fig_cal,
-                ax_fit=self.ax_cal,
-            )
+            self.perform_cal()
             self.update_cal_table()
             self.fig_cal.canvas.draw_idle()
 
@@ -458,17 +454,7 @@ class NasaGammaApp(QMainWindow):
         try:
             self.which_button_cal()
             self.ax_cal.clear()
-            self.pred_erg, self.efit = pf.ecalibration(
-                mean_vals=self.mean_vals,
-                erg=self.e_vals,
-                channels=self.x,
-                n=self.n,
-                e_units=self.e_units,
-                plot=True,
-                residual=False,
-                fig=self.fig_cal,
-                ax_fit=self.ax_cal,
-            )
+            self.perform_cal()
 
             self.fig_cal.canvas.draw_idle()
         except:
