@@ -441,7 +441,7 @@ def ecalibration(
     if plot:
         plt.rc("font", size=14)
         plt.style.use("seaborn-darkgrid")
-        x_offset = 100
+        x_offset = 100  # max(channels)*0.01
         if fig is None:
             fig = plt.figure(constrained_layout=False, figsize=(12, 8))
         if residual:
@@ -493,6 +493,7 @@ def ecalibration(
         ax_fit.set_xlabel("Channels")
         ax_fit.set_ylabel(f"Energy [{e_units}]")
         ax_fit.legend()
+        # ax_fit.set_xlim([0,10])
         # plt.style.use("default")
     return predicted, fit
 
