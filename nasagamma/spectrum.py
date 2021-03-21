@@ -109,8 +109,6 @@ class Spectrum:
         None.
 
         """
-        plt.rc("font", size=14)
-        plt.style.use("seaborn-darkgrid")
 
         ax_orig = ax
         if ax is None:

@@ -255,8 +255,6 @@ class PeakFit:
             bkg_label = self.bkg
 
         if plot_type == "simple":
-            plt.rc("font", size=14)
-            plt.style.use("seaborn-darkgrid")
             plt.figure(figsize=(10, 8))
             plt.title(f"Reduced $\chi^2$ = {round(res.redchi,4)}")
             plt.plot(x, y, "bo", alpha=0.5, label="data")
@@ -297,8 +295,6 @@ class PeakFit:
 
             rs = np.array([mean, area, fwhm]).T
             colors = [["lightblue"] * len(cols)] * len(rs)
-            plt.rc("font", size=14)
-            plt.style.use("seaborn-darkgrid")
 
             if fig is None:
                 fig = plt.figure(constrained_layout=True, figsize=(16, 8))
@@ -439,8 +435,6 @@ def ecalibration(
             terms.append(f"${round(c,3)}x^{i}$")
     equation = " + ".join(terms)
     if plot:
-        plt.rc("font", size=14)
-        plt.style.use("seaborn-darkgrid")
         x_offset = 100  # max(channels)*0.01
         if fig is None:
             fig = plt.figure(constrained_layout=False, figsize=(12, 8))
@@ -612,8 +606,6 @@ class GaussianComponents:
 
     def plot_gauss(self, plot_type="simple", table_scale=[1, 3]):
         if plot_type == "simple":
-            plt.rc("font", size=14)
-            plt.style.use("seaborn-darkgrid")
             plt.figure(figsize=(12, 8))
             for i in range(self.npeaks):
                 x = self.x_data[i]
@@ -635,8 +627,6 @@ class GaussianComponents:
             fwhm = self.fwhm
             rs = np.array([mean, area, fwhm]).T
             rs = np.round(rs, decimals=2)
-            plt.rc("font", size=14)
-            plt.style.use("seaborn-darkgrid")
             fig = plt.figure(constrained_layout=False, figsize=(18, 8))
             gs = fig.add_gridspec(1, 2, width_ratios=[3, 2.5])  # 5 , 3
             f_ax1 = fig.add_subplot(gs[0, 0])

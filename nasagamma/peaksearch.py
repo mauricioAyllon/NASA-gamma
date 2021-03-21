@@ -219,8 +219,6 @@ class PeakSearch:
         None.
 
         """
-        plt.rc("font", size=14)
-        plt.style.use("seaborn-darkgrid")
         if self.spectrum.energies is None:
             # x = self.spectrum.channels[:-1]
             x = self.spectrum.channels
@@ -265,8 +263,6 @@ class PeakSearch:
             x = self.spectrum.channels
         else:
             x = self.spectrum.energies
-        plt.rc("font", size=14)
-        plt.style.use("seaborn-darkgrid")
 
         ax_orig = ax
         if ax is None:
