@@ -244,6 +244,8 @@ class PeakSearch:
         ax.set_title(f"SNR > {self.min_snr}")
         ax.set_xlabel(self.spectrum.x_units)
         ax.set_ylabel("Cts")
+        if ax_orig is None:
+            plt.show()
 
     def plot_components(self, scale="log", ax=None):
         """
@@ -279,3 +281,5 @@ class PeakSearch:
         ax.set_xlabel(self.spectrum.x_units)
         ax.set_ylabel("Cts")
         ax.legend(loc=1)
+        if ax_orig is None:
+            plt.show()
