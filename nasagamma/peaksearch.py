@@ -134,6 +134,7 @@ class PeakSearch:
         g1_x0 = gaussian_derivative(edges[:-1], x, sigma)
         g1_x1 = gaussian_derivative(edges[1:], x, sigma)
         kernel = g1_x0 - g1_x1
+        kernel /= kernel[kernel > 0].sum()
         return kernel
 
     def kernel_matrix(self, edges):
