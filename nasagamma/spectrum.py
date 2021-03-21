@@ -7,9 +7,8 @@ import pandas as pd
 
 
 class Spectrum:
-    def __init__(self, counts=None, channels=None, energies=None, e_units=None):
-        """
-        Initialize the spectrum.
+    def __init__(self, counts, channels=None, energies=None, e_units=None):
+        """Initialize the spectrum.
 
         Parameters
         ----------
@@ -29,8 +28,6 @@ class Spectrum:
         None.
 
         """
-        if counts is None:
-            print("ERROR: Must specify counts")
         if channels is None:
             channels = np.arange(0, len(counts), 1)
         if energies is not None:
@@ -49,8 +46,9 @@ class Spectrum:
         self.counts = np.asarray(counts, dtype=float)
         self.channels = np.asarray(channels, dtype=int)
 
-    def smooth(self, num=4):
-        """
+    def smooth(self, num: int = 4):
+        """Moving average filter.
+
         Parameters
         ----------
         num : integer, optional
@@ -97,7 +95,7 @@ class Spectrum:
         en = (en0 + en1) / 2
         return en, y
 
-    def plot(self, fig=None, ax=None, scale="log"):
+    def plot(self, ax=None, scale="log") -> None:
         """
         Plot spectrum object using channels and energies (if not None)
 
@@ -114,10 +112,9 @@ class Spectrum:
         plt.rc("font", size=14)
         plt.style.use("seaborn-darkgrid")
 
-        if fig is None:
-            fig = plt.figure(figsize=(10, 6))
+        ax_orig = ax
         if ax is None:
-            ax = fig.add_subplot()
+            _, ax = plt.subplots(figsize=(10, 6))
 
         integral = round(self.counts.sum())
         set_label = f"Raw Spectrum.\nTotal = {integral:.3E}"
@@ -128,4 +125,6 @@ class Spectrum:
         ax.set_xlabel(self.x_units)
         ax.set_ylabel("Cts")
         ax.legend()
-        plt.show()
+
+        if ax_orig is None:
+            plt.show()
