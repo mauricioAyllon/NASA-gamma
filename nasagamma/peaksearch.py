@@ -8,49 +8,29 @@ from scipy.signal import find_peaks
 from . import spectrum as sp
 
 
-def gaussian(x, mean, sigma):
-    """
-    Gaussian function.
+def gaussian_second_derivate(x, mean, sigma):
+    """Return the second Gaussian derivate (unnormalized).
+
+    This is also called the Marr wavelet or Mexican hat [https://en.wikipedia.org/wiki/Mexican_hat_wavelet].
 
     Parameters
     ----------
     x : numpy array.
         x-values.
     mean : float or int.
-        mean of distribution.
-    sigma : float or int.
-        standard deviation.
-
-    Returns
-    -------
-    numpy array.
-        Gaussian distribution.
-    """
-    z = (x - mean) / sigma
-    return np.exp(-(z ** 2) / 2.0)
-
-
-def gaussian_derivative(x, mean, sigma):
-    """
-    First derivative of a Gaussian.
-
-    Parameters
-    ----------
-    x : numpy array.
-        x-values.
-    mean : float or int.
-        mean of distribution.
+        mean of Gaussian distribution.
     sigma : float or int.
         standard deviation.
 
     Returns
     -------
     numpy array
-        first derivaive of a Gaussian.
+        second derivative of the Gaussian distribution
 
     """
-    z = x - mean
-    return -1 * z * gaussian(x, mean, sigma)
+
+    z = (x - mean) / sigma
+    return (1 - z ** 2) * np.exp(-(z ** 2) / 2.0)
 
 
 class PeakSearch:
@@ -129,19 +109,20 @@ class PeakSearch:
 
     def kernel(self, x, edges):
         """Generate the kernel for the given x value."""
-        fwhm1 = self.fwhm(x)
-        sigma = fwhm1 / 2.355
-        g1_x0 = gaussian_derivative(edges[:-1], x, sigma)
-        g1_x1 = gaussian_derivative(edges[1:], x, sigma)
-        kernel = g1_x0 - g1_x1
-        kernel /= kernel[kernel > 0].sum()
+
+        sigma = self.fwhm(x) / 2.355
+        kernel = gaussian_second_derivate(edges, x, sigma)
+        # normalize so that the peaks fit the data
+        mask = kernel > 0
+        if mask.sum():
+            kernel /= kernel[mask].sum()
         return kernel
 
     def kernel_matrix(self, edges):
         """Build a matrix of the kernel evaluated at each x value."""
-        n_channels = len(edges) - 1
+        n_channels = len(edges)
         kern = np.zeros((n_channels, n_channels))
-        for i, x in enumerate(edges[:-1]):
+        for i, x in enumerate(edges):
             kern[:, i] = self.kernel(x, edges)
         return kern
 
@@ -165,8 +146,7 @@ class PeakSearch:
     def calculate(self):
         """Calculate the convolution of the spectrum with the kernel."""
 
-        edg = np.append(self.spectrum.channels, self.spectrum.channels[-1] + 1)
-        self.convolve(edg, self.spectrum.counts)
+        self.convolve(self.spectrum.channels, self.spectrum.counts)
 
         # find peak indices
         peaks_idx = find_peaks(self.snr, height=self.min_snr)[0]
@@ -181,23 +161,23 @@ class PeakSearch:
             print("The kernel has not been calculated yet, nothing to plot")
             return
 
-        n_channels = len(self.spectrum.channels)
-        kern_min = self.kern_mat.min()
-        kern_max = self.kern_mat.max()
-        kern_min = min(kern_min, -kern_max)
-        kern_max = max(kern_max, -kern_min)
+        # at the edges, the normalization can create single values that are close to 1
+        # we want to skip these for the plotting, so we pick the 99% percentile
+        tmp = np.sort(np.abs(self.kern_mat).flatten())
+        kern_max = tmp[int(len(tmp) * 0.99)]
 
         ax_orig = ax
         if ax is None:
             _, ax = plt.subplots()
-        ax.imshow(
-            self.kern_mat.T[::-1, :],
+
+        img = ax.imshow(
+            self.kern_mat.T,
             cmap=plt.get_cmap("bwr"),
-            vmin=kern_min,
+            vmin=-kern_max,
             vmax=kern_max,
-            extent=[n_channels, 0, 0, n_channels],
+            origin="lower",
         )
-        ax.colorbar()
+        plt.colorbar(img)
         ax.set_xlabel("Input x")
         ax.set_ylabel("Output x")
         ax.set_aspect("equal")
