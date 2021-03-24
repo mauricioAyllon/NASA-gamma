@@ -9,6 +9,7 @@ parameter handle for GUI
 import pandas as pd
 from nasagamma import spectrum as sp
 from nasagamma import peaksearch as ps
+from nasagamma import read_cnf
 import re
 
 
@@ -40,13 +41,17 @@ def get_spect_search(commands):
     else:
         min_snr = float(commands["--min_snr"])
 
-    e_units, spect, x = read_file(file_name)
+    file_name = file_name.lower()
+    if file_name[-4:] == ".csv":
+        e_units, spect, x = read_csv_file(file_name)
+    elif file_name[-4:] == ".cnf":
+        e_units, spect, x = read_cnf.read_cnf_to_spect(file_name)
     # peaksearch class
     search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
     return spect, search, e_units, x, ref_x, fwhm_at_0, ref_fwhm
 
 
-def read_file(file_name):
+def read_csv_file(file_name):
     df = pd.read_csv(file_name)
     ###
     name_lst = ["count", "counts", "cts", "data"]
