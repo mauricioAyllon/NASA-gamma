@@ -39,10 +39,11 @@ from PyQt5.uic import loadUi
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.widgets import SpanSelector
-from param_handle import get_spect_search, read_file
+from param_handle import get_spect_search, read_csv_file
 from nasagamma import peakfit as pf
 from nasagamma import peaksearch as ps
 from nasagamma import spectrum as sp
+from nasagamma import read_cnf
 import pkg_resources
 
 
@@ -190,17 +191,6 @@ class NasaGammaApp(QMainWindow):
             self.toolbar0.setVisible(False)
 
     def create_graph(self, fit=True):
-        # plot spectrum with peaksearch
-        # self.ax_main.clear()
-        # self.ax_res.clear()
-        # self.ax_fit.clear()
-        # self.ax_tab.clear()
-        # self.ax_res.set_xticks([])
-        # self.ax_res.set_yticks([])
-        # self.ax_fit.set_xticks([])
-        # self.ax_fit.set_yticks([])
-        # self.ax_tab.set_xticks([])
-        # self.ax_tab.set_yticks([])
         self.reset_main_figure()
         if fit:
             self.search.plot_peaks(
@@ -241,6 +231,8 @@ class NasaGammaApp(QMainWindow):
         self.ax_fit = self.fig.add_subplot(gs[1, 1])
         self.ax_tab = self.fig.add_subplot(gs[2, 1])
         # remove ticks
+        # self.ax_main.set_xticks([])
+        # self.ax_main.set_yticks([])
         self.ax_res.set_xticks([])
         self.ax_res.set_yticks([])
         self.ax_fit.set_xticks([])
@@ -380,9 +372,7 @@ class NasaGammaApp(QMainWindow):
             self.ax_cal.clear()
             # self.reset_cal_figure()
             en = self.text_add_cal.text().split(",")
-            print(en)
             mean_lst = self.get_mean_vals(self.fit)
-            print(mean_lst)
 
             for ch, e in zip(mean_lst, en):
                 e2 = e.strip()  # remove white spaces
@@ -394,8 +384,6 @@ class NasaGammaApp(QMainWindow):
                         self.e_vals.append(num_e)
                         self.mean_vals.append(ch)
 
-            print("ch: ", self.mean_vals)
-            print("energies: ", self.e_vals)
             self.mean_vals.sort()
             self.e_vals.sort()
             self.perform_cal()
@@ -512,7 +500,7 @@ class NasaGammaApp(QMainWindow):
             self, "Save", "", "All Files (*);;Text Files (*.txt)", options=options
         )
         if fileName and len(self.list_xrange) != 0:
-            print(fileName)
+            print("Report file: ", fileName)
             self.save_fit(fileName)
 
     def save_fit(self, fileName):
@@ -529,7 +517,7 @@ class NasaGammaApp(QMainWindow):
             self, "Save", "", "All Files (*);;Text Files (*.txt)", options=options
         )
 
-        print(fileName)
+        print("Saved file: ", fileName)
         cts = self.spect.counts
         if self.spect.energies is not None:
             cols = ["counts", f"{self.spect.x_units}"]
@@ -555,9 +543,14 @@ class NasaGammaApp(QMainWindow):
             options=options,
         )
 
-        print(fileName)
+        print("Open file: ", fileName)
+        fileName = fileName.lower()
 
-        self.e_units, self.spect, self.x = read_file(fileName)
+        if fileName[-4:] == ".csv":
+            self.e_units, self.spect, self.x = read_csv_file(fileName)
+        elif fileName[-4:] == ".cnf":
+            self.e_units, self.spect, self.x = read_cnf.read_cnf_to_spect(fileName)
+
         self.create_graph(fit=False)
 
 
