@@ -477,9 +477,9 @@ def ecalibration(
             mfc="black",
             mec="black",
             markersize=7,
-            ls="--",
+            ls=" ",
             lw=3,
-            label="Best fit",
+            label="Data",
         )
         ax_fit.plot(
             channels,
