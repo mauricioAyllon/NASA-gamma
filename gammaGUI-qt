@@ -57,7 +57,7 @@ class NasaGammaApp(QMainWindow):
         # self.label_nasa.setPixmap(pixmap)
         self.resize(1800, 900)
         self.setWindowTitle("NASA-gamma")
-        self.scale = "log"
+        self.scale = "linear"
         self.pushButton_scale.clicked.connect(self.update_scale)
         self.pushButton_scale.setStyleSheet("background-color : lightgoldenrodyellow")
         # push buttons
@@ -206,7 +206,7 @@ class NasaGammaApp(QMainWindow):
                 bbox={"facecolor": "green", "alpha": 0.5, "pad": 20},
             )
         else:
-            self.spect.plot(fig=self.fig, ax=self.ax_main)
+            self.spect.plot(fig=self.fig, ax=self.ax_main, scale=self.scale)
             txt = "Add parameters in 'Parameters' tab for fitting"
             self.ax_fit.text(
                 0.27,
