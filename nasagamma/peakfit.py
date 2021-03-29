@@ -610,7 +610,7 @@ class GaussianComponents:
             dict_err["fwhm_err"] = self.df_peak.loc[i, "fwhm_err"]
             self.peak_err.append(dict_err)
 
-    def plot_gauss(self, plot_type="simple", table_scale=[1, 3]):
+    def plot_gauss(self, plot_type="simple", table_scale=[1, 3], fig=None, ax=None):
         if plot_type == "simple":
             plt.rc("font", size=14)
             plt.style.use("seaborn-darkgrid")
@@ -697,6 +697,30 @@ class GaussianComponents:
             t.set_fontsize(12)
             f_ax2.axis("off")
             plt.style.use("default")
+        elif plot_type == "fwhm":
+            if fig is None:
+                plt.rc("font", size=14)
+                plt.style.use("seaborn-darkgrid")
+                fig = plt.figure(constrained_layout=False, figsize=(18, 8))
+            if ax is None:
+                ax = fig.add_subplot()
+            for i in range(self.npeaks):
+                x = self.x_data[i]
+                y = self.gauss[i]
+                ax.fill_between(x, 0, y, alpha=0.5)
+                x0 = self.mean[i]
+                y0 = y.max()
+                a = self.area[i]
+                ax.text(
+                    x0,
+                    y0,
+                    int(i + 1),
+                    bbox=dict(facecolor="red", alpha=0.1),
+                    weight="bold",
+                )
+            ax.set_xlabel(self.x_units)
+            ax.set_ylabel("Cts")
+            ax.set_title("Gaussian Components")
 
 
 class AddPeaks:
@@ -879,3 +903,153 @@ def auto_scan(search, xlst=None, bkglst=None, plot=False, save_to_hdf=False):
                 fit0.plot(plot_type="full")
             fits.append(fit0)
     return fits
+
+
+def fwhm1(E, a, b):
+    return a + b * np.sqrt(E)
+
+
+def fwhm2(E, a, b, c):
+    return a + b * np.sqrt(E + c * E ** 2)
+
+
+def fwhm_vs_erg(energies, fwhms, x_units, e_units, order=2, fig=None, ax=None):
+    plt.rc("font", size=14)
+    plt.style.use("seaborn-darkgrid")
+    if fig is None:
+        fig = plt.figure(constrained_layout=True, figsize=(16, 8))
+    if ax is None:
+        ax = fig.add_subplot()
+
+    energies = np.array(energies)
+    fwhms = np.array(fwhms)
+
+    if order == 1:
+        gmodel = lmfit.Model(fwhm1)
+        fit = gmodel.fit(fwhms, E=energies, a=0, b=0)
+        best_vals = fit.best_values
+        ye = fit.eval_uncertainty()
+        a = round(best_vals["a"], 5)
+        b = round(best_vals["b"], 5)
+        # predicted = result.eval(x=channels)
+
+        ax.errorbar(
+            energies,
+            fwhms,
+            yerr=ye,
+            ecolor="red",
+            elinewidth=5,
+            capsize=12,
+            capthick=3,
+            marker="s",
+            mfc="black",
+            mec="black",
+            markersize=7,
+            ls=" ",
+            lw=3,
+            label="Data",
+        )
+        ax.plot(
+            energies,
+            fit.best_fit,
+            ls="-",
+            lw=3,
+            color="green",
+            label=f"a={a}\nb={b}",
+        )
+
+        ax.legend(loc="best")
+        ax.set_xlabel(f"{x_units}")
+        ax.set_ylabel(f"FWHM [{e_units}]")
+        ax.set_title("$a+b\sqrt{E}$")
+    elif order == 2:
+        gmodel = lmfit.Model(fwhm2)
+        fit = gmodel.fit(fwhms, E=energies, a=0, b=0, c=0)
+        best_vals = fit.best_values
+        ye = fit.eval_uncertainty()
+        a = round(best_vals["a"], 5)
+        b = round(best_vals["b"], 5)
+        c = round(best_vals["c"], 5)
+        # predicted = result.eval(x=channels)
+
+        ax.errorbar(
+            energies,
+            fwhms,
+            yerr=ye,
+            ecolor="red",
+            elinewidth=5,
+            capsize=12,
+            capthick=3,
+            marker="s",
+            mfc="black",
+            mec="black",
+            markersize=7,
+            ls=" ",
+            lw=3,
+            label="Data",
+        )
+        ax.plot(
+            energies,
+            fit.best_fit,
+            ls="-",
+            lw=3,
+            color="green",
+            label=f"a={a}\nb={b}\nc={c}",
+        )
+
+        ax.legend(loc="best")
+        ax.set_xlabel(f"{x_units}")
+        ax.set_ylabel(f"FWHM [{e_units}]")
+        ax.set_title("$a+b\sqrt{E+cE^2}$")
+    return best_vals
+
+
+def fwhm_table(
+    x_lst,
+    fwhm_lst,
+    t_scale=[1, 1.8],
+    decimals=3,
+    e_units=None,
+    ax=None,
+    fig=None,
+):
+    if fig is None:
+        fig = plt.figure(constrained_layout=False, figsize=(12, 8))
+    if ax is None:
+        ax = fig.add_subplot()
+
+    flag = 1
+    if 0 in x_lst:
+        x_lst.pop(0)
+        fwhm_lst.pop(0)
+        flag = 0
+
+    percent = np.array(fwhm_lst) / np.array(x_lst) * 100
+    xs = np.round(np.array(x_lst), decimals=decimals)
+    fwhms = np.round(np.array(fwhm_lst), decimals=decimals)
+    fwhm_perc = np.round(percent, decimals=2)
+    cols = ["N", f"energy [{e_units}]", f"FWHM [{e_units}]", "FWHM [%]"]
+    N = np.arange(1, len(xs) + 1, 1)
+    rs = np.array([N, xs, fwhms, fwhm_perc]).T
+    colors = [["lightblue"] * len(cols)] * len(rs)
+    df = pd.DataFrame(rs, columns=cols)
+    df = df.astype({"N": "int32"})
+    df = df.astype({"N": "str"})
+
+    t = ax.table(
+        cellText=df.values,
+        colLabels=cols,
+        loc="center",
+        cellLoc="center",
+        colWidths=[1 / 8, 1 / 3, 1 / 3, 1 / 3],
+        colColours=["palegreen"] * len(cols),
+        cellColours=colors,
+    )
+    t.scale(t_scale[0], t_scale[1])
+    t.auto_set_font_size(False)
+    t.set_fontsize(14)
+    ax.axis("off")
+
+    if flag == 0:
+        x_lst.insert(0, 0)
+        fwhm_lst.insert(0, 0)
