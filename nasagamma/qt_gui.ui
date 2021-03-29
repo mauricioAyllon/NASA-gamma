@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1481</width>
+    <width>1489</width>
     <height>801</height>
    </rect>
   </property>
@@ -116,14 +116,14 @@
          </spacer>
         </item>
         <item row="0" column="8">
-         <widget class="QLabel" name="label_2">
+         <widget class="QPushButton" name="button_add_fwhm">
           <property name="font">
            <font>
-            <pointsize>16</pointsize>
+            <pointsize>14</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>NASA-gamma</string>
+           <string>Add to FWHM</string>
           </property>
          </widget>
         </item>
@@ -141,6 +141,31 @@
          </spacer>
         </item>
         <item row="0" column="10">
+         <widget class="QPushButton" name="button_add_eff">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Add to efficiency</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="11">
+         <spacer name="horizontalSpacer_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>17</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="12">
          <widget class="QPushButton" name="pushButton_poly1">
           <property name="font">
            <font>
@@ -152,7 +177,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="11">
+        <item row="0" column="13">
          <widget class="QPushButton" name="pushButton_poly2">
           <property name="font">
            <font>
@@ -164,7 +189,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="12">
+        <item row="0" column="14">
          <widget class="QPushButton" name="pushButton_exp">
           <property name="font">
            <font>
@@ -176,7 +201,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="13">
+        <item row="0" column="15">
          <spacer name="horizontalSpacer_17">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -189,7 +214,7 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="0" colspan="14">
+        <item row="1" column="0" colspan="16">
          <widget class="MplWidget" name="main_plot" native="true">
           <property name="mouseTracking">
            <bool>false</bool>
@@ -214,7 +239,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Origin Yes/No</string>
+           <string>Origin yes/no</string>
           </property>
          </widget>
         </item>
@@ -385,6 +410,118 @@
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
         <string>Efficiency</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tab_5">
+       <attribute name="title">
+        <string>Resolution</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="0" column="0">
+         <widget class="QPushButton" name="button_origin_fwhm">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Origin yes/no</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="button_fwhm1">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Fit order = 1</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="button_fwhm2">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Fit order = 2</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QPushButton" name="button_extrapolate">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Extrapolate</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>1110</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="5">
+         <widget class="QPushButton" name="button_reset_fwhm">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Reset </string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6">
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>14</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0" colspan="7">
+         <widget class="MplWidget" name="resolution_plot" native="true">
+          <property name="mouseTracking">
+           <bool>false</bool>
+          </property>
+          <property name="autoFillBackground">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_lynx">
+       <attribute name="title">
+        <string>Lynx</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tab_2">
@@ -626,7 +763,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1481</width>
+     <width>1489</width>
      <height>29</height>
     </rect>
    </property>
@@ -638,7 +775,14 @@
     <addaction name="saveSpect"/>
     <addaction name="saveFitReport"/>
    </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="clearSpectrum"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuOptions"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="openFile">
@@ -663,6 +807,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="clearSpectrum">
+   <property name="text">
+    <string>Clear spectrum</string>
    </property>
   </action>
  </widget>
