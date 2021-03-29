@@ -95,12 +95,18 @@ class NasaGammaApp(QMainWindow):
         self.addToolBar(self.toolbar1)
         self.toolbar1.setVisible(False)
 
+        self.toolbar3 = NavigationToolbar(self.resolution_plot.canvas, self)
+        self.addToolBar(self.toolbar3)
+        self.toolbar3.setVisible(False)
+
         self.tabWidget.currentChanged.connect(self.switch_toolbar)
 
         # menu bar
         self.saveFitReport.triggered.connect(self.saveReport)
         self.openFile.triggered.connect(self.open_file)
         self.saveSpect.triggered.connect(self.save_spect)
+
+        self.clearSpectrum.triggered.connect(self.reset_main_figure)
 
         self.reset_main_figure()
 
@@ -182,16 +188,59 @@ class NasaGammaApp(QMainWindow):
         # apply calibration
         self.button_apply_cal.clicked.connect(self.apply_cal)
 
+        ## Resolution
+        # push butons
+        self.button_fwhm1.setStyleSheet("background-color : lightblue")
+        self.button_fwhm2.setStyleSheet("background-color : lightblue")
+        self.button_add_fwhm.setStyleSheet("background-color : khaki")
+        self.button_origin_fwhm.setStyleSheet("background-color : lightgoldenrodyellow")
+        self.button_reset_fwhm.setStyleSheet("background-color : lightcoral")
+        self.button_extrapolate.setStyleSheet("background-color : lightgreen")
+
+        self.button_fwhm1.setCheckable(True)
+        self.button_fwhm2.setCheckable(True)
+
+        self.btn_grp3 = QButtonGroup()
+        self.btn_grp3.setExclusive(True)
+        self.btn_grp3.addButton(self.button_fwhm1)
+        self.btn_grp3.addButton(self.button_fwhm2)
+
+        self.btn_grp3.buttonClicked.connect(self.update_fwhm_figure)
+        self.reset_fwhm_figure()
+        self.fit_lst = []
+
+        self.button_add_fwhm.clicked.connect(self.add_fwhm)
+        self.button_origin_fwhm.clicked.connect(self.set_origin_fwhm)
+        self.button_reset_fwhm.clicked.connect(self.reset_fwhm)
+
+        self.fwhm_x = [0]
+        self.fwhm = [0]
+
+        ## Efficiency
+        # push butons
+        self.button_add_eff.setStyleSheet("background-color : sandybrown")
+
     def switch_toolbar(self):
         if self.tabWidget.currentIndex() == 0:
             self.toolbar0.setVisible(True)
             self.toolbar1.setVisible(False)
+            self.toolbar3.setVisible(False)
         elif self.tabWidget.currentIndex() == 1:
-            self.toolbar1.setVisible(True)
             self.toolbar0.setVisible(False)
+            self.toolbar1.setVisible(True)
+            self.toolbar3.setVisible(False)
+        elif self.tabWidget.currentIndex() == 3:
+            self.toolbar0.setVisible(False)
+            self.toolbar1.setVisible(False)
+            self.toolbar3.setVisible(True)
 
-    def create_graph(self, fit=True):
-        self.reset_main_figure()
+    def create_graph(self, fit=True, reset=True):
+        if reset:
+            self.reset_main_figure()
+        else:
+            self.ax_fit.clear()
+            self.ax_fit.set_xticks([])
+            self.ax_fit.set_yticks([])
         if fit:
             self.search.plot_peaks(
                 yscale=self.scale, snrs="off", fig=self.fig, ax=self.ax_main
@@ -239,6 +288,8 @@ class NasaGammaApp(QMainWindow):
         self.ax_fit.set_yticks([])
         self.ax_tab.set_xticks([])
         self.ax_tab.set_yticks([])
+
+        self.fig.canvas.draw_idle()
 
     def reset_cal_figure(self):
         self.fig_cal = self.cal_plot.canvas.figure
@@ -443,6 +494,7 @@ class NasaGammaApp(QMainWindow):
             self.which_button_cal()
             self.ax_cal.clear()
             self.perform_cal()
+            self.update_cal_table()
 
             self.fig_cal.canvas.draw_idle()
         except:
@@ -478,6 +530,137 @@ class NasaGammaApp(QMainWindow):
             self.create_graph(fit=True)
         except:
             pass
+
+    ## Resolution (FWHM)
+    def reset_fwhm_figure(self):
+        self.fig_fwhm = self.resolution_plot.canvas.figure
+        self.fig_fwhm.clear()
+        self.fig_fwhm.set_constrained_layout(True)
+        gs = self.fig_fwhm.add_gridspec(
+            2, 2, width_ratios=[0.5, 0.5], height_ratios=[0.5, 0.5]
+        )
+
+        # axes
+        self.ax_fwhm = self.fig_fwhm.add_subplot(gs[:, 0])
+        self.ax_fwhm_gauss = self.fig_fwhm.add_subplot(gs[0, 1])
+        self.ax_fwhm_tab = self.fig_fwhm.add_subplot(gs[1, 1])
+
+        # remove ticks
+        self.ax_fwhm.set_xticks([])
+        self.ax_fwhm.set_yticks([])
+        self.ax_fwhm_tab.set_xticks([])
+        self.ax_fwhm_tab.set_yticks([])
+        self.ax_fwhm_gauss.set_xticks([])
+        self.ax_fwhm_gauss.set_yticks([])
+
+        # self.fig.canvas.draw_idle()
+
+    @staticmethod
+    def get_fwhm_vals(fit):
+        fwhm_lst = []
+        for d in fit.peak_info:
+            keys = list(d)
+            fwhm_val = d[keys[2]]
+            fwhm_lst.append(fwhm_val)
+        return fwhm_lst
+
+    def which_button_fwhm(self):
+        if self.button_fwhm1.isChecked():
+            self.n_fwhm = 1
+        elif self.button_fwhm2.isChecked():
+            self.n_fwhm = 2
+        else:
+            self.n_fwhm = 1
+
+    def perform_fwhm(self):
+        try:
+            self.which_button_fwhm()
+            self.best_fwhm_fit = pf.fwhm_vs_erg(
+                energies=self.fwhm_x,
+                fwhms=self.fwhm,
+                x_units=self.spect.x_units,
+                e_units=self.e_units,
+                order=self.n_fwhm,
+                fig=self.fig_fwhm,
+                ax=self.ax_fwhm,
+            )
+            self.update_table_fwhm()
+            self.update_gauss_fwhm()
+            self.fig_fwhm.canvas.draw_idle()
+        except TypeError:
+            print("Failed to fit a second order function. Switching to first order")
+            self.button_fwhm1.setChecked(True)
+            self.perform_fwhm()
+        else:
+            pass
+
+    def update_table_fwhm(self):
+        self.ax_fwhm_tab.clear()
+        pf.fwhm_table(
+            x_lst=self.fwhm_x,
+            fwhm_lst=self.fwhm,
+            e_units=self.e_units,
+            ax=self.ax_fwhm_tab,
+            fig=self.fig_fwhm,
+        )
+
+    def update_gauss_fwhm(self):
+        self.ax_fwhm_gauss.clear()
+        gauss_comp = pf.GaussianComponents(fit_obj_lst=self.fit_lst)
+        gauss_comp.plot_gauss(
+            plot_type="fwhm", fig=self.fig_fwhm, ax=self.ax_fwhm_gauss
+        )
+
+    def add_fwhm(self):
+        self.ax_fwhm.clear()
+        xvals = self.get_mean_vals(self.fit)
+        fwhms = self.get_fwhm_vals(self.fit)
+
+        for x, f in zip(xvals, fwhms):
+            if x not in self.fwhm_x and f not in self.fwhm:
+                self.fwhm_x.append(x)
+                self.fwhm.append(f)
+
+        self.fit_lst.append(self.fit)
+        self.fwhm_x.sort()
+        self.fwhm.sort()
+        self.perform_fwhm()
+        # self.update_fwhm_table()
+
+    def update_fwhm_figure(self):
+        self.ax_fwhm.clear()
+        self.which_button_fwhm()
+        self.perform_fwhm()
+
+    def set_origin_fwhm(self):
+        self.ax_fwhm.clear()
+        if 0 in self.fwhm_x:
+            self.fwhm_x.pop(0)
+            self.fwhm.pop(0)
+        else:
+            self.fwhm_x.insert(0, 0)
+            self.fwhm.insert(0, 0)
+
+        if len(self.fwhm_x) > 1:
+            self.perform_fwhm()
+            # self.update_cal_table()
+
+    def reset_fwhm(self):
+        print("Reseting calibration")
+        self.ax_fwhm.clear()
+        self.ax_fwhm_tab.clear()
+        self.ax_fwhm_gauss.clear()
+        self.fit_lst = []
+        self.fwhm_x = [0]
+        self.fwhm = [0]
+        # remove ticks
+        self.ax_fwhm.set_xticks([])
+        self.ax_fwhm.set_yticks([])
+        self.ax_fwhm_tab.set_xticks([])
+        self.ax_fwhm_tab.set_yticks([])
+        self.ax_fwhm_gauss.set_xticks([])
+        self.ax_fwhm_gauss.set_yticks([])
+        self.fig_fwhm.canvas.draw_idle()
 
     ## menu bar
     def apply_params(self):
@@ -551,7 +734,7 @@ class NasaGammaApp(QMainWindow):
         elif fileName[-4:] == ".cnf":
             self.e_units, self.spect, self.x = read_cnf.read_cnf_to_spect(fileName)
 
-        self.create_graph(fit=False)
+        self.create_graph(fit=False, reset=False)
 
 
 if __name__ == "__main__":
