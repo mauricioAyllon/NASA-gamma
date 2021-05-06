@@ -31,11 +31,13 @@ detector configurations.
 import docopt
 import pandas as pd
 import numpy as np
+import datetime
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QKeySequence, QIcon, QPixmap
 from PyQt5.uic import loadUi
 
 # from PyQt5.QtCore import Qt
+from PyQt5.QtCore import pyqtSlot
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.widgets import SpanSelector
@@ -45,6 +47,24 @@ from nasagamma import peaksearch as ps
 from nasagamma import spectrum as sp
 from nasagamma import read_cnf
 import pkg_resources
+
+
+class WindowCal(QDialog):
+    def __init__(self):
+        QDialog.__init__(self)
+        ui_file = pkg_resources.resource_filename("nasagamma", "win_erg_cal.ui")
+        loadUi(ui_file, self)
+        self.setWindowTitle("Energy calibration")
+        # self.button_ok_cancel.accepted.connect(self.accept)
+        # self.button_ok_cancel.rejected.connect(self.reject)
+
+
+class WindowEff(QDialog):
+    def __init__(self):
+        QDialog.__init__(self)
+        ui_file = pkg_resources.resource_filename("nasagamma", "win_eff.ui")
+        loadUi(ui_file, self)
+        self.setWindowTitle("Efficiency calibration")
 
 
 class NasaGammaApp(QMainWindow):
@@ -82,10 +102,7 @@ class NasaGammaApp(QMainWindow):
         self.button_remove_cal.setStyleSheet("background-color : lightcoral")
 
         # textbox
-        self.e_units = "Type energy units"
         self.button_apply.clicked.connect(self.apply_params)
-        self.text_units.setText(self.e_units)
-        self.text_units.returnPressed.connect(self.onPressed)
 
         # navigation toolbars
         self.toolbar0 = NavigationToolbar(self.main_plot.canvas, self)
@@ -94,6 +111,10 @@ class NasaGammaApp(QMainWindow):
         self.toolbar1 = NavigationToolbar(self.cal_plot.canvas, self)
         self.addToolBar(self.toolbar1)
         self.toolbar1.setVisible(False)
+
+        self.toolbar2 = NavigationToolbar(self.efficiency_plot.canvas, self)
+        self.addToolBar(self.toolbar2)
+        self.toolbar2.setVisible(False)
 
         self.toolbar3 = NavigationToolbar(self.resolution_plot.canvas, self)
         self.addToolBar(self.toolbar3)
@@ -146,6 +167,8 @@ class NasaGammaApp(QMainWindow):
         self.mean_vals = [0]
         self.e_vals = [0]
         self.pred_erg = 0
+        self.mean_vals_not_fit = []
+        self.e_vals_not_fit = []
         # push butons
         self.button_add_cal.setStyleSheet("background-color : lightblue")
         self.button_origin.setStyleSheet("background-color : lightgoldenrodyellow")
@@ -182,7 +205,8 @@ class NasaGammaApp(QMainWindow):
         )
 
         # energy textbox
-        self.button_add_cal.clicked.connect(self.add_cal)
+        # self.button_add_cal.clicked.connect(self.add_cal)
+        self.button_add_cal.clicked.connect(self.new_window_cal)
         # reset calibration
         self.button_reset_cal.clicked.connect(self.reset_cal)
         # apply calibration
@@ -217,21 +241,41 @@ class NasaGammaApp(QMainWindow):
         self.fwhm = [0]
 
         ## Efficiency
+        self.eff_vals = []
+        self.eff_scale = "log"
         # push butons
+        self.button_yscale_eff.setStyleSheet("background-color : lightgoldenrodyellow")
+        self.button_yscale_eff.clicked.connect(self.eff_yscale)
+        self.button_reset_eff.setStyleSheet("background-color : lightcoral")
+        self.button_reset_eff.clicked.connect(self.reset_eff_all)
+        self.button_fit1_eff.setStyleSheet("background-color : lightgreen")
+        self.button_fit1_eff.clicked.connect(self.eff_fit1)
+        self.button_fit2_eff.setStyleSheet("background-color : lightgreen")
+        self.button_fit2_eff.clicked.connect(self.eff_fit2)
         self.button_add_eff.setStyleSheet("background-color : sandybrown")
+        self.button_add_eff.clicked.connect(self.new_window_eff)
+        self.reset_eff_figure()
 
     def switch_toolbar(self):
         if self.tabWidget.currentIndex() == 0:
             self.toolbar0.setVisible(True)
             self.toolbar1.setVisible(False)
+            self.toolbar2.setVisible(False)
             self.toolbar3.setVisible(False)
         elif self.tabWidget.currentIndex() == 1:
             self.toolbar0.setVisible(False)
             self.toolbar1.setVisible(True)
+            self.toolbar2.setVisible(False)
+            self.toolbar3.setVisible(False)
+        elif self.tabWidget.currentIndex() == 2:
+            self.toolbar0.setVisible(False)
+            self.toolbar1.setVisible(False)
+            self.toolbar2.setVisible(True)
             self.toolbar3.setVisible(False)
         elif self.tabWidget.currentIndex() == 3:
             self.toolbar0.setVisible(False)
             self.toolbar1.setVisible(False)
+            self.toolbar2.setVisible(False)
             self.toolbar3.setVisible(True)
 
     def create_graph(self, fit=True, reset=True):
@@ -388,7 +432,7 @@ class NasaGammaApp(QMainWindow):
                     min_snr=self.min_snr,
                 )
 
-                self.create_graph(fit=True)
+                self.create_graph(fit=False)
         except AttributeError:
             self.spect = sp.Spectrum(counts=self.spect.counts)
             self.create_graph(fit=False)
@@ -405,6 +449,17 @@ class NasaGammaApp(QMainWindow):
             mean_lst.append(mean_ch)
         return mean_lst
 
+    def append_to_list_not_repeated(self, list_e_in, list_m_in, list_e_out, list_m_out):
+        for ch, e in zip(list_m_in, list_e_in):
+            e2 = e.strip()  # remove white spaces
+            if e2 == "_" or e2 == "-":
+                next
+            else:
+                num_e = float(e2)
+                if num_e not in list_e_out and ch not in list_m_out:
+                    list_e_out.append(num_e)
+                    list_m_out.append(ch)
+
     def perform_cal(self):
         self.pred_erg, self.efit = pf.ecalibration(
             mean_vals=self.mean_vals,
@@ -418,36 +473,80 @@ class NasaGammaApp(QMainWindow):
             ax_fit=self.ax_cal,
         )
 
+    def add_point_dont_fit(self):
+
+        en = self.w_cal.energy_txt.text().split(",")
+        mean_lst = self.get_mean_vals(self.fit)
+        self.append_to_list_not_repeated(
+            en, mean_lst, self.e_vals_not_fit, self.mean_vals_not_fit
+        )
+        self.ax_cal.clear()
+        self.check_radioButton()
+        self.perform_cal()
+        self.update_cal_table()
+        self.plot_point_dont_fit()
+
+    def plot_point_dont_fit(self):
+        if len(self.mean_vals_not_fit) > 0:
+            self.ax_cal.plot(
+                self.mean_vals_not_fit,
+                self.e_vals_not_fit,
+                "o",
+                color="C0",
+                ms=8,
+                label="Not used for fit",
+            )
+            self.ax_cal.legend()
+            self.mean_vals_not_fit.sort()
+            self.e_vals_not_fit.sort()
+            self.fig_cal.canvas.draw_idle()
+
     def add_cal(self):
         try:
-            self.ax_cal.clear()
-            # self.reset_cal_figure()
-            en = self.text_add_cal.text().split(",")
-            mean_lst = self.get_mean_vals(self.fit)
+            if self.w_cal.checkBox_cal.isChecked():
+                self.add_point_dont_fit()
+            else:
+                self.ax_cal.clear()
+                # self.reset_cal_figure()
+                # en = self.text_add_cal.text().split(",")
+                en = self.w_cal.energy_txt.text().split(",")
+                mean_lst = self.get_mean_vals(self.fit)
+                self.append_to_list_not_repeated(
+                    en, mean_lst, self.e_vals, self.mean_vals
+                )
 
-            for ch, e in zip(mean_lst, en):
-                e2 = e.strip()  # remove white spaces
-                if e2 == "_" or e2 == "-":
-                    next
-                else:
-                    num_e = float(e2)
-                    if num_e not in self.e_vals and ch not in self.mean_vals:
-                        self.e_vals.append(num_e)
-                        self.mean_vals.append(ch)
-
-            self.mean_vals.sort()
-            self.e_vals.sort()
-            self.perform_cal()
-            self.update_cal_table()
-            self.fig_cal.canvas.draw_idle()
+                self.mean_vals.sort()
+                self.e_vals.sort()
+                self.check_radioButton()
+                self.perform_cal()
+                self.update_cal_table()
+                self.fig_cal.canvas.draw_idle()
         except:
-            pass
+            print("Calibration not performed")
+
+    def new_window_cal(self):
+        self.w_cal = WindowCal()
+        self.w_cal.show()
+        self.w_cal.accepted.connect(self.add_cal)
+
+    def check_radioButton(self):
+        if self.w_cal.radio_button_ev.isChecked():
+            self.e_units = "eV"
+        elif self.w_cal.radio_button_kev.isChecked():
+            self.e_units = "keV"
+        elif self.w_cal.radio_button_mev.isChecked():
+            self.e_units = "MeV"
+        else:
+            msg = "ERROR: energy units not determined. Will use channels instead"
+            print(msg)
 
     def update_cal_table(self):
         self.ax_cal_tab.clear()
-        ergs = self.efit.data
-        chs = self.mean_vals
-        sigs = self.efit.eval_uncertainty()
+        sigs_not_fit = [0] * len(self.mean_vals_not_fit)
+        ergs = self.e_vals + self.e_vals_not_fit
+        # ergs = self.efit.data + self.e_vals_not_fit
+        chs = self.mean_vals + self.mean_vals_not_fit
+        sigs = list(self.efit.eval_uncertainty()) + sigs_not_fit
         pf.cal_table(
             ch_lst=chs,
             e_lst=ergs,
@@ -458,13 +557,6 @@ class NasaGammaApp(QMainWindow):
             fig=self.fig_cal,
             ax=self.ax_cal_tab,
         )
-        self.fig_cal.canvas.draw_idle()
-
-    def onPressed(self):
-        self.e_units = self.text_units.text()
-        self.ax_cal.set_ylabel(f"Energy [{self.e_units}]")
-        self.spect.x_units = f"Energy [{self.e_units}]"
-        self.update_cal_table()
         self.fig_cal.canvas.draw_idle()
 
     def set_origin(self):
@@ -478,6 +570,7 @@ class NasaGammaApp(QMainWindow):
 
         if len(self.mean_vals) > 1:
             self.perform_cal()
+            self.plot_point_dont_fit()
             self.update_cal_table()
             self.fig_cal.canvas.draw_idle()
 
@@ -494,8 +587,8 @@ class NasaGammaApp(QMainWindow):
             self.which_button_cal()
             self.ax_cal.clear()
             self.perform_cal()
+            self.plot_point_dont_fit()
             self.update_cal_table()
-
             self.fig_cal.canvas.draw_idle()
         except:
             pass
@@ -507,6 +600,8 @@ class NasaGammaApp(QMainWindow):
         self.pred_erg = 0
         self.mean_vals = [0]
         self.e_vals = [0]
+        self.mean_vals_not_fit = []
+        self.e_vals_not_fit = []
         # remove ticks
         self.ax_cal.set_xticks([])
         self.ax_cal.set_yticks([])
@@ -530,6 +625,140 @@ class NasaGammaApp(QMainWindow):
             self.create_graph(fit=True)
         except:
             pass
+
+    ## efficiency calibration
+    def reset_eff_figure(self):
+        self.fig_eff = self.efficiency_plot.canvas.figure
+        self.fig_eff.clear()
+        self.fig_eff.set_constrained_layout(True)
+        gs2 = self.fig_eff.add_gridspec(
+            1, 2, width_ratios=[0.5, 0.5], height_ratios=[1]
+        )
+
+        # axes
+        self.ax_eff = self.fig_eff.add_subplot(gs2[:, 0])
+        self.ax_eff_tab = self.fig_eff.add_subplot(gs2[:, 1])
+
+        # remove ticks
+        self.ax_eff.set_xticks([])
+        self.ax_eff.set_yticks([])
+        self.ax_eff_tab.set_xticks([])
+        self.ax_eff_tab.set_yticks([])
+
+    def reset_eff_all(self):
+        self.reset_eff_figure()
+        self.fig_eff.canvas.draw_idle()
+        self.eff_vals = []
+
+    def new_window_eff(self):
+        self.w_eff = WindowEff()
+        self.w_eff.show()
+        self.w_eff.accepted.connect(self.add_eff)
+
+    def add_eff(self):
+        self.get_eff_params()
+        eff_class = pf.Efficiency(
+            t_half=self.t_half,
+            A0=self.A0,
+            Br=self.B,
+            livetime=self.acq_time,
+            t_elapsed=self.delta_t_sec,
+            which_peak=self.n_peak_eff,
+        )
+        eff_class.calculate_efficiency(self.fit)
+        self.append_to_eff(eff_class.eff * 100, eff_class.mean_val)
+        self.plot_eff_points()
+
+    def plot_eff_points(self):
+        x = np.array(self.eff_vals)[:, 0]
+        y = np.array(self.eff_vals)[:, 1]
+        self.ax_eff.clear()
+        self.ax_eff_tab.clear()
+        self.ax_eff.plot(x, y, "o", color="k")
+        # self.ax_eff.legend(loc='best')
+        self.ax_eff.set_xlabel(self.fit.x_units)
+        self.ax_eff.set_ylabel("Efficiency [%]")
+        self.ax_eff.set_yscale("log")
+        self.ax_eff.set_title("Efficiency")
+        pf.eff_table(
+            x_lst=x,
+            eff_lst=y,
+            e_units=self.e_units,
+            ax=self.ax_eff_tab,
+            fig=self.fig_eff,
+        )
+        self.fig_eff.canvas.draw_idle()
+
+    def append_to_eff(self, eff, mean):
+        if (mean, eff) not in self.eff_vals:
+            self.eff_vals.append((mean, eff))
+        self.eff_vals.sort(key=lambda x: x[0])
+
+    def eff_fit1(self):
+        if len(self.eff_vals) > 3:
+            x = np.array(self.eff_vals)[:, 0]
+            y = np.array(self.eff_vals)[:, 1]
+            self.ax_eff.clear()
+            pf.eff_fit(x, y, order=1, plot_table=True, fig=self.fig_eff, ax=self.ax_eff)
+            self.fig_eff.canvas.draw_idle()
+
+    def eff_fit2(self):
+        pass
+
+    def eff_yscale(self):
+        if self.eff_scale == "log":
+            self.ax_eff.set_yscale("linear")
+            self.eff_scale = "linear"
+        else:
+            self.ax_eff.set_yscale("log")
+            self.eff_scale = "log"
+        self.fig_eff.canvas.draw_idle()
+
+    def get_eff_params(self):
+        # which peak?
+        if self.w_eff.button_first.isChecked():
+            self.n_peak_eff = 0
+        elif self.w_eff.button_second.isChecked():
+            self.n_peak_eff = 1
+        elif self.w_eff.button_third.isChecked():
+            self.n_peak_eff = 2
+
+        # t_half
+        if self.w_eff.button_seconds.isChecked():
+            t_fact = 1
+        elif self.w_eff.button_minutes.isChecked():
+            t_fact = 60
+        elif self.w_eff.button_years.isChecked():
+            t_fact = 365 * 24 * 3600
+        else:
+            msg = "ERROR: time units not determined"
+            print(msg)
+        self.t_half = float(self.w_eff.txt_t_half.text()) * t_fact
+
+        # A0
+        if self.w_eff.button_Ci.isChecked():
+            A_fact = 3.7e10
+        elif self.w_eff.button_Sv.isChecked():
+            A_fact = 1
+        else:
+            msg = "ERROR: activity units not determined"
+            print(msg)
+        self.A0 = float(self.w_eff.txt_activity.text()) * A_fact
+
+        # dates
+        date_str0 = self.w_eff.txt_init_date.text()
+        fmt_str = "%Y-%m-%d"
+        date0 = datetime.datetime.strptime(date_str0, fmt_str)
+        date_str1 = self.w_eff.txt_end_date.text()
+        date1 = datetime.datetime.strptime(date_str1, fmt_str)
+        delta_t = date1 - date0
+        self.delta_t_sec = delta_t.days * 24 * 3600
+
+        # branching ratio
+        self.B = float(self.w_eff.txt_B.text())
+
+        # acquisition time
+        self.acq_time = float(self.w_eff.txt_acq.text())
 
     ## Resolution (FWHM)
     def reset_fwhm_figure(self):
@@ -735,6 +964,7 @@ class NasaGammaApp(QMainWindow):
             self.e_units, self.spect, self.x = read_cnf.read_cnf_to_spect(fileName)
 
         self.create_graph(fit=False, reset=False)
+        self.setWindowTitle(f"NASA-gamma: {fileName}")
 
 
 if __name__ == "__main__":
