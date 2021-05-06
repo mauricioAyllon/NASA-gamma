@@ -9,7 +9,7 @@ setup(
     author="Mauricio Ayllon Unzueta",
     author_email="mauri.ayllon12@gmail.com",
     packages=["nasagamma"],
-    scripts=["gammaGUI", "ecalGUI", "gammaGUI-qt"],
+    scripts=["gammaGUI-qt"],
     package_data={
         "": [
             os.path.join("qt_gui.ui"),
