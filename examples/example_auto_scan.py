@@ -54,4 +54,4 @@ ranges_m = [
     [1086, 1450],
 ]
 
-peak_lst = pf.auto_scan(search, lst=ranges_m, plot=False, save_to_hdf=False)
+peak_lst = pf.auto_scan(search, xlst=ranges_m, plot=False, save_to_hdf=False)
