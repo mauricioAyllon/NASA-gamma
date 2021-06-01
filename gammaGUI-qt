@@ -46,7 +46,16 @@ from nasagamma import peakfit as pf
 from nasagamma import peaksearch as ps
 from nasagamma import spectrum as sp
 from nasagamma import read_cnf
+from nasagamma import tlist
 import pkg_resources
+
+
+class WindowCust(QDialog):
+    def __init__(self):
+        QDialog.__init__(self)
+        ui_file = pkg_resources.resource_filename("nasagamma", "win_customize.ui")
+        loadUi(ui_file, self)
+        self.setWindowTitle("Customize plot")
 
 
 class WindowCal(QDialog):
@@ -65,6 +74,14 @@ class WindowEff(QDialog):
         ui_file = pkg_resources.resource_filename("nasagamma", "win_eff.ui")
         loadUi(ui_file, self)
         self.setWindowTitle("Efficiency calibration")
+
+
+class WindowCNF(QDialog):
+    def __init__(self):
+        QDialog.__init__(self)
+        ui_file = pkg_resources.resource_filename("nasagamma", "win_cnf.ui")
+        loadUi(ui_file, self)
+        self.setWindowTitle("CNF file information")
 
 
 class NasaGammaApp(QMainWindow):
@@ -101,6 +118,9 @@ class NasaGammaApp(QMainWindow):
         self.button_apply.setStyleSheet("background-color : lightblue")
         self.button_remove_cal.setStyleSheet("background-color : lightcoral")
 
+        self.button_customize.setStyleSheet("background-color : lightsteelblue")
+        self.button_customize.clicked.connect(self.new_window_custom)
+
         # textbox
         self.button_apply.clicked.connect(self.apply_params)
 
@@ -120,12 +140,17 @@ class NasaGammaApp(QMainWindow):
         self.addToolBar(self.toolbar3)
         self.toolbar3.setVisible(False)
 
+        self.toolbar4 = NavigationToolbar(self.lynx_plot.canvas, self)
+        self.addToolBar(self.toolbar4)
+        self.toolbar4.setVisible(False)
+
         self.tabWidget.currentChanged.connect(self.switch_toolbar)
 
         # menu bar
         self.saveFitReport.triggered.connect(self.saveReport)
         self.openFile.triggered.connect(self.open_file)
         self.saveSpect.triggered.connect(self.save_spect)
+        self.info_cnf_file.triggered.connect(self.display_info_cnf)
 
         self.clearSpectrum.triggered.connect(self.reset_main_figure)
 
@@ -256,27 +281,46 @@ class NasaGammaApp(QMainWindow):
         self.button_add_eff.clicked.connect(self.new_window_eff)
         self.reset_eff_figure()
 
+        ## Lynx
+        self.reset_lynx_figure()
+        self.button_load_tlist.setStyleSheet("background-color : lightblue")
+        self.button_load_tlist.clicked.connect(self.open_tlist_file)
+        self.button_lynx_yscale.clicked.connect(self.lynx_yscale)
+        self.button_apply_lynx.clicked.connect(self.apply_period_tbins)
+        self.button_filter_lynx.clicked.connect(self.filter_time)
+        self.button_reset_1.clicked.connect(self.reset_plot1)
+
     def switch_toolbar(self):
         if self.tabWidget.currentIndex() == 0:
             self.toolbar0.setVisible(True)
             self.toolbar1.setVisible(False)
             self.toolbar2.setVisible(False)
             self.toolbar3.setVisible(False)
+            self.toolbar4.setVisible(False)
         elif self.tabWidget.currentIndex() == 1:
             self.toolbar0.setVisible(False)
             self.toolbar1.setVisible(True)
             self.toolbar2.setVisible(False)
             self.toolbar3.setVisible(False)
+            self.toolbar4.setVisible(False)
         elif self.tabWidget.currentIndex() == 2:
             self.toolbar0.setVisible(False)
             self.toolbar1.setVisible(False)
             self.toolbar2.setVisible(True)
             self.toolbar3.setVisible(False)
+            self.toolbar4.setVisible(False)
         elif self.tabWidget.currentIndex() == 3:
             self.toolbar0.setVisible(False)
             self.toolbar1.setVisible(False)
             self.toolbar2.setVisible(False)
             self.toolbar3.setVisible(True)
+            self.toolbar4.setVisible(False)
+        elif self.tabWidget.currentIndex() == 4:
+            self.toolbar0.setVisible(False)
+            self.toolbar1.setVisible(False)
+            self.toolbar2.setVisible(False)
+            self.toolbar3.setVisible(False)
+            self.toolbar4.setVisible(True)
 
     def create_graph(self, fit=True, reset=True):
         if reset:
@@ -361,6 +405,34 @@ class NasaGammaApp(QMainWindow):
             self.ax_main.set_yscale("log")
             self.scale = "log"
         self.fig.canvas.draw_idle()
+
+    def new_window_custom(self):
+        self.w_cust = WindowCust()
+        self.w_cust.show()
+        self.w_cust.accepted.connect(self.customize_plot)
+
+    def customize_plot(self):
+        xlabel = self.w_cust.x_label_txt.text()
+        ylabel = self.w_cust.y_label_txt.text()
+        legend = self.w_cust.legend_txt.text().split(",")
+        yconst = self.w_cust.yconst_txt.text()
+
+        if xlabel != "":
+            self.ax_main.set_xlabel(xlabel)
+            self.spect.x_units = xlabel
+            self.fig.canvas.draw_idle()
+        if ylabel != "":
+            self.ax_main.set_ylabel(ylabel)
+            self.spect.y_label = ylabel
+            self.fig.canvas.draw_idle()
+        if legend != [""]:
+            legend = [x.strip() for x in legend]
+            self.ax_main.legend(labels=legend)
+            # self.spect.plot_label = legend
+            self.fig.canvas.draw_idle()
+        if yconst != "":
+            self.spect.counts = self.spect.counts * eval(yconst)
+            self.create_graph(fit=False, reset=True)
 
     def which_button(self):
         if self.pushButton_poly1.isChecked():
@@ -891,6 +963,82 @@ class NasaGammaApp(QMainWindow):
         self.ax_fwhm_gauss.set_yticks([])
         self.fig_fwhm.canvas.draw_idle()
 
+    ## Lynx
+    def open_tlist_file(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getOpenFileName(
+            self,
+            "QFileDialog.getOpenFileName()",
+            "",
+            "All Files (*);;",
+            options=options,
+        )
+
+        print("Open file: ", fileName)
+        fileName = fileName.lower()
+
+        self.reset_lynx_figure()
+        self.tl = tlist.Tlist(period=1000, fname=fileName)
+        self.tl.plot_hist(ax=self.ax_lynx_dt)
+        self.tl.plot_1(ax=self.ax_lynx_spect1)
+        self.fig_lynx.canvas.draw_idle()
+        self.setWindowTitle(f"NASA-gamma: {fileName}")
+
+    def reset_lynx_figure(self):
+        self.fig_lynx = self.lynx_plot.canvas.figure
+        self.fig_lynx.clear()
+        self.fig_lynx.set_constrained_layout(True)
+        gs = self.fig_lynx.add_gridspec(
+            2, 2, width_ratios=[0.5, 0.5], height_ratios=[0.5, 0.5]
+        )
+
+        # axes
+        self.ax_lynx_dt = self.fig_lynx.add_subplot(gs[0, 0])
+        # self.ax_lynx_buttons = self.fig_lynx.add_subplot(gs[1, 0])
+        self.ax_lynx_spect1 = self.fig_lynx.add_subplot(gs[0, 1])
+        self.ax_lynx_spect2 = self.fig_lynx.add_subplot(gs[1, 1])
+        self.lynx_scale = "linear"
+        self.fig_lynx.canvas.draw_idle()
+
+    def lynx_yscale(self):
+        if self.lynx_scale == "log":
+            self.ax_lynx_spect1.set_yscale("linear")
+            self.lynx_scale = "linear"
+        else:
+            self.ax_lynx_spect1.set_yscale("log")
+            self.lynx_scale = "log"
+        self.fig_lynx.canvas.draw_idle()
+
+    def apply_period_tbins(self):
+        period = self.edit_period.text()
+        tbins = self.edit_tbins.text()
+        if period != "":
+            self.tl.period = float(period)
+            self.tl.change_period(self.tl.period)
+        if tbins != "":
+            self.tl.tbins = int(tbins)
+        self.ax_lynx_dt.clear()
+        self.tl.plot_hist(ax=self.ax_lynx_dt)
+        self.fig_lynx.canvas.draw_idle()
+
+    def filter_time(self):
+        self.ax_lynx_dt.clear()
+        t0 = float(self.edit_t0.text())
+        t1 = float(self.edit_t1.text())
+        self.tl.trange = [t0, t1]
+        self.tl.filter_data(self.tl.trange)
+        self.tl.plot_hist(ax=self.ax_lynx_dt)
+        self.tl.plot_1(ax=self.ax_lynx_spect1)
+        self.tl.plot_vlines(ax=self.ax_lynx_dt)
+
+        self.fig_lynx.canvas.draw_idle()
+        self.tl.restore_df()
+
+    def reset_plot1(self):
+        self.ax_lynx_spect1.clear()
+        self.fig_lynx.canvas.draw_idle()
+
     ## menu bar
     def apply_params(self):
         self.ax_main.clear()
@@ -943,6 +1091,10 @@ class NasaGammaApp(QMainWindow):
             df.to_csv(f"{fileName}", index=False)
         else:
             df.to_csv(f"{fileName}.csv", index=False)
+
+    def display_info_cnf(self):
+        self.w_cnf = WindowCNF()
+        self.w_cnf.show()
 
     def open_file(self):
         options = QFileDialog.Options()
