@@ -436,14 +436,17 @@ def read_cnf_to_spect(filename):
 
     counts = dict_cnf["Channels data"]
     energy = dict_cnf["Energy"]
+    livetime = dict_cnf["Live time"]
 
     if energy is None:
         e_units = "channels"
-        spect = sp.Spectrum(counts=counts, e_units=e_units)
+        spect = sp.Spectrum(counts=counts, e_units=e_units, livetime=livetime)
         x = spect.channels
     else:
         e_units = dict_cnf["Energy unit"]
-        spect = sp.Spectrum(counts=counts, energies=energy, e_units=e_units)
+        spect = sp.Spectrum(
+            counts=counts, energies=energy, e_units=e_units, livetime=livetime
+        )
         x = spect.energies
 
     return e_units, spect, x
