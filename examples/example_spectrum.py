@@ -24,4 +24,6 @@ chan = np.arange(0, len(cts_np), 1)
 # instantiate a Spectrum object
 spect = sp.Spectrum(counts=cts_np, energies=erg)
 
-spect.plot()
+fig = plt.figure(figsize=(10, 6))
+ax = fig.add_subplot()
+spect.plot(fig=fig, ax=ax)
