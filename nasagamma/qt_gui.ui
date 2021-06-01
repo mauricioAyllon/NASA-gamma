@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1418</width>
-    <height>794</height>
+    <height>905</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,53 +18,51 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
         <string>Spectrum</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QPushButton" name="pushButton_scale">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Y-scale</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="1">
-         <spacer name="horizontalSpacer_8">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+         <widget class="QPushButton" name="button_customize">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>42</width>
-            <height>20</height>
-           </size>
+          <property name="text">
+           <string>Customize</string>
           </property>
-         </spacer>
-        </item>
-        <item row="0" column="13">
-         <spacer name="horizontalSpacer_17">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>37</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="0" column="9">
-         <spacer name="horizontalSpacer_6">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>17</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
+         </widget>
         </item>
         <item row="0" column="2">
+         <spacer name="horizontalSpacer_24">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>44</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="3">
          <widget class="QPushButton" name="button_add_cal">
           <property name="font">
            <font>
@@ -73,16 +71,6 @@
           </property>
           <property name="text">
            <string>Add to calibration</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0" colspan="14">
-         <widget class="MplWidget" name="main_plot" native="true">
-          <property name="mouseTracking">
-           <bool>false</bool>
-          </property>
-          <property name="autoFillBackground">
-           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -98,7 +86,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="6">
+        <item row="0" column="5">
          <widget class="QPushButton" name="button_add_fwhm">
           <property name="font">
            <font>
@@ -110,57 +98,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="10">
-         <widget class="QPushButton" name="pushButton_poly1">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Poly1</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="11">
-         <widget class="QPushButton" name="pushButton_poly2">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Poly2</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="5">
-         <spacer name="horizontalSpacer_16">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>36</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="0" column="3">
-         <spacer name="horizontalSpacer_20">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>13</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="0" column="8">
+        <item row="0" column="6">
          <widget class="QPushButton" name="button_add_eff">
           <property name="font">
            <font>
@@ -172,32 +110,44 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="pushButton_scale">
+        <item row="0" column="7">
+         <spacer name="horizontalSpacer_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>17</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="8">
+         <widget class="QPushButton" name="pushButton_poly1">
           <property name="font">
            <font>
             <pointsize>14</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>Y-scale</string>
+           <string>Poly1</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="7">
-         <spacer name="horizontalSpacer_15">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+        <item row="0" column="9">
+         <widget class="QPushButton" name="pushButton_poly2">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>18</width>
-            <height>20</height>
-           </size>
+          <property name="text">
+           <string>Poly2</string>
           </property>
-         </spacer>
+         </widget>
         </item>
-        <item row="0" column="12">
+        <item row="0" column="10">
          <widget class="QPushButton" name="pushButton_exp">
           <property name="font">
            <font>
@@ -206,6 +156,16 @@
           </property>
           <property name="text">
            <string>Exp</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="12">
+         <widget class="MplWidget" name="main_plot" native="true">
+          <property name="mouseTracking">
+           <bool>false</bool>
+          </property>
+          <property name="autoFillBackground">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -592,6 +552,198 @@
        <attribute name="title">
         <string>Lynx</string>
        </attribute>
+       <layout class="QGridLayout" name="gridLayout_7">
+        <item row="0" column="0">
+         <widget class="QPushButton" name="button_load_tlist">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Load tlist file</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <spacer name="horizontalSpacer_8">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>1222</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="button_reset_1">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Reset plot 1</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QPushButton" name="button_lynx_yscale">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Y-scale</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="4">
+         <widget class="MplWidget" name="lynx_plot" native="true">
+          <property name="mouseTracking">
+           <bool>false</bool>
+          </property>
+          <property name="autoFillBackground">
+           <bool>true</bool>
+          </property>
+          <widget class="QGroupBox" name="box_trange">
+           <property name="geometry">
+            <rect>
+             <x>40</x>
+             <y>500</y>
+             <width>461</width>
+             <height>91</height>
+            </rect>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>461</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
+           <property name="title">
+            <string>Time range [us]</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_8">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>t0 = </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="edit_t0"/>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_2">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>t1 = </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLineEdit" name="edit_t1"/>
+            </item>
+            <item row="0" column="4">
+             <widget class="QPushButton" name="button_filter_lynx">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Filter</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QGroupBox" name="groupBox">
+           <property name="geometry">
+            <rect>
+             <x>40</x>
+             <y>400</y>
+             <width>461</width>
+             <height>75</height>
+            </rect>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>461</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
+           <property name="title">
+            <string>Histogram</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_9">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_3">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>period [us] = </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="edit_period"/>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_4">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>bins =</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLineEdit" name="edit_tbins"/>
+            </item>
+            <item row="0" column="4">
+             <widget class="QPushButton" name="button_apply_lynx">
+              <property name="text">
+               <string>Apply</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
@@ -629,7 +781,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap>../figs/nasa-logo2.png</pixmap>
+           <pixmap>../../../../../.designer/figs/nasa-logo2.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -843,6 +995,7 @@
     <addaction name="openFile"/>
     <addaction name="saveSpect"/>
     <addaction name="saveFitReport"/>
+    <addaction name="info_cnf_file"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
@@ -881,6 +1034,14 @@
   <action name="clearSpectrum">
    <property name="text">
     <string>Clear spectrum</string>
+   </property>
+  </action>
+  <action name="info_cnf_file">
+   <property name="text">
+    <string>Info (cnf file)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
    </property>
   </action>
  </widget>
