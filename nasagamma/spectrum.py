@@ -7,7 +7,9 @@ import pandas as pd
 
 
 class Spectrum:
-    def __init__(self, counts=None, channels=None, energies=None, e_units=None):
+    def __init__(
+        self, counts=None, channels=None, energies=None, e_units=None, livetime=None
+    ):
         """
         Initialize the spectrum.
 
@@ -48,6 +50,9 @@ class Spectrum:
 
         self.counts = np.asarray(counts, dtype=float)
         self.channels = np.asarray(channels, dtype=int)
+        self.livetime = livetime
+        self.y_label = "Cts"
+        self.plot_label = None
 
     def smooth(self, num=4):
         """
@@ -120,12 +125,17 @@ class Spectrum:
             ax = fig.add_subplot()
 
         integral = round(self.counts.sum())
-        set_label = f"Raw Spectrum.\nTotal = {integral:.3E}"
+        if self.plot_label is None:
+            if self.livetime is None:
+                lt = "Livetime = N/A"
+            else:
+                lt = f"Livetime = {self.livetime:.3E} s"
+            self.plot_label = f"Total counts = {integral:.3E}\n{lt}"
 
         ax.fill_between(self.x, 0, self.counts, alpha=0.2, color="C1", step="pre")
-        ax.plot(self.x, self.counts, drawstyle="steps", label=set_label)
+        ax.plot(self.x, self.counts, drawstyle="steps", label=self.plot_label)
         ax.set_yscale(scale)
         ax.set_xlabel(self.x_units)
-        ax.set_ylabel("Cts")
+        ax.set_ylabel(self.y_label)
         ax.legend()
         plt.show()
