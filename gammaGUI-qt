@@ -285,10 +285,21 @@ class NasaGammaApp(QMainWindow):
         self.reset_lynx_figure()
         self.button_load_tlist.setStyleSheet("background-color : lightblue")
         self.button_load_tlist.clicked.connect(self.open_tlist_file)
+        self.button_lynx_yscale.setStyleSheet("background-color : lightyellow")
         self.button_lynx_yscale.clicked.connect(self.lynx_yscale)
+        self.button_apply_lynx.setStyleSheet("background-color : ivory")
         self.button_apply_lynx.clicked.connect(self.apply_period_tbins)
+        self.button_filter_lynx.setStyleSheet("background-color : ivory")
         self.button_filter_lynx.clicked.connect(self.filter_time)
+        self.button_reset_1.setStyleSheet("background-color : lightcoral")
         self.button_reset_1.clicked.connect(self.reset_plot1)
+        self.button_send_to_spect.setStyleSheet("background-color : lightgreen")
+        self.button_send_to_spect.clicked.connect(self.send_to_spect)
+        # energy filter
+        self.button_apply_lynx_e.setStyleSheet("background-color : ivory")
+        self.button_apply_lynx_e.clicked.connect(self.apply_dt_bins)
+        self.button_filter_lynx_e.setStyleSheet("background-color : ivory")
+        self.button_filter_lynx_e.clicked.connect(self.filter_erg)
 
     def switch_toolbar(self):
         if self.tabWidget.currentIndex() == 0:
@@ -1031,13 +1042,32 @@ class NasaGammaApp(QMainWindow):
         self.tl.plot_hist(ax=self.ax_lynx_dt)
         self.tl.plot_1(ax=self.ax_lynx_spect1)
         self.tl.plot_vlines(ax=self.ax_lynx_dt)
-
         self.fig_lynx.canvas.draw_idle()
-        self.tl.restore_df()
+
+    def filter_erg(self):
+        self.ax_lynx_spect2.clear()
+        ch0 = float(self.edit_ch0.text())
+        ch1 = float(self.edit_ch1.text())
+        self.tl.erange = [ch0, ch1]
+        self.tl.filter_edata(self.tl.erange)
+        self.tl.plot_spect_e(ax=self.ax_lynx_spect2)
+        self.fig_lynx.canvas.draw_idle()
+
+    def apply_dt_bins(self):
+        dt_bins = self.edit_dt_bins.text()
+        if dt_bins != "":
+            self.tl.dt_bins = int(dt_bins)
+            self.ax_lynx_spect2.clear()
+            self.tl.plot_spect_e(ax=self.ax_lynx_spect2)
+            self.fig_lynx.canvas.draw_idle()
 
     def reset_plot1(self):
         self.ax_lynx_spect1.clear()
         self.fig_lynx.canvas.draw_idle()
+
+    def send_to_spect(self):
+        self.spect = sp.Spectrum(counts=self.tl.spect_cts)
+        self.create_graph(fit=False, reset=False)
 
     ## menu bar
     def apply_params(self):
