@@ -11,13 +11,13 @@ import matplotlib.pyplot as plt
 
 
 class Tlist:
-    def __init__(self, fname, period):
+    def __init__(self, fname, period, from_multiscan=True):
         ebin_lst = [2 ** 10, 2 ** 11, 2 ** 12, 2 ** 13, 2 ** 14, 2 ** 15]
         self.period = period
         self.tbins = 200
         self.trange = [0, period]
         self.erange = None
-        self.data = self.load_data(fname)
+        self.data = self.load_data(fname, from_multiscan)
         self.ebins = min(ebin_lst, key=lambda x: abs(x - self.data[:, 0].max()))
         self.dt_bins = 100
         self.df = pd.DataFrame(data=self.data, columns=["channel", "ts", "dt"])
@@ -25,8 +25,15 @@ class Tlist:
         plt.rc("font", size=14)
         plt.style.use("seaborn-darkgrid")
 
-    def load_data(self, fname):
-        data0 = np.genfromtxt(fname)
+    def load_data(self, fname, from_multiscan=True):
+        if from_multiscan:
+            cols = ["channel", "delete", "ts"]
+            df = pd.read_csv(fname, sep="\t", names=cols, dtype=np.float64)
+            df.drop(columns="delete", inplace=True)
+        else:
+            cols = ["channel", "ts"]
+            df = pd.read_csv(fname, sep="\t", names=cols, dtype=np.float64)
+        data0 = np.array(df)
         dt0 = np.mod(data0[:, 1], self.period * 10) / 10
         dt = dt0.reshape((dt0.shape[0], 1))
         data = np.hstack((data0, dt))
