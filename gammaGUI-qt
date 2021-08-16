@@ -990,7 +990,7 @@ class NasaGammaApp(QMainWindow):
         fileName = fileName.lower()
 
         self.reset_lynx_figure()
-        self.tl = tlist.Tlist(period=1000, fname=fileName)
+        self.tl = tlist.Tlist(period=1000, fname=fileName, from_multiscan=False)
         self.tl.plot_hist(ax=self.ax_lynx_dt)
         self.tl.plot_1(ax=self.ax_lynx_spect1)
         self.fig_lynx.canvas.draw_idle()
@@ -1137,16 +1137,19 @@ class NasaGammaApp(QMainWindow):
             options=options,
         )
 
-        print("Open file: ", fileName)
-        fileName = fileName.lower()
+        try:
+            print("Open file: ", fileName)
+            fileName = fileName.lower()
 
-        if fileName[-4:] == ".csv":
-            self.e_units, self.spect, self.x = read_csv_file(fileName)
-        elif fileName[-4:] == ".cnf":
-            self.e_units, self.spect, self.x = read_cnf.read_cnf_to_spect(fileName)
+            if fileName[-4:] == ".csv":
+                self.e_units, self.spect, self.x = read_csv_file(fileName)
+            elif fileName[-4:] == ".cnf":
+                self.e_units, self.spect, self.x = read_cnf.read_cnf_to_spect(fileName)
 
-        self.create_graph(fit=False, reset=False)
-        self.setWindowTitle(f"NASA-gamma: {fileName}")
+            self.create_graph(fit=False, reset=False)
+            self.setWindowTitle(f"NASA-gamma: {fileName}")
+        except:
+            pass
 
 
 if __name__ == "__main__":
