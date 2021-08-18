@@ -990,9 +990,9 @@ class NasaGammaApp(QMainWindow):
         fileName = fileName.lower()
 
         self.reset_lynx_figure()
-        self.tl = tlist.Tlist(period=1000, fname=fileName, from_multiscan=False)
-        self.tl.plot_hist(ax=self.ax_lynx_dt)
-        self.tl.plot_1(ax=self.ax_lynx_spect1)
+        self.tl = tlist.Tlist(period=1000, fname=fileName)
+        self.tl.plot_time_hist(ax=self.ax_lynx_dt)
+        self.tl.plot_spect_erg_all(ax=self.ax_lynx_spect1)
         self.fig_lynx.canvas.draw_idle()
         self.setWindowTitle(f"NASA-gamma: {fileName}")
 
@@ -1030,7 +1030,7 @@ class NasaGammaApp(QMainWindow):
         if tbins != "":
             self.tl.tbins = int(tbins)
         self.ax_lynx_dt.clear()
-        self.tl.plot_hist(ax=self.ax_lynx_dt)
+        self.tl.plot_time_hist(ax=self.ax_lynx_dt)
         self.fig_lynx.canvas.draw_idle()
 
     def filter_time(self):
@@ -1039,8 +1039,8 @@ class NasaGammaApp(QMainWindow):
         t1 = float(self.edit_t1.text())
         self.tl.trange = [t0, t1]
         self.tl.filter_data(self.tl.trange)
-        self.tl.plot_hist(ax=self.ax_lynx_dt)
-        self.tl.plot_1(ax=self.ax_lynx_spect1)
+        self.tl.plot_time_hist(ax=self.ax_lynx_dt)
+        self.tl.plot_spect_erg_all(ax=self.ax_lynx_spect1)
         self.tl.plot_vlines(ax=self.ax_lynx_dt)
         self.fig_lynx.canvas.draw_idle()
 
@@ -1050,7 +1050,7 @@ class NasaGammaApp(QMainWindow):
         ch1 = float(self.edit_ch1.text())
         self.tl.erange = [ch0, ch1]
         self.tl.filter_edata(self.tl.erange)
-        self.tl.plot_spect_e(ax=self.ax_lynx_spect2)
+        self.tl.plot_spect_erg_range(ax=self.ax_lynx_spect2)
         self.fig_lynx.canvas.draw_idle()
 
     def apply_dt_bins(self):
@@ -1058,7 +1058,7 @@ class NasaGammaApp(QMainWindow):
         if dt_bins != "":
             self.tl.dt_bins = int(dt_bins)
             self.ax_lynx_spect2.clear()
-            self.tl.plot_spect_e(ax=self.ax_lynx_spect2)
+            self.tl.plot_spect_erg_range(ax=self.ax_lynx_spect2)
             self.fig_lynx.canvas.draw_idle()
 
     def reset_plot1(self):
