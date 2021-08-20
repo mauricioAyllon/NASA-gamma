@@ -1106,50 +1106,57 @@ class NasaGammaApp(QMainWindow):
         fileName, _ = QFileDialog.getSaveFileName(
             self, "Save", "", "All Files (*);;Text Files (*.txt)", options=options
         )
-
-        print("Saved file: ", fileName)
-        cts = self.spect.counts
-        if self.spect.energies is not None:
-            cols = ["counts", f"{self.spect.x_units}"]
-            data = np.array((cts, self.spect.x)).T
+        if fileName == "":
+            pass
         else:
-            cols = ["counts"]
-            data = cts
+            print("Saved file: ", fileName)
+            cts = self.spect.counts
+            if self.spect.energies is not None:
+                cols = ["counts", f"{self.spect.x_units}"]
+                data = np.array((cts, self.spect.x)).T
+            else:
+                cols = ["counts"]
+                data = cts
 
-        df = pd.DataFrame(data=data, columns=cols)
-        if ".csv" in fileName:
-            df.to_csv(f"{fileName}", index=False)
-        else:
-            df.to_csv(f"{fileName}.csv", index=False)
+            df = pd.DataFrame(data=data, columns=cols)
+            if ".csv" in fileName:
+                df.to_csv(f"{fileName}", index=False)
+            else:
+                df.to_csv(f"{fileName}.csv", index=False)
 
     def display_info_cnf(self):
         self.w_cnf = WindowCNF()
         self.w_cnf.show()
 
     def open_file(self):
+        # dialog = QFileDialog(self)
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         fileName, _ = QFileDialog.getOpenFileName(
             self,
-            "QFileDialog.getOpenFileName()",
+            "Open spectrum file",
             "",
             "All Files (*);;",
             options=options,
         )
-
-        try:
-            print("Open file: ", fileName)
-            fileName = fileName.lower()
-
-            if fileName[-4:] == ".csv":
-                self.e_units, self.spect, self.x = read_csv_file(fileName)
-            elif fileName[-4:] == ".cnf":
-                self.e_units, self.spect, self.x = read_cnf.read_cnf_to_spect(fileName)
-
-            self.create_graph(fit=False, reset=False)
-            self.setWindowTitle(f"NASA-gamma: {fileName}")
-        except:
+        if fileName == "":
             pass
+        else:
+            try:
+                print("Open file: ", fileName)
+                fileName = fileName.lower()
+
+                if fileName[-4:] == ".csv":
+                    self.e_units, self.spect, self.x = read_csv_file(fileName)
+                elif fileName[-4:] == ".cnf":
+                    self.e_units, self.spect, self.x = read_cnf.read_cnf_to_spect(
+                        fileName
+                    )
+
+                self.create_graph(fit=False, reset=False)
+                self.setWindowTitle(f"NASA-gamma: {fileName}")
+            except:
+                pass
 
 
 if __name__ == "__main__":
