@@ -622,7 +622,7 @@
           <property name="autoFillBackground">
            <bool>true</bool>
           </property>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <property name="geometry">
             <rect>
              <x>20</x>
@@ -1135,13 +1135,13 @@
     <addaction name="openFile"/>
     <addaction name="saveSpect"/>
     <addaction name="saveFitReport"/>
-    <addaction name="info_cnf_file"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
      <string>Options</string>
     </property>
     <addaction name="clearSpectrum"/>
+    <addaction name="info_cnf_file"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuOptions"/>
