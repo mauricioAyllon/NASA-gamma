@@ -1127,38 +1127,43 @@ class NasaGammaApp(QMainWindow):
     def display_info_cnf(self):
         self.w_cnf = WindowCNF()
         self.w_cnf.show()
-        livetime = self.cnf_dict["Live time"]
-        realtime = self.cnf_dict["Real time"]
-        deadtime = (1 - livetime / realtime) * 100
-        total_cts = self.cnf_dict["Total counts"]
-        count_rate = total_cts / livetime
-        ch_num = self.cnf_dict["Number of channels"]
-        start_time = self.cnf_dict["Start time"]
-        self.w_cnf.label_lt.setText(str(livetime))
-        self.w_cnf.label_rt.setText(str(realtime))
-        self.w_cnf.label_dt.setText(str(deadtime))
-        self.w_cnf.label_tc.setText(str(total_cts))
-        self.w_cnf.label_cr.setText(str(count_rate))
-        self.w_cnf.label_nch.setText(str(ch_num))
-        self.w_cnf.label_time.setText(start_time)
+        try:
+            self.cnf_dict = read_cnf.read_cnf_file(self.fileName, False)
+            livetime = self.cnf_dict["Live time"]
+            realtime = self.cnf_dict["Real time"]
+            deadtime = (1 - livetime / realtime) * 100
+            total_cts = self.cnf_dict["Total counts"]
+            count_rate = total_cts / livetime
+            ch_num = self.cnf_dict["Number of channels"]
+            start_time = self.cnf_dict["Start time"]
+            self.w_cnf.label_lt.setText(str(livetime))
+            self.w_cnf.label_rt.setText(str(realtime))
+            self.w_cnf.label_dt.setText(str(deadtime))
+            self.w_cnf.label_tc.setText(str(total_cts))
+            self.w_cnf.label_cr.setText(str(count_rate))
+            self.w_cnf.label_nch.setText(str(ch_num))
+            self.w_cnf.label_time.setText(start_time)
+        except:
+            invalid_cnf = "Not a valid CNF file"
+            print(invalid_cnf)
+            self.w_cnf.label_tc.setText(invalid_cnf)
 
     def open_file(self):
-        # dialog = QFileDialog(self)
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(
+        self.fileName, _ = QFileDialog.getOpenFileName(
             self,
             "Open spectrum file",
             "",
             "All Files (*);;",
             options=options,
         )
-        if fileName == "":
+        if self.fileName == "":
             pass
         else:
             try:
-                print("Open file: ", fileName)
-                fileName = fileName.lower()
+                print("Open file: ", self.fileName)
+                fileName = self.fileName.lower()
 
                 if fileName[-4:] == ".csv":
                     self.e_units, self.spect, self.x = read_csv_file(fileName)
@@ -1166,7 +1171,7 @@ class NasaGammaApp(QMainWindow):
                     self.e_units, self.spect, self.x = read_cnf.read_cnf_to_spect(
                         fileName
                     )
-                    self.cnf_dict = read_cnf.read_cnf_file(fileName, False)
+                    # self.cnf_dict = read_cnf.read_cnf_file(fileName, False)
 
                 self.create_graph(fit=False, reset=False)
                 self.setWindowTitle(f"NASA-gamma: {fileName}")
