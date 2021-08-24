@@ -1125,7 +1125,7 @@
      <x>0</x>
      <y>0</y>
      <width>1418</width>
-     <height>29</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1133,8 +1133,6 @@
      <string>File</string>
     </property>
     <addaction name="openFile"/>
-    <addaction name="saveSpect"/>
-    <addaction name="saveFitReport"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
@@ -1143,8 +1141,16 @@
     <addaction name="clearSpectrum"/>
     <addaction name="info_cnf_file"/>
    </widget>
+   <widget class="QMenu" name="menuSave">
+    <property name="title">
+     <string>Save</string>
+    </property>
+    <addaction name="saveSpect"/>
+    <addaction name="saveFitReport"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuOptions"/>
+   <addaction name="menuSave"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="openFile">
