@@ -1001,7 +1001,29 @@ def fwhm_vs_erg(energies, fwhms, x_units, e_units, order=2, fig=None, ax=None):
         ax.set_xlabel(f"{x_units}")
         ax.set_ylabel(f"FWHM [{e_units}]")
         ax.set_title("$a+b\sqrt{E+cE^2}$")
-    return best_vals
+    return fit
+
+
+def fwhm_extrapolate(energies, fit, order=1, ax=None, fig=None):
+    # plot extrapolated best fit line
+    if fig is None:
+        fig = plt.figure(constrained_layout=False, figsize=(12, 8))
+    if ax is None:
+        ax = fig.add_subplot()
+    dic_vals = fit.best_values
+    if order == 1:
+        a = dic_vals["a"]
+        b = dic_vals["b"]
+        y = fwhm1(E=energies, a=a, b=b)
+        ax.plot(energies, y, ls="--", lw=3, color="k")
+    elif order == 2:
+        a = dic_vals["a"]
+        b = dic_vals["b"]
+        c = dic_vals["c"]
+        y = fwhm2(E=energies, a=a, b=b, c=c)
+        ax.plot(energies, y, ls="--", lw=3, color="k")
+    else:
+        print("Invalid polynomial order")
 
 
 def fwhm_table(
@@ -1072,7 +1094,6 @@ class Efficiency:
         return N_emitted
 
     def calculate_N_detected(self, fit_obj):
-
         mean_val = fit_obj.peak_info[self.which_peak][f"mean{self.which_peak+1}"]
         area_val = fit_obj.peak_info[self.which_peak][f"area{self.which_peak+1}"]
         N_detected = float(area_val)
