@@ -248,6 +248,7 @@ class NasaGammaApp(QMainWindow):
 
         self.button_fwhm1.setCheckable(True)
         self.button_fwhm2.setCheckable(True)
+        self.button_extrapolate.setCheckable(True)
 
         self.btn_grp3 = QButtonGroup()
         self.btn_grp3.setExclusive(True)
@@ -261,6 +262,7 @@ class NasaGammaApp(QMainWindow):
         self.button_add_fwhm.clicked.connect(self.add_fwhm)
         self.button_origin_fwhm.clicked.connect(self.set_origin_fwhm)
         self.button_reset_fwhm.clicked.connect(self.reset_fwhm)
+        self.button_extrapolate.clicked.connect(self.extrapolate_fwhm)
 
         self.fwhm_x = [0]
         self.fwhm = [0]
@@ -887,7 +889,7 @@ class NasaGammaApp(QMainWindow):
     def perform_fwhm(self):
         try:
             self.which_button_fwhm()
-            self.best_fwhm_fit = pf.fwhm_vs_erg(
+            self.fwhm_fit = pf.fwhm_vs_erg(
                 energies=self.fwhm_x,
                 fwhms=self.fwhm,
                 x_units=self.spect.x_units,
@@ -973,6 +975,21 @@ class NasaGammaApp(QMainWindow):
         self.ax_fwhm_gauss.set_xticks([])
         self.ax_fwhm_gauss.set_yticks([])
         self.fig_fwhm.canvas.draw_idle()
+
+    def extrapolate_fwhm(self):
+        if self.button_extrapolate.isChecked():
+            pf.fwhm_extrapolate(
+                energies=self.spect.x,
+                fit=self.fwhm_fit,
+                order=self.n_fwhm,
+                ax=self.ax_fwhm,
+                fig=self.fig_fwhm,
+            )
+            self.fig_fwhm.canvas.draw_idle()
+            print("clicked")
+        else:
+            self.update_fwhm_figure()
+            print("unclicked")
 
     ## Lynx
     def open_tlist_file(self):
