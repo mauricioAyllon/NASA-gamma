@@ -54,7 +54,9 @@ def gaussian_derivative(x, mean, sigma):
 
 
 class PeakSearch:
-    def __init__(self, spectrum, ref_x, ref_fwhm, fwhm_at_0=1.0, min_snr=2):
+    def __init__(
+        self, spectrum, ref_x, ref_fwhm, fwhm_at_0=1.0, min_snr=2, xrange=None
+    ):
         """
         Find peaks in a Spectrum object and decompose specrum into components
         using a Gaussian kernel deconvolution technique. Most of this
@@ -72,6 +74,8 @@ class PeakSearch:
             fwhm value at channel = 0. The default is 1.0.
         min_snr : int or float, optional
             minimum SNR to look for releant peaks. The default is 2.
+        xrange : list or numpy array of shape (2,), optional
+            specific x range for peak searching. The default is None.
 
         Raises
         ------
@@ -85,11 +89,14 @@ class PeakSearch:
         """
         if not isinstance(spectrum, sp.Spectrum):
             raise Exception("'spectrum' must be a Spectrum object")
+        if xrange == None:
+            self.channel_idx = spectrum.channels
         self.ref_x = ref_x
         self.ref_fwhm = ref_fwhm
         self.fwhm_at_0 = fwhm_at_0
         self.spectrum = spectrum
         self.min_snr = min_snr
+        self.xrange = xrange
         self.snr = []
         self.peak_plus_bkg = []
         self.bkg = []
@@ -165,12 +172,26 @@ class PeakSearch:
     def calculate(self):
         """Calculate the convolution of the spectrum with the kernel."""
 
-        snr = np.zeros(len(self.spectrum.counts))
-        edg = np.append(self.spectrum.channels, self.spectrum.channels[-1] + 1)
-        # calculate the convolution
-        peak_plus_bkg, bkg, signal, noise, snr = self.convolve(
-            edg, self.spectrum.counts
-        )
+        snr = np.zeros(len(self.spectrum.counts))  # do we need this?
+        if self.xrange == None:
+            self.edg = np.append(self.spectrum.channels, self.spectrum.channels[-1] + 1)
+            # calculate the convolution
+            peak_plus_bkg, bkg, signal, noise, snr = self.convolve(
+                self.edg, self.spectrum.counts
+            )
+        elif len(self.xrange) == 2:
+            x0 = self.xrange[0]
+            x1 = self.xrange[1]
+            self.channel_idx = (self.spectrum.channels >= x0) & (
+                self.spectrum.channels <= x1
+            )
+            new_ch = self.spectrum.channels[self.channel_idx]
+            new_cts = self.spectrum.counts[self.channel_idx]
+            self.edg = np.append(new_ch, new_ch[-1] + 1)
+            peak_plus_bkg, bkg, signal, noise, snr = self.convolve(self.edg, new_cts)
+        else:
+            print("ERROR: check that the length of xrange is 2")
+
         # find peak indices
         peaks_idx = find_peaks(snr.clip(0), height=self.min_snr)[0]
 
@@ -180,13 +201,16 @@ class PeakSearch:
         self.signal = signal
         self.noise = noise
         self.snr = snr.clip(0)
-        self.peaks_idx = peaks_idx
+        if self.xrange == None:
+            self.peaks_idx = peaks_idx
+        else:
+            self.peaks_idx = new_ch[peaks_idx]
         # self.reset()
 
     def plot_kernel(self):
         """Plot the 3D matrix of kernels evaluated across the x values."""
         # edges = self.spectrum.channels
-        edges = np.append(self.spectrum.channels, self.spectrum.channels[-1] + 1)
+        edges = self.edg
         n_channels = len(edges) - 1
         kern_mat = self.kernel_matrix(edges)
         kern_min = kern_mat.min()
@@ -226,18 +250,18 @@ class PeakSearch:
         plt.style.use("seaborn-darkgrid")
         if self.spectrum.energies is None:
             # x = self.spectrum.channels[:-1]
-            x = self.spectrum.channels
+            x = self.spectrum.channels[self.channel_idx]
         else:
-            x = self.spectrum.energies
+            x = self.spectrum.energies[self.channel_idx]
         if fig is None:
             fig = plt.figure(figsize=(10, 6))
         if ax is None:
             ax = fig.add_subplot()
 
-        if snrs == "on":
-            ax.plot(x, self.snr, label="SNR all")
-        # ax.plot(x, self.spectrum.counts, label="Raw spectrum")
         self.spectrum.plot(fig=fig, ax=ax)
+        if snrs == "on":
+            ax.plot(x, self.snr, label="SNR")
+        # ax.plot(x, self.spectrum.counts, label="Raw spectrum")
         if yscale == "log":
             ax.set_yscale("log")
         else:
@@ -270,13 +294,13 @@ class PeakSearch:
 
         """
         if self.spectrum.energies is None:
-            x = self.spectrum.channels
+            x = self.spectrum.channels[self.channel_idx]
         else:
-            x = self.spectrum.energies
+            x = self.spectrum.energies[self.channel_idx]
         plt.rc("font", size=14)
         plt.style.use("seaborn-darkgrid")
         plt.figure(figsize=(10, 6))
-        plt.plot(x, self.spectrum.counts, label="Raw spectrum")
+        plt.plot(x, self.spectrum.counts[self.channel_idx], label="Raw spectrum")
         plt.plot(x, self.peak_plus_bkg.clip(1e-1), label="Peaks+Continuum")
         plt.plot(x, self.bkg.clip(1e-1), label="Continuum")
         plt.plot(x, self.signal.clip(1e-1), label="Peaks")
