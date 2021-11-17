@@ -890,6 +890,32 @@
         <string>Parameters</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
+        <item row="2" column="2">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>131</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="5" column="8">
+         <spacer name="horizontalSpacer_11">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>658</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
         <item row="0" column="0" rowspan="2" colspan="7">
          <widget class="QLabel" name="label_6">
           <property name="text">
@@ -897,7 +923,100 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="8">
+        <item row="8" column="3">
+         <widget class="QLabel" name="label_9">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>x0 = </string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QCheckBox" name="checkBox_scint">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Scintillator</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="2">
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>75</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="5" column="3" colspan="3">
+         <widget class="QLineEdit" name="text_snr">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::DefaultContextMenu</enum>
+          </property>
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="8">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>658</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_snr">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>SNR &gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="8">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>492</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="9">
          <widget class="QLabel" name="label_nasa">
           <property name="font">
            <font>
@@ -915,33 +1034,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="7">
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>492</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="2" column="1">
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>131</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="2" column="8">
+        <item row="2" column="9" rowspan="3">
          <spacer name="verticalSpacer_3">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -954,47 +1047,7 @@
           </property>
          </spacer>
         </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_snr">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>SNR &gt;</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="2" colspan="5">
-         <widget class="QLineEdit" name="text_snr">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="contextMenuPolicy">
-           <enum>Qt::DefaultContextMenu</enum>
-          </property>
-          <property name="autoFillBackground">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="7">
-         <spacer name="horizontalSpacer_11">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>658</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="4" column="0">
+        <item row="6" column="0" colspan="2">
          <widget class="QLabel" name="label_ref_ch">
           <property name="font">
            <font>
@@ -1006,7 +1059,7 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="2" colspan="5">
+        <item row="6" column="3" colspan="3">
          <widget class="QLineEdit" name="text_ref_ch">
           <property name="font">
            <font>
@@ -1015,41 +1068,7 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="7">
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>658</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_ref_fwhm">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Reference FWHM</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="2" colspan="5">
-         <widget class="QLineEdit" name="text_ref_fwhm">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="7">
+        <item row="7" column="8">
          <spacer name="horizontalSpacer_10">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -1062,7 +1081,19 @@
           </property>
          </spacer>
         </item>
-        <item row="6" column="0">
+        <item row="3" column="1" colspan="4">
+         <widget class="QCheckBox" name="checkBox_HPGe">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Semiconductor</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0" colspan="2">
          <widget class="QLabel" name="label_xrange">
           <property name="font">
            <font>
@@ -1074,19 +1105,28 @@
           </property>
          </widget>
         </item>
-        <item row="6" column="2">
-         <widget class="QLabel" name="label_9">
+        <item row="7" column="0">
+         <widget class="QLabel" name="label_ref_fwhm">
           <property name="font">
            <font>
-            <pointsize>12</pointsize>
+            <pointsize>14</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>x0 = </string>
+           <string>Reference FWHM</string>
           </property>
          </widget>
         </item>
-        <item row="6" column="3">
+        <item row="7" column="3" colspan="3">
+         <widget class="QLineEdit" name="text_ref_fwhm">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="4">
          <widget class="QLineEdit" name="text_x0">
           <property name="font">
            <font>
@@ -1095,7 +1135,7 @@
           </property>
          </widget>
         </item>
-        <item row="6" column="4">
+        <item row="8" column="5">
          <widget class="QLabel" name="label_x1">
           <property name="font">
            <font>
@@ -1107,7 +1147,19 @@
           </property>
          </widget>
         </item>
-        <item row="6" column="5">
+        <item row="10" column="3" colspan="2">
+         <widget class="QPushButton" name="button_apply">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Apply</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="6">
          <widget class="QLineEdit" name="text_x1">
           <property name="font">
            <font>
@@ -1116,32 +1168,20 @@
           </property>
          </widget>
         </item>
-        <item row="6" column="6">
-         <widget class="QLabel" name="label_units">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Units</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <spacer name="verticalSpacer_2">
+        <item row="10" column="8" colspan="2">
+         <spacer name="horizontalSpacer_9">
           <property name="orientation">
-           <enum>Qt::Vertical</enum>
+           <enum>Qt::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>20</width>
-            <height>130</height>
+            <width>702</width>
+            <height>20</height>
            </size>
           </property>
          </spacer>
         </item>
-        <item row="8" column="0" colspan="2">
+        <item row="10" column="0" colspan="3">
          <spacer name="horizontalSpacer_3">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -1154,27 +1194,27 @@
           </property>
          </spacer>
         </item>
-        <item row="8" column="2" colspan="2">
-         <widget class="QPushButton" name="button_apply">
+        <item row="8" column="7">
+         <widget class="QLabel" name="label_units">
           <property name="font">
            <font>
-            <pointsize>18</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>Apply</string>
+           <string>Units</string>
           </property>
          </widget>
         </item>
-        <item row="8" column="7" colspan="2">
-         <spacer name="horizontalSpacer_9">
+        <item row="9" column="2">
+         <spacer name="verticalSpacer_2">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Vertical</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>702</width>
-            <height>20</height>
+            <width>20</width>
+            <height>130</height>
            </size>
           </property>
          </spacer>
