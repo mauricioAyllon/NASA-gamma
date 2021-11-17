@@ -89,14 +89,23 @@ class PeakSearch:
         """
         if not isinstance(spectrum, sp.Spectrum):
             raise Exception("'spectrum' must be a Spectrum object")
-        if xrange == None:
+        if xrange is None:
             self.channel_idx = spectrum.channels
+            self.xrange = xrange
+        elif len(xrange) == 2 and spectrum.energies is not None:
+            ixe = (spectrum.energies >= xrange[0]) & (spectrum.energies <= xrange[1])
+            erange = spectrum.channels[ixe]
+            self.xrange = [erange[0], erange[-1]]
+        elif len(xrange) == 2 and spectrum.energies is None:
+            self.xrange = xrange
+        else:
+            print("ERROR: check that the length of xrange is 2")
+
         self.ref_x = ref_x
         self.ref_fwhm = ref_fwhm
         self.fwhm_at_0 = fwhm_at_0
         self.spectrum = spectrum
         self.min_snr = min_snr
-        self.xrange = xrange
         self.snr = []
         self.peak_plus_bkg = []
         self.bkg = []
@@ -173,13 +182,13 @@ class PeakSearch:
         """Calculate the convolution of the spectrum with the kernel."""
 
         snr = np.zeros(len(self.spectrum.counts))  # do we need this?
-        if self.xrange == None:
+        if self.xrange is None:
             self.edg = np.append(self.spectrum.channels, self.spectrum.channels[-1] + 1)
             # calculate the convolution
             peak_plus_bkg, bkg, signal, noise, snr = self.convolve(
                 self.edg, self.spectrum.counts
             )
-        elif len(self.xrange) == 2:
+        else:
             x0 = self.xrange[0]
             x1 = self.xrange[1]
             self.channel_idx = (self.spectrum.channels >= x0) & (
@@ -189,8 +198,6 @@ class PeakSearch:
             new_cts = self.spectrum.counts[self.channel_idx]
             self.edg = np.append(new_ch, new_ch[-1] + 1)
             peak_plus_bkg, bkg, signal, noise, snr = self.convolve(self.edg, new_cts)
-        else:
-            print("ERROR: check that the length of xrange is 2")
 
         # find peak indices
         peaks_idx = find_peaks(snr.clip(0), height=self.min_snr)[0]
