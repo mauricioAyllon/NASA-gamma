@@ -180,7 +180,6 @@ class NasaGammaApp(QMainWindow):
                 self.ref_fwhm,
             ) = get_input
             self.create_graph(fit=True)
-
         try:
             self.min_snr = float(self.commands["--min_snr"])
         except:
@@ -336,6 +335,7 @@ class NasaGammaApp(QMainWindow):
             self.toolbar4.setVisible(True)
 
     def create_graph(self, fit=True, reset=True):
+        self.label_units.setText(self.e_units)
         if reset:
             self.reset_main_figure()
         else:
@@ -1093,10 +1093,25 @@ class NasaGammaApp(QMainWindow):
         self.ref_x = float(self.text_ref_ch.text())
         self.ref_fwhm = float(self.text_ref_fwhm.text())
         self.fwhm_at_0 = 1
-
-        self.search = ps.PeakSearch(
-            self.spect, self.ref_x, self.ref_fwhm, self.fwhm_at_0, min_snr=self.min_snr
-        )
+        if self.text_x0.text() and self.text_x1.text():
+            x0 = float(self.text_x0.text())
+            x1 = float(self.text_x1.text())
+            self.search = ps.PeakSearch(
+                self.spect,
+                self.ref_x,
+                self.ref_fwhm,
+                self.fwhm_at_0,
+                min_snr=self.min_snr,
+                xrange=[x0, x1],
+            )
+        else:
+            self.search = ps.PeakSearch(
+                self.spect,
+                self.ref_x,
+                self.ref_fwhm,
+                self.fwhm_at_0,
+                min_snr=self.min_snr,
+            )
 
         self.create_graph(fit=True)
 
