@@ -10,14 +10,11 @@ Gamma spectrocopy tools and visualizations. Some of its capabilitis include:
 7. Energy calibration
 8. Efficiency calibration
 9. FWHM vs. energy plots
-10. Time analysis from LYNX
+10. Time analysis from LYNX data
 
 ## Installation
-nasagamma runs on Python 3.6 or higher version. You can install it from PyPI via pip:
-```
-pip install nasagamma
-```
-or download it directly using
+nasagamma runs on Python 3.6 or higher version. You can install it by
+downloading the package directly using
 ```
 git clone https://github.com/mauricioAyllon/NASA-gamma
 ```
@@ -34,8 +31,8 @@ Otherwise, run from inside the "NASA-gamma" folder):
 gammaGUI-qt -o
 ```
 
-![gammaGUI](figs/gammaGUI.png)
-![ecalGUI](figs/ecalGUI.png)
+![gammaGUI](figs/gammaGUI_qt.png)
+![ecalGUI](figs/gammaGUI_qt.png)
 
 
 ## Development
