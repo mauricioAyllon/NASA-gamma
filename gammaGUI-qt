@@ -84,6 +84,14 @@ class WindowCNF(QDialog):
         self.setWindowTitle("CNF file information")
 
 
+class Window_isotID(QDialog):
+    def __init__(self):
+        QDialog.__init__(self)
+        ui_file = pkg_resources.resource_filename("nasagamma", "win_isot_id.ui")
+        loadUi(ui_file, self)
+        self.setWindowTitle("Isotope ID")
+
+
 class NasaGammaApp(QMainWindow):
     def __init__(self, commands):
         QMainWindow.__init__(self)
@@ -151,7 +159,7 @@ class NasaGammaApp(QMainWindow):
         self.openFile.triggered.connect(self.open_file)
         self.saveSpect.triggered.connect(self.save_spect)
         self.info_cnf_file.triggered.connect(self.display_info_cnf)
-
+        self.isotopeID.triggered.connect(self.activate_isotope_id)
         self.clearSpectrum.triggered.connect(self.reset_main_figure)
 
         self.reset_main_figure()
@@ -1178,6 +1186,10 @@ class NasaGammaApp(QMainWindow):
             invalid_cnf = "Not a valid CNF file"
             print(invalid_cnf)
             self.w_cnf.label_tc.setText(invalid_cnf)
+
+    def activate_isotope_id(self):
+        self.w_isot_id = Window_isotID()
+        self.w_isot_id.show()
 
     def open_file(self):
         options = QFileDialog.Options()
