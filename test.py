@@ -83,20 +83,44 @@ def check_spectrum():
 
 
 def check_peaksearch():
-    df = pd.read_csv(file_csv)
-    cts_np = df["counts"].to_numpy()
-    spect_csv = sp.Spectrum(counts=cts_np)
-    _, spect_cnf = read_cnf.read_cnf_to_spect(file_cnf)
-    fwhm_at_0 = 1.0
-    ref_fwhm = 20
-    ref_x = 420
-    # peaksearch class
-    search1 = ps.PeakSearch(spect_csv, ref_x, ref_fwhm, fwhm_at_0)
-    pass
+    try:
+        df = pd.read_csv(file_csv)
+        cts_np = df["counts"].to_numpy()
+        spect_csv = sp.Spectrum(counts=cts_np)
+        _, spect_cnf = read_cnf.read_cnf_to_spect(file_cnf)
+        # without range
+        try:
+            search1 = ps.PeakSearch(spect_csv, ref_x=420, ref_fwhm=20)
+            search2 = ps.PeakSearch(spect_cnf, ref_x=420, ref_fwhm=20)
+            log(green("PASS"), "Peaksearch class ok before xrange")
+        except:
+            log(red("FAIL"), "Peaksearch class failed before testing xrange")
+        # with defined range
+        try:
+            search3 = ps.PeakSearch(
+                spect_csv, ref_x=420, ref_fwhm=20, xrange=[500, 800]
+            )
+            search4 = ps.PeakSearch(
+                spect_cnf, ref_x=420, ref_fwhm=20, xrange=[523, 1400]
+            )
+            log(green("PASS"), "Peaksearch class ok after xrange")
+        except:
+            log(red("FAIL"), "Peaksearch class failed after testing xrange")
+    except:
+        log(red("FAIL"), "Cannot instantiate a peaksearch object")
+    return search1, search2, search3, search4
 
 
-def check_peak_fit():
-    pass
+def check_peakfit():
+    search1, search2, search3, search4 = check_peaksearch()
+    try:
+        fit1 = pf.PeakFit(search1, xrange=[600, 800], bkg="poly1")
+        fit2 = pf.PeakFit(search2, xrange=[1080, 1400], bkg="poly1")
+        fit3 = pf.PeakFit(search3, xrange=[700, 745], bkg="poly1")
+        fit4 = pf.PeakFit(search4, xrange=[550, 700], bkg="poly1")
+        log(green("PASS"), "Peakfit class ok")
+    except:
+        log(red("FAIL"), "Cannot instantiate a peakfit object")
 
 
 def main():
@@ -105,6 +129,7 @@ def main():
         check_csv_reader()
         check_cnf_reader()
         check_spectrum()
+        check_peakfit()
     except Exception:
         log_exit(traceback.format_exc())
 
