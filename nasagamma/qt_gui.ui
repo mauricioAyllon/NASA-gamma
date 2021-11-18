@@ -1246,6 +1246,7 @@
     </property>
     <addaction name="clearSpectrum"/>
     <addaction name="info_cnf_file"/>
+    <addaction name="isotopeID"/>
    </widget>
    <widget class="QMenu" name="menuSave">
     <property name="title">
@@ -1294,6 +1295,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="isotopeID">
+   <property name="text">
+    <string>Isotope ID</string>
    </property>
   </action>
  </widget>
