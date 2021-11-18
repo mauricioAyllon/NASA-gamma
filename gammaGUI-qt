@@ -174,7 +174,6 @@ class NasaGammaApp(QMainWindow):
                 self.spect,
                 self.search,
                 self.e_units,
-                self.x,
                 self.ref_x,
                 self.fwhm_at_0,
                 self.ref_fwhm,
@@ -1198,11 +1197,9 @@ class NasaGammaApp(QMainWindow):
                 fileName = self.fileName.lower()
 
                 if fileName[-4:] == ".csv":
-                    self.e_units, self.spect, self.x = read_csv_file(fileName)
+                    self.e_units, self.spect = read_csv_file(fileName)
                 elif fileName[-4:] == ".cnf":
-                    self.e_units, self.spect, self.x = read_cnf.read_cnf_to_spect(
-                        fileName
-                    )
+                    self.e_units, self.spect = read_cnf.read_cnf_to_spect(fileName)
                     # self.cnf_dict = read_cnf.read_cnf_file(fileName, False)
 
                 self.create_graph(fit=False, reset=False)
