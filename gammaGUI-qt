@@ -993,10 +993,8 @@ class NasaGammaApp(QMainWindow):
                 fig=self.fig_fwhm,
             )
             self.fig_fwhm.canvas.draw_idle()
-            print("clicked")
         else:
             self.update_fwhm_figure()
-            print("unclicked")
 
     ## Lynx
     def open_tlist_file(self):
@@ -1010,15 +1008,21 @@ class NasaGammaApp(QMainWindow):
             options=options,
         )
 
-        print("Open file: ", fileName)
-        fileName = fileName.lower()
+        if self.fileName == "":
+            pass
+        else:
+            try:
+                print("Open file: ", fileName)
+                fileName = fileName.lower()
 
-        self.reset_lynx_figure()
-        self.tl = tlist.Tlist(period=1000, fname=fileName)
-        self.tl.plot_time_hist(ax=self.ax_lynx_dt)
-        self.tl.plot_spect_erg_all(ax=self.ax_lynx_spect1)
-        self.fig_lynx.canvas.draw_idle()
-        self.setWindowTitle(f"NASA-gamma: {fileName}")
+                self.reset_lynx_figure()
+                self.tl = tlist.Tlist(period=1000, fname=fileName)
+                self.tl.plot_time_hist(ax=self.ax_lynx_dt)
+                self.tl.plot_spect_erg_all(ax=self.ax_lynx_spect1)
+                self.fig_lynx.canvas.draw_idle()
+                self.setWindowTitle(f"NASA-gamma: {fileName}")
+            except:
+                print("Could not open file")
 
     def reset_lynx_figure(self):
         self.fig_lynx = self.lynx_plot.canvas.figure
@@ -1217,7 +1221,7 @@ class NasaGammaApp(QMainWindow):
                 self.create_graph(fit=False, reset=False)
                 self.setWindowTitle(f"NASA-gamma: {fileName}")
             except:
-                pass
+                print("Could not open file")
 
 
 if __name__ == "__main__":
