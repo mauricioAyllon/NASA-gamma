@@ -148,9 +148,9 @@ def read_cnf_file(filename, write_output=False):
     if set(("Channels", "Left marker")) <= set(read_dic):
         read_dic.update(markers_integration(read_dic))
 
-    print(50 * "=")
-    print(10 * " " + "File " + str(filename) + " succesfully read!" + 10 * " ")
-    print(50 * "=")
+    # print(50 * "=")
+    # print(10 * " " + "File " + str(filename) + " succesfully read!" + 10 * " ")
+    # print(50 * "=")
 
     # If true, writes an text output file
     if write_output:
@@ -441,12 +441,12 @@ def read_cnf_to_spect(filename):
     if energy is None:
         e_units = "channels"
         spect = sp.Spectrum(counts=counts, e_units=e_units, livetime=livetime)
-        x = spect.channels
+        spect.x = spect.channels
     else:
         e_units = dict_cnf["Energy unit"]
         spect = sp.Spectrum(
             counts=counts, energies=energy, e_units=e_units, livetime=livetime
         )
-        x = spect.energies
+        spect.x = spect.energies
 
-    return e_units, spect, x
+    return e_units, spect
