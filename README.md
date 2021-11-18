@@ -32,7 +32,7 @@ gammaGUI-qt -o
 ```
 
 ![gammaGUI](figs/gammaGUI_qt.png)
-![ecalGUI](figs/gammaGUI_qt.png)
+![ecalGUI](figs/gammaGUI_qt_cal.png)
 
 
 ## Development
