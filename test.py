@@ -4,7 +4,11 @@ Created on Wed Nov 17 15:05:08 2021
 @author: mauricio
 Test nasagamma modules
 """
-import nasagamma
+from nasagamma import spectrum as sp
+from nasagamma import peaksearch as ps
+from nasagamma import peakfit as pf
+from nasagamma import read_cnf
+import param_handle
 import traceback
 import pandas as pd
 
@@ -44,19 +48,50 @@ def check_nasagamma():
         log(red("FAIL"), "nasagamma not installed")
 
 
-def check_csv_loader():
-    pass
+def check_csv_reader():
+    try:
+        e_units1, _ = param_handle.read_csv_file(file_csv)
+        e_units2, _ = param_handle.read_csv_file(file_cal)
+        if e_units1 == "channels" and e_units2 == "MeV":
+            log(green("PASS"), "csv file reader OK")
+        else:
+            log(red("FAIL"), "csv file reader unable to read units")
+    except:
+        log(red("FAIL"), "csv file reader unable to run")
 
 
-def check_cnf_loader():
-    pass
+def check_cnf_reader():
+    try:
+        e_units, spect = read_cnf.read_cnf_to_spect(file_cnf)
+        if e_units == "keV" and spect.counts.shape[0] > 0:
+            log(green("PASS"), "cnf file reader OK")
+    except:
+        log(red("FAIL"), "cnf file reader unable to run")
 
 
 def check_spectrum():
-    pass
+    try:
+        df = pd.read_csv(file_csv)
+        cts_np = df["counts"].to_numpy()
+        spect = sp.Spectrum(counts=cts_np)
+        if len(spect.counts) == 0:
+            log(red("FAIL"), "Empty counts in spectrum")
+        else:
+            log(green("PASS"), "Spectrum class OK")
+    except:
+        log(red("FAIL"), "Cannot instantiate a spectrum object")
 
 
-def check_peakfind():
+def check_peaksearch():
+    df = pd.read_csv(file_csv)
+    cts_np = df["counts"].to_numpy()
+    spect_csv = sp.Spectrum(counts=cts_np)
+    _, spect_cnf = read_cnf.read_cnf_to_spect(file_cnf)
+    fwhm_at_0 = 1.0
+    ref_fwhm = 20
+    ref_x = 420
+    # peaksearch class
+    search1 = ps.PeakSearch(spect_csv, ref_x, ref_fwhm, fwhm_at_0)
     pass
 
 
@@ -67,6 +102,9 @@ def check_peak_fit():
 def main():
     try:
         check_nasagamma()
+        check_csv_reader()
+        check_cnf_reader()
+        check_spectrum()
     except Exception:
         log_exit(traceback.format_exc())
 
