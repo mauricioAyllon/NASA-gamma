@@ -21,7 +21,9 @@ class Tlist:
         self.ebins = min(ebin_lst, key=lambda x: abs(x - self.data[:, 0].max()))
         self.dt_bins = 100
         self.df = pd.DataFrame(data=self.data, columns=["channel", "ts", "dt"])
-        self.spect_cts = 0
+        self.spect_cts, edg = np.histogram(
+            self.df["channel"], bins=self.ebins, range=[0, self.ebins]
+        )
         plt.rc("font", size=14)
         plt.style.use("seaborn-darkgrid")
 
@@ -74,9 +76,6 @@ class Tlist:
         if ax is None:
             fig = plt.figure(figsize=(8, 6))
             ax = fig.add_subplot()
-        self.spect_cts, edg = np.histogram(
-            self.df["channel"], bins=self.ebins, range=[0, self.ebins]
-        )
         ax.plot(self.spect_cts, label=f"time range: {self.trange} us")
         ax.set_xlabel("Channels")
         ax.set_ylabel("Counts")
