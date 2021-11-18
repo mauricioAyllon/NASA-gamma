@@ -43,12 +43,12 @@ def get_spect_search(commands):
 
     file_name = file_name.lower()
     if file_name[-4:] == ".csv":
-        e_units, spect, x = read_csv_file(file_name)
+        e_units, spect = read_csv_file(file_name)
     elif file_name[-4:] == ".cnf":
-        e_units, spect, x = read_cnf.read_cnf_to_spect(file_name)
+        e_units, spect = read_cnf.read_cnf_to_spect(file_name)
     # peaksearch class
     search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
-    return spect, search, e_units, x, ref_x, fwhm_at_0, ref_fwhm
+    return spect, search, e_units, ref_x, fwhm_at_0, ref_fwhm
 
 
 def read_csv_file(file_name):
@@ -74,14 +74,14 @@ def read_csv_file(file_name):
     if cts_col == 0:
         print("ERROR: no column named with counts keyword e.g counts, data, cts")
     elif erg == 0:
-        print("working with channel numbers")
+        # print("working with channel numbers")
         e_units = "channels"
         spect = sp.Spectrum(counts=df[cts_col], e_units=e_units)
-        x = spect.channels
+        spect.x = spect.channels
     elif erg != 0:
-        print("working with energy values")
+        # print("working with energy values")
         e_units = unit
         spect = sp.Spectrum(counts=df[cts_col], energies=df[erg], e_units=e_units)
-        x = spect.energies
+        spect.x = spect.energies
 
-    return e_units, spect, x
+    return e_units, spect
