@@ -30,6 +30,12 @@ Otherwise, run from inside the "NASA-gamma" folder):
 ```
 gammaGUI-qt -o
 ```
+Then select File -> open -> examples -> data -> gui_test_data_labr.csv.
+Go to the Parameters tab and choose the following parameters:
+SNR > 1
+Reference channel: 420
+Reference FWH: 15
+and hit "Apply". Then, go back to the Spectrum tab and feel free to play around!
 
 ![gammaGUI](figs/gammaGUI_qt.png)
 ![ecalGUI](figs/gammaGUI_qt_cal.png)
