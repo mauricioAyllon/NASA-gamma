@@ -931,6 +931,9 @@ def fwhm_vs_erg(energies, fwhms, x_units, e_units, order=2, fig=None, ax=None):
         ye = fit.eval_uncertainty()
         a = round(best_vals["a"], 5)
         b = round(best_vals["b"], 5)
+        y = fwhm1(E=energies, a=a, b=b)
+        erg_continuous = np.linspace(energies[0], energies[-1], num=100)
+        y = fwhm1(E=erg_continuous, a=a, b=b)
         # predicted = result.eval(x=channels)
 
         ax.errorbar(
@@ -950,8 +953,8 @@ def fwhm_vs_erg(energies, fwhms, x_units, e_units, order=2, fig=None, ax=None):
             label="Data",
         )
         ax.plot(
-            energies,
-            fit.best_fit,
+            erg_continuous,
+            y,
             ls="-",
             lw=3,
             color="green",
@@ -970,6 +973,9 @@ def fwhm_vs_erg(energies, fwhms, x_units, e_units, order=2, fig=None, ax=None):
         a = round(best_vals["a"], 5)
         b = round(best_vals["b"], 5)
         c = round(best_vals["c"], 5)
+        # erg_continuous = np.arange(energies[0], energies[-1], 0.1)
+        erg_continuous = np.linspace(energies[0], energies[-1], num=100)
+        y = fwhm2(E=erg_continuous, a=a, b=b, c=c)
         # predicted = result.eval(x=channels)
 
         ax.errorbar(
@@ -989,8 +995,8 @@ def fwhm_vs_erg(energies, fwhms, x_units, e_units, order=2, fig=None, ax=None):
             label="Data",
         )
         ax.plot(
-            energies,
-            fit.best_fit,
+            erg_continuous,
+            y,
             ls="-",
             lw=3,
             color="green",
