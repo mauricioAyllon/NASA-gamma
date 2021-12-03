@@ -1008,7 +1008,7 @@ class NasaGammaApp(QMainWindow):
             options=options,
         )
 
-        if self.fileName == "":
+        if fileName == "":
             pass
         else:
             try:
