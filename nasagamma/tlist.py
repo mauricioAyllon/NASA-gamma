@@ -21,30 +21,42 @@ class Tlist:
         self.ebins = min(ebin_lst, key=lambda x: abs(x - self.data[:, 0].max()))
         self.dt_bins = 100
         self.df = pd.DataFrame(data=self.data, columns=["channel", "ts", "dt"])
-        self.spect_cts, edg = np.histogram(
-            self.df["channel"], bins=self.ebins, range=[0, self.ebins]
-        )
+        self.hist_erg()
         plt.rc("font", size=14)
         plt.style.use("seaborn-darkgrid")
 
     def load_data(self, fname):
-        try:
-            cols = ["channel", "delete", "ts"]
-            df = pd.read_csv(fname, sep="\t", names=cols, dtype=np.float64)
-            df.drop(columns="delete", inplace=True)
-        except:
-            cols = ["channel", "ts"]
-            df = pd.read_csv(fname, sep="\t", names=cols, dtype=np.float64)
-        data0 = np.array(df)
-        dt0 = np.mod(data0[:, 1], self.period * 10) / 10
-        dt = dt0.reshape((dt0.shape[0], 1))
-        data = np.hstack((data0, dt))
+        if fname[-3:] == "txt":
+            try:
+                cols = ["channel", "delete", "ts"]
+                df = pd.read_csv(fname, sep="\t", names=cols, dtype=np.float64)
+                df.drop(columns="delete", inplace=True)
+            except:
+                cols = ["channel", "ts"]
+                df = pd.read_csv(fname, sep="\t", names=cols, dtype=np.float64)
+            data0 = np.array(df)
+            dt0 = np.mod(data0[:, 1], self.period * 10) / 10
+            dt = dt0.reshape((dt0.shape[0], 1))
+            data = np.hstack((data0, dt))
+        elif fname[-3:] == "npy":
+            data0 = np.load(fname)
+            if data0.shape[1] == 2:
+                dt0 = np.mod(data0[:, 1], self.period * 10) / 10
+                dt = dt0.reshape((dt0.shape[0], 1))
+                data = np.hstack((data0, dt))
+            elif data0.shape[1] == 3:  # assume channel, ts, dt
+                data = data0
+        else:
+            print("Could not open file")
+            pass
+
         return data
 
     def filter_data(self, trange):
         self.restore_df()
         self.df = self.df[(self.df["dt"] > trange[0]) & (self.df["dt"] < trange[1])]
         self.trange = trange
+        self.hist_erg()
 
     def filter_edata(self, erange):
         self.restore_df()
@@ -61,6 +73,11 @@ class Tlist:
         self.data[:, 2] = dt_new
         self.restore_df()
         self.period = new_period
+
+    def hist_erg(self):
+        self.spect_cts, edg = np.histogram(
+            self.df["channel"], bins=self.ebins, range=[0, self.ebins]
+        )
 
     def plot_time_hist(self, ax=None):
         if ax is None:
