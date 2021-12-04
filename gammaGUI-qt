@@ -436,6 +436,8 @@ class NasaGammaApp(QMainWindow):
         ylabel = self.w_cust.y_label_txt.text()
         legend = self.w_cust.legend_txt.text().split(",")
         yconst = self.w_cust.yconst_txt.text()
+        rebin = self.w_cust.rebin_txt.text()
+        moving_avg = self.w_cust.smooth_txt.text()
 
         if xlabel != "":
             self.ax_main.set_xlabel(xlabel)
@@ -452,6 +454,17 @@ class NasaGammaApp(QMainWindow):
             self.fig.canvas.draw_idle()
         if yconst != "":
             self.spect.counts = self.spect.counts * eval(yconst)
+            self.create_graph(fit=False, reset=True)
+        if rebin != "":
+            nbins = eval(rebin)
+            if np.mod(nbins, 2) == 0:  # check if even
+                n = nbins // 2
+                for i in range(n):
+                    self.spect.rebin()
+                self.create_graph(fit=False, reset=True)
+        if moving_avg != "":
+            n = int(eval(moving_avg))
+            self.spect.smooth(num=n)
             self.create_graph(fit=False, reset=True)
 
     def which_button(self):

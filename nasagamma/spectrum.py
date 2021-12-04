@@ -31,6 +31,7 @@ class Spectrum:
         None.
 
         """
+        self.e_units = e_units
         if counts is None:
             print("ERROR: Must specify counts")
         if channels is None:
@@ -38,7 +39,7 @@ class Spectrum:
         if energies is not None:
             self.energies = np.asarray(energies, dtype=float)
             self.x = self.energies
-            if e_units is None:
+            if self.e_units is None:
                 self.x_units = "Energy"
             else:
                 self.x_units = f"Energy [{e_units}]"
@@ -70,7 +71,14 @@ class Spectrum:
         df = pd.DataFrame(data=self.counts, columns=["cts"])
         mav = df.cts.rolling(window=num, center=True).mean()
         mav.fillna(0, inplace=True)
-        return np.array(mav)
+        counts_mav = np.array(mav)
+        counts_mav_scaled = counts_mav / counts_mav.sum() * self.counts.sum()
+        self.__init__(
+            counts=counts_mav_scaled,
+            energies=self.energies,
+            e_units=self.e_units,
+            livetime=self.livetime,
+        )
 
     def rebin(self):
         """
@@ -92,15 +100,22 @@ class Spectrum:
         y = y0 + y1
 
         if self.energies is None:
-            return y
-
-        erg = self.energies
-        if erg.shape[0] % 2 != 0:
-            erg = erg[:-1]
-        en0 = erg[::2]
-        en1 = erg[1::2]
-        en = (en0 + en1) / 2
-        return en, y
+            self.__init__(
+                counts=y,
+                energies=self.energies,
+                e_units=self.e_units,
+                livetime=self.livetime,
+            )
+        else:
+            erg = self.energies
+            if erg.shape[0] % 2 != 0:
+                erg = erg[:-1]
+            en0 = erg[::2]
+            en1 = erg[1::2]
+            en = (en0 + en1) / 2
+            self.__init__(
+                counts=y, energies=en, e_units=self.e_units, livetime=self.livetime
+            )
 
     def plot(self, fig=None, ax=None, scale="log"):
         """
