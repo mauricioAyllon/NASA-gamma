@@ -1302,6 +1302,11 @@
     <string>Isotope ID</string>
    </property>
   </action>
+  <action name="smoothSpectrum">
+   <property name="text">
+    <string>Smooth spectrum</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
