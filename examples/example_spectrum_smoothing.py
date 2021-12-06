@@ -24,11 +24,11 @@ fig = plt.figure(figsize=(10, 6))
 ax = fig.add_subplot()
 spect.plot(fig=fig, ax=ax)
 
-# test smoothing by rebinning
-for i in range(2):
-    spect.rebin()
-spect.plot(fig=fig, ax=ax)
-
-# # test smoothing by moving average
-# spect.smooth(num=12)
+# # test smoothing by rebinning
+# for i in range(2):
+#     spect.rebin()
 # spect.plot(fig=fig, ax=ax)
+
+# test smoothing by moving average
+spect.smooth(num=4)
+spect.plot(fig=fig, ax=ax)
