@@ -70,6 +70,8 @@ class Spectrum:
         """
         df = pd.DataFrame(data=self.counts, columns=["cts"])
         mav = df.cts.rolling(window=num, center=True).mean()
+        mav.fillna(method="bfill", inplace=True)
+        mav.fillna(method="pad", inplace=True)
         mav.fillna(0, inplace=True)
         counts_mav = np.array(mav)
         counts_mav_scaled = counts_mav / counts_mav.sum() * self.counts.sum()
@@ -148,7 +150,9 @@ class Spectrum:
             self.plot_label = f"Total counts = {integral:.3E}\n{lt}"
 
         ax.fill_between(self.x, 0, self.counts, alpha=0.2, color="C1", step="pre")
-        ax.plot(self.x, self.counts, drawstyle="steps", label=self.plot_label)
+        ax.plot(
+            self.x, self.counts, drawstyle="steps", alpha=0.7, label=self.plot_label
+        )
         ax.set_yscale(scale)
         ax.set_xlabel(self.x_units)
         ax.set_ylabel(self.y_label)
