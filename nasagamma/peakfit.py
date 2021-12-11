@@ -1131,6 +1131,12 @@ def eff_fit(en, eff, order=1, plot_table=True, fig=None, ax=None):
         fit = emodel.fit(effs, x=energies, a0=0, a1=0, a2=0, a3=0)
         best_vals = fit.best_values
         ye = fit.eval_uncertainty()
+        a0 = best_vals["a0"]
+        a1 = best_vals["a1"]
+        a2 = best_vals["a2"]
+        a3 = best_vals["a3"]
+        erg_continuous = np.linspace(energies[0], energies[-1], num=100)
+        y = eff_func(x=erg_continuous, a0=a0, a1=a1, a2=a2, a3=a3)
 
         ax.errorbar(
             energies,
@@ -1149,8 +1155,8 @@ def eff_fit(en, eff, order=1, plot_table=True, fig=None, ax=None):
             # label="Distance = 2.5 cm",
         )
     ax.plot(
-        energies,
-        fit.best_fit,
+        erg_continuous,
+        y,
         ls="-",
         lw=3,
         # color="green",
