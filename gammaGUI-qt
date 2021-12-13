@@ -783,7 +783,7 @@ class NasaGammaApp(QMainWindow):
         # self.ax_eff.legend(loc='best')
         self.ax_eff.set_xlabel(self.fit.x_units)
         self.ax_eff.set_ylabel("Efficiency [%]")
-        self.ax_eff.set_yscale("log")
+        self.ax_eff.set_yscale(self.eff_scale)
         self.ax_eff.set_title("Efficiency")
         pf.eff_table(
             x_lst=x,
@@ -805,6 +805,8 @@ class NasaGammaApp(QMainWindow):
             y = np.array(self.eff_vals)[:, 1]
             self.ax_eff.clear()
             pf.eff_fit(x, y, order=1, plot_table=True, fig=self.fig_eff, ax=self.ax_eff)
+            self.ax_eff.set_xlabel(self.fit.x_units)
+            self.ax_eff.set_ylabel("Efficiency [%]")
             self.fig_eff.canvas.draw_idle()
 
     def eff_fit2(self):
