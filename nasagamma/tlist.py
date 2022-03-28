@@ -18,14 +18,20 @@ class Tlist:
         self.trange = [0, period]
         self.erange = None
         self.data = self.load_data(fname)
+        if self.energy_flag:
+            self.df = pd.DataFrame(
+                data=self.data, columns=["energy", "channel", "ts", "dt"]
+            )
+        else:
+            self.df = pd.DataFrame(data=self.data, columns=["channel", "ts", "dt"])
         self.ebins = min(ebin_lst, key=lambda x: abs(x - self.data[:, 0].max()))
         self.dt_bins = 100
-        self.df = pd.DataFrame(data=self.data, columns=["channel", "ts", "dt"])
         self.hist_erg()
         plt.rc("font", size=14)
         plt.style.use("seaborn-darkgrid")
 
     def load_data(self, fname):
+        self.energy_flag = False  # default
         if fname[-3:] == "txt":
             try:
                 cols = ["channel", "delete", "ts"]
@@ -46,6 +52,9 @@ class Tlist:
                 data = np.hstack((data0, dt))
             elif data0.shape[1] == 3:  # assume channel, ts, dt
                 data = data0
+            elif data0.shape[1] == 4:  # assume energy, ch, ts, dt
+                data = data0
+                self.energy_flag = True
         else:
             print("Could not open file")
             pass
@@ -66,7 +75,12 @@ class Tlist:
         self.erange = erange
 
     def restore_df(self):
-        self.df = pd.DataFrame(data=self.data, columns=["channel", "ts", "dt"])
+        if self.energy_flag:
+            self.df = pd.DataFrame(
+                data=self.data, columns=["energy", "channel", "ts", "dt"]
+            )
+        else:
+            self.df = pd.DataFrame(data=self.data, columns=["channel", "ts", "dt"])
 
     def change_period(self, new_period):
         dt_new = np.mod(self.data[:, 1], new_period * 10) / 10
@@ -75,8 +89,12 @@ class Tlist:
         self.period = new_period
 
     def hist_erg(self):
+        if self.energy_flag:
+            keyword = "energy"
+        else:
+            keyword = "channel"
         self.spect_cts, edg = np.histogram(
-            self.df["channel"], bins=self.ebins, range=[0, self.ebins]
+            self.df[keyword], bins=self.ebins, range=[0, self.ebins]
         )
 
     def plot_time_hist(self, ax=None):

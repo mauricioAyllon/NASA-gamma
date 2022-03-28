@@ -449,7 +449,8 @@ class NasaGammaApp(QMainWindow):
             self.fig.canvas.draw_idle()
         if legend != [""]:
             legend = [x.strip() for x in legend]
-            self.ax_main.legend(labels=legend)
+            self.ax_main.legend(self.ax_main.get_legend_handles_labels()[0], legend)
+            # self.ax_main.legend(labels=legend)
             # self.spect.plot_label = legend
             self.fig.canvas.draw_idle()
         if yconst != "":
@@ -498,8 +499,8 @@ class NasaGammaApp(QMainWindow):
             self.onselect,
             "horizontal",
             useblit=True,
-            span_stays=True,
-            rectprops=dict(alpha=0.3, facecolor="green"),
+            interactive=True,
+            props=dict(alpha=0.3, facecolor="green"),
         )
 
     def onselect(self, xmin, xmax):
