@@ -10,6 +10,7 @@ import pandas as pd
 from nasagamma import spectrum as sp
 from nasagamma import peaksearch as ps
 from nasagamma import peakfit as pf
+from nasagamma import energy_calibration as ecal
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -39,7 +40,7 @@ mean_values = [peak_info[0]["mean1"], peak_info[1]["mean2"]]
 mean_values.insert(0, 0)  # add the origin
 erg = [0, 1173.2, 1332.5]  # in keV
 
-pred_erg, efit = pf.ecalibration(
+pred_erg, efit = ecal.ecalibration(
     mean_vals=mean_values, erg=erg, channels=ch, n=1, plot=True, residual=True
 )
 
@@ -54,6 +55,6 @@ spect2.plot()
 ergs = efit.data
 chs = mean_values
 sigs = efit.eval_uncertainty()
-pf.cal_table(
+ecal.cal_table(
     ch_lst=chs, e_lst=ergs, sig_lst=sigs, t_scale=[1, 1.8], decimals=3, e_units="keV"
 )
