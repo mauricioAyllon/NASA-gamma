@@ -25,27 +25,39 @@
         <string>Spectrum</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QPushButton" name="pushButton_scale">
+        <item row="0" column="9">
+         <widget class="QPushButton" name="pushButton_poly1">
           <property name="font">
            <font>
             <pointsize>14</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>Y-scale</string>
+           <string>Bkg1</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="button_customize">
+        <item row="0" column="10">
+         <widget class="QPushButton" name="pushButton_poly2">
           <property name="font">
            <font>
             <pointsize>14</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>Customize</string>
+           <string>Bkg2</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="11">
+         <widget class="QPushButton" name="pushButton_exp">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Exp</string>
           </property>
          </widget>
         </item>
@@ -61,6 +73,18 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="button_customize">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Customize</string>
+          </property>
+         </widget>
         </item>
         <item row="0" column="3">
          <widget class="QPushButton" name="button_remove_cal">
@@ -86,15 +110,15 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="5">
-         <widget class="QPushButton" name="button_add_fwhm">
+        <item row="0" column="0">
+         <widget class="QPushButton" name="pushButton_scale">
           <property name="font">
            <font>
             <pointsize>14</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>Add to FWHM</string>
+           <string>Y-scale</string>
           </property>
          </widget>
         </item>
@@ -110,6 +134,18 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="5">
+         <widget class="QPushButton" name="button_add_fwhm">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Add to FWHM</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="7">
          <spacer name="horizontalSpacer_6">
           <property name="orientation">
@@ -117,49 +153,13 @@
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>17</width>
-            <height>20</height>
+            <width>6</width>
+            <height>17</height>
            </size>
           </property>
          </spacer>
         </item>
-        <item row="0" column="8">
-         <widget class="QPushButton" name="pushButton_poly1">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Poly1</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="9">
-         <widget class="QPushButton" name="pushButton_poly2">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Poly2</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="10">
-         <widget class="QPushButton" name="pushButton_exp">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Exp</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0" colspan="11">
+        <item row="1" column="0" colspan="12">
          <widget class="MplWidget" name="main_plot" native="true">
           <property name="mouseTracking">
            <bool>false</bool>
@@ -168,6 +168,34 @@
            <bool>true</bool>
           </property>
          </widget>
+        </item>
+        <item row="0" column="8">
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QPushButton" name="pushButton_gauss">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Gauss</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_gauss2">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Sk. Gauss</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -889,7 +917,7 @@
        <attribute name="title">
         <string>Parameters</string>
        </attribute>
-       <layout class="QFormLayout" name="formLayout">
+       <layout class="QGridLayout" name="gridLayout_13">
         <item row="0" column="0">
          <widget class="QFrame" name="frame_2">
           <property name="frameShape">
@@ -899,54 +927,80 @@
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_3">
-           <item row="0" column="0" colspan="8">
+           <item row="3" column="3" colspan="5">
+            <widget class="QLineEdit" name="text_ref_ch">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="3">
+            <widget class="QLabel" name="label_ref_ch">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Reference channel</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" colspan="2">
+            <widget class="QLabel" name="label_ref_fwhm">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Reference FWHM</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="3" colspan="5">
+            <widget class="QLineEdit" name="text_ref_fwhm">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0" colspan="3">
+            <widget class="QLabel" name="label_xrange">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>X-Range (optional)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_snr">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>SNR &gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="6">
             <widget class="QLabel" name="label_6">
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Parameter values for proper peak finding.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Minimum SNR values allow the user to reglulate&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;the importance of peaks based on their signal-to-noise ratio. &lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;The reference FWHM is an estimate of the FWHM at the&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;reference channel,  which varies depending on detector type.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#005500;&quot;&gt;Choose the parameters below for proper peak finding.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#005500;&quot;&gt;Minimum SNR values allow the user to reglulate&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#005500;&quot;&gt;the importance of peaks based on their signal-to-noise ratio. &lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:12pt; color:#005500;&quot;&gt;The reference FWHM is an estimate of the FWHM at the&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:12pt; color:#005500;&quot;&gt;reference channel, which varies depending on detector type.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:12pt; color:#005500;&quot;&gt;X-Range is an optional parameter that defines a constrained&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:12pt; color:#005500;&quot;&gt;range of channels or energies for peak finding. By constraining&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:12pt; color:#005500;&quot;&gt;the range, efficiency is increased. If left blank, the program will&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:12pt; color:#005500;&quot;&gt;attempt to find peaks throughout the entire spectrum.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>17</width>
-               <height>74</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="2" column="0">
-            <widget class="QCheckBox" name="checkBox_scint">
-             <property name="font">
-              <font>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Scintillator</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1" colspan="5">
-            <widget class="QCheckBox" name="checkBox_HPGe">
-             <property name="font">
-              <font>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Semiconductor</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
             <spacer name="verticalSpacer_4">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -959,19 +1013,7 @@
              </property>
             </spacer>
            </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_snr">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>SNR &gt;</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="3" colspan="5">
+           <item row="2" column="3" colspan="5">
             <widget class="QLineEdit" name="text_snr">
              <property name="font">
               <font>
@@ -986,61 +1028,16 @@
              </property>
             </widget>
            </item>
-           <item row="5" column="0" colspan="3">
-            <widget class="QLabel" name="label_ref_ch">
+           <item row="5" column="4">
+            <widget class="QLineEdit" name="text_x0">
              <property name="font">
               <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Reference channel</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="3" colspan="5">
-            <widget class="QLineEdit" name="text_ref_ch">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
+               <pointsize>12</pointsize>
               </font>
              </property>
             </widget>
            </item>
-           <item row="6" column="0" colspan="2">
-            <widget class="QLabel" name="label_ref_fwhm">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Reference FWHM</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="3" colspan="5">
-            <widget class="QLineEdit" name="text_ref_fwhm">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="0" colspan="3">
-            <widget class="QLabel" name="label_xrange">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>X-Range (optional)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="3">
+           <item row="5" column="3">
             <widget class="QLabel" name="label_9">
              <property name="font">
               <font>
@@ -1052,16 +1049,7 @@
              </property>
             </widget>
            </item>
-           <item row="7" column="4">
-            <widget class="QLineEdit" name="text_x0">
-             <property name="font">
-              <font>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="5">
+           <item row="5" column="5">
             <widget class="QLabel" name="label_x1">
              <property name="font">
               <font>
@@ -1073,16 +1061,7 @@
              </property>
             </widget>
            </item>
-           <item row="7" column="6">
-            <widget class="QLineEdit" name="text_x1">
-             <property name="font">
-              <font>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="7">
+           <item row="5" column="7">
             <widget class="QLabel" name="label_units">
              <property name="font">
               <font>
@@ -1094,7 +1073,7 @@
              </property>
             </widget>
            </item>
-           <item row="8" column="3">
+           <item row="6" column="3">
             <spacer name="verticalSpacer_2">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -1107,7 +1086,16 @@
              </property>
             </spacer>
            </item>
-           <item row="9" column="2" colspan="3">
+           <item row="5" column="6">
+            <widget class="QLineEdit" name="text_x1">
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="2" colspan="3">
             <widget class="QPushButton" name="button_apply">
              <property name="font">
               <font>
@@ -1119,7 +1107,7 @@
              </property>
             </widget>
            </item>
-           <item row="10" column="3">
+           <item row="8" column="3">
             <spacer name="verticalSpacer_3">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -1143,8 +1131,21 @@
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <layout class="QFormLayout" name="formLayout_2">
+          <layout class="QGridLayout" name="gridLayout_12">
            <item row="0" column="0">
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>311</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="1">
             <widget class="QLabel" name="label_10">
              <property name="text">
               <string/>
@@ -1153,6 +1154,19 @@
               <pixmap>../figs/nasa-logo2.png</pixmap>
              </property>
             </widget>
+           </item>
+           <item row="1" column="1">
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>487</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -1187,7 +1201,7 @@
      <x>0</x>
      <y>0</y>
      <width>1454</width>
-     <height>29</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
