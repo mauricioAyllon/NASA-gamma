@@ -11,7 +11,7 @@ from . import peaksearch as ps
 
 
 class PeakFit:
-    def __init__(self, search, xrange, bkg="linear"):
+    def __init__(self, search, xrange, bkg="linear", skew=False):
         """
         Use the package LMfit to fit and plot peaks with Gaussians with a
         given background. It must be initialized with a PeakSearch object.
@@ -27,6 +27,8 @@ class PeakFit:
         bkg : string, optional
             Can be 'linear', 'quadratic', 'exponential' or 'polyn', where n
             is any degree polynomial. The default is 'linear'.
+        skew : bool, optional
+            fit a skewed Gaussian instead. The default is 'False'
 
         Raises
         ------
@@ -60,7 +62,7 @@ class PeakFit:
             print("Working with energy values")
             self.x = search.spectrum.energies
 
-        self.gaussians_bkg()
+        self.gaussians_bkg(skew)
 
     def find_peaks_range(self):
         """
@@ -122,7 +124,7 @@ class PeakFit:
         b0 = left - m0 * self.xrange[0]
         return m0, b0, amp0, erg0, sig0
 
-    def gaussians_bkg(self):
+    def gaussians_bkg(self, skeweness):
         """
         Fit one or multiple Gaussians with a given background.
 
@@ -153,10 +155,11 @@ class PeakFit:
             quad_mod = lmfit.models.QuadraticModel(prefix="quadratic")
             pars = quad_mod.guess(y0, x=x0)
             model = quad_mod
-        elif self.bkg == "exponential":
+        elif self.bkg == "exp" or self.bkg == "exponential":
             exp_mod = lmfit.models.ExponentialModel()
             pars = exp_mod.guess(y0, x=x0)
             model = exp_mod
+            self.bkg = "exponential"
         else:
             # assume polynomial of degree n
             n = [int(s) for s in list(self.bkg) if s.isdigit()][0]
@@ -165,13 +168,18 @@ class PeakFit:
             model = poly_mod
 
         for i in range(npeaks):
-            gauss0 = lmfit.models.GaussianModel(prefix=f"g{i+1}_")
+            if skeweness:
+                gauss0 = lmfit.models.SkewedGaussianModel(prefix=f"g{i+1}_")
+            else:
+                gauss0 = lmfit.models.GaussianModel(prefix=f"g{i+1}_")
             pars.update(gauss0.make_params())
             pars[f"g{i+1}_center"].set(value=erg[i])
             pars[f"g{i+1}_sigma"].set(value=sig[i])
             pars[f"g{i+1}_amplitude"].set(value=amp[i])
+            if skeweness:
+                pars[f"g{i+1}_gamma"].set(value=-1)
             model += gauss0
-        fit0 = model.fit(y0, pars, x=x0)
+        fit0 = model.fit(y0, pars, x=x0, weights=np.sqrt(1.0 / y0))
         print(fit0.message)
         components = fit0.eval_components()
         self.fit_result = fit0
@@ -195,7 +203,8 @@ class PeakFit:
             # errors
             mean_err = epar[f"g{i+1}_center"].stderr
             area_err = np.sqrt(area0)
-            fwhm_err = epar[f"g{i+1}_fwhm"].stderr
+            # fwhm_err = epar[f"g{i+1}_fwhm"].stderr
+            fwhm_err = epar[f"g{i+1}_sigma"].stderr * 2.355
             dict_peak_err = {
                 f"mean_err{i+1}": mean_err,
                 f"area_err{i+1}": area_err,
@@ -244,6 +253,9 @@ class PeakFit:
         # init_fit = self.fit_result.init_fit
         best_fit = self.fit_result.best_fit
         res = self.fit_result
+        # predicted values
+        x_pred = np.linspace(x[0], x[-1], num=500)
+        y_pred = res.eval(x=x_pred)
 
         comps = res.eval_components()
 
@@ -260,22 +272,26 @@ class PeakFit:
             plt.figure(figsize=(10, 8))
             plt.title(f"Reduced $\chi^2$ = {round(res.redchi,4)}")
             plt.plot(x, y, "bo", alpha=0.5, label="data")
-            plt.plot(x, best_fit, "r", lw=3, alpha=0.5, label="Best fit")
+            plt.plot(x_pred, y_pred, "r", lw=3, alpha=0.5, label="Best fit")
+            plt.plot(x, comps[f"{bkg_label}"], "g--", lw=3, label=f"bkg: {self.bkg}")
+            m = 1
             for cp in range(len(comps) - 1):
-                plt.plot(
-                    x,
-                    comps[f"{bkg_label}"] + comps[f"g{cp+1}_"],
-                    "k--",
-                    lw=2,
-                    label=f"Gaussian {cp+1} + {bkg_label}: n={n}",
-                )
-                plt.plot(x, comps[f"{bkg_label}"], "g--", label="bkg")
-
-            dely = res.eval_uncertainty(sigma=3)
+                if m == 1:
+                    plt.plot(
+                        x,
+                        comps[f"{bkg_label}"] + comps[f"g{cp+1}_"],
+                        "k--",
+                        lw=2,
+                        label="Components",
+                    )
+                    m = 0
+                else:
+                    plt.plot(x, comps[f"{bkg_label}"] + comps[f"g{cp+1}_"], "k--", lw=2)
+            dely = res.eval_uncertainty(x=x_pred, sigma=3)
             plt.fill_between(
-                x,
-                res.best_fit - dely,
-                res.best_fit + dely,
+                x_pred,
+                y_pred - dely,
+                y_pred + dely,
                 color="#ABABAB",
                 label="3-$\sigma$ uncertainty band",
             )
@@ -285,7 +301,7 @@ class PeakFit:
             plt.style.use("default")
 
         elif plot_type == "full":
-            cols = ["mean", "net_area", "fwhm"]
+            cols = ["Mean", "Net_area", "FWHM"]
             mean = []
             area = []
             fwhm = []
@@ -318,8 +334,9 @@ class PeakFit:
 
             ax_fit.set_title(f"Reduced $\chi^2$ = {round(res.redchi,4)}")
             ax_fit.plot(x, y, "bo", alpha=0.5, label="data")
-            ax_fit.plot(x, best_fit, "r", lw=3, alpha=0.5, label="Best fit")
+            ax_fit.plot(x_pred, y_pred, "r", lw=3, alpha=0.5, label="Best fit")
             # ax_fit.set_xlim([x.min(), x.max()])
+            ax_fit.plot(x, comps[f"{bkg_label}"], "g--", lw=3, label=f"bkg: {self.bkg}")
             m = 1
             for cp in range(len(comps) - 1):
                 if m == 1:
@@ -328,27 +345,25 @@ class PeakFit:
                         comps[f"{bkg_label}"] + comps[f"g{cp+1}_"],
                         "k--",
                         lw=2,
-                        label=f"Gaussian {cp+1} + {bkg_label}: n={n}",
+                        label="Components",
                     )
-                    ax_fit.plot(x, comps[f"{bkg_label}"], "g--", label="bkg")
+                    m = 0
                 else:
                     ax_fit.plot(
                         x, comps[f"{bkg_label}"] + comps[f"g{cp+1}_"], "k--", lw=2
                     )
-                    ax_fit.plot(x, comps[f"{bkg_label}"], "g--")
-                m = 0
 
-            dely = res.eval_uncertainty(sigma=3)
+            dely = res.eval_uncertainty(x=x_pred, sigma=3)
             ax_fit.fill_between(
-                x,
-                res.best_fit - dely,
-                res.best_fit + dely,
+                x_pred,
+                y_pred - dely,
+                y_pred + dely,
                 color="#ABABAB",
                 label="3-$\sigma$ uncertainty band",
             )
             ax_fit.set_xlabel(self.x_units)
             if legend == "on":
-                ax_fit.legend(loc="best", ncol=2)
+                ax_fit.legend(loc="upper left", ncol=2)
 
             # errors
             vals_lst = []
