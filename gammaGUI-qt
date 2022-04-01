@@ -109,19 +109,30 @@ class NasaGammaApp(QMainWindow):
         self.bg = "poly1"
         self.pushButton_poly1.setStyleSheet("background-color : lightgreen")
         self.pushButton_poly1.setCheckable(True)
-
+        self.pushButton_poly1.setChecked(True)
         self.pushButton_poly2.setStyleSheet("background-color : lightgreen")
         self.pushButton_poly2.setCheckable(True)
-
         self.pushButton_exp.setStyleSheet("background-color : lightgreen")
         self.pushButton_exp.setCheckable(True)
-
         self.btn_grp = QButtonGroup()
         self.btn_grp.setExclusive(True)
         self.btn_grp.addButton(self.pushButton_poly1)
         self.btn_grp.addButton(self.pushButton_poly2)
         self.btn_grp.addButton(self.pushButton_exp)
         self.btn_grp.buttonClicked.connect(self.update_poly)
+
+        # Gaussian or skewed Gaussian?
+        self.sk_gauss = False
+        self.pushButton_gauss.setStyleSheet("background-color : silver")
+        self.pushButton_gauss.setCheckable(True)
+        self.pushButton_gauss.setChecked(True)
+        self.pushButton_gauss2.setStyleSheet("background-color : silver")
+        self.pushButton_gauss2.setCheckable(True)
+        self.btn_grp_gauss = QButtonGroup()
+        self.btn_grp_gauss.setExclusive(True)
+        self.btn_grp_gauss.addButton(self.pushButton_gauss)
+        self.btn_grp_gauss.addButton(self.pushButton_gauss2)
+        self.btn_grp_gauss.buttonClicked.connect(self.update_gauss)
 
         self.button_apply.setStyleSheet("background-color : lightblue")
         self.button_remove_cal.setStyleSheet("background-color : lightcoral")
@@ -476,10 +487,37 @@ class NasaGammaApp(QMainWindow):
         elif self.pushButton_exp.isChecked():
             self.bg = "exponential"
 
+    def which_button_gauss(self):
+        if self.pushButton_gauss2.isChecked():
+            self.sk_gauss = True
+        else:
+            self.sk_gauss = False
+
     def update_poly(self):
         if len(self.list_xrange) != 0:
             self.which_button()
-            self.fit = pf.PeakFit(self.search, self.list_xrange[-1], bkg=self.bg)
+            self.fit = pf.PeakFit(
+                self.search, self.list_xrange[-1], bkg=self.bg, skew=self.sk_gauss
+            )
+            self.ax_res.clear()
+            self.ax_fit.clear()
+            self.ax_tab.clear()
+            self.fit.plot(
+                plot_type="full",
+                table_scale=[1, 1.8],
+                fig=self.fig,
+                ax_res=self.ax_res,
+                ax_fit=self.ax_fit,
+                ax_tab=self.ax_tab,
+            )
+            self.fig.canvas.draw_idle()
+
+    def update_gauss(self):
+        if len(self.list_xrange) != 0:
+            self.which_button_gauss()
+            self.fit = pf.PeakFit(
+                self.search, self.list_xrange[-1], bkg=self.bg, skew=self.sk_gauss
+            )
             self.ax_res.clear()
             self.ax_fit.clear()
             self.ax_tab.clear()
@@ -513,7 +551,7 @@ class NasaGammaApp(QMainWindow):
         self.ax_res.clear()
         self.ax_fit.clear()
         self.ax_tab.clear()
-        self.fit = pf.PeakFit(self.search, xrange, bkg=self.bg)
+        self.fit = pf.PeakFit(self.search, xrange, bkg=self.bg, skew=self.sk_gauss)
         # plot_fit(fit)
         self.fit.plot(
             plot_type="full",
