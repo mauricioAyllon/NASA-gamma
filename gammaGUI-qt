@@ -47,6 +47,9 @@ from nasagamma import peaksearch as ps
 from nasagamma import spectrum as sp
 from nasagamma import read_cnf
 from nasagamma import tlist
+from nasagamma import energy_calibration as ecal
+from nasagamma import efficiency
+from nasagamma import resolution
 import pkg_resources
 
 
@@ -605,7 +608,7 @@ class NasaGammaApp(QMainWindow):
                     list_m_out.append(ch)
 
     def perform_cal(self):
-        self.pred_erg, self.efit = pf.ecalibration(
+        self.pred_erg, self.efit = ecal.ecalibration(
             mean_vals=self.mean_vals,
             erg=self.e_vals,
             channels=self.spect.channels,
@@ -691,7 +694,7 @@ class NasaGammaApp(QMainWindow):
         # ergs = self.efit.data + self.e_vals_not_fit
         chs = self.mean_vals + self.mean_vals_not_fit
         sigs = list(self.efit.eval_uncertainty()) + sigs_not_fit
-        pf.cal_table(
+        ecal.cal_table(
             ch_lst=chs,
             e_lst=ergs,
             sig_lst=sigs,
@@ -801,7 +804,7 @@ class NasaGammaApp(QMainWindow):
 
     def add_eff(self):
         self.get_eff_params()
-        eff_class = pf.Efficiency(
+        eff_class = efficiency.Efficiency(
             t_half=self.t_half,
             A0=self.A0,
             Br=self.B,
@@ -824,7 +827,7 @@ class NasaGammaApp(QMainWindow):
         self.ax_eff.set_ylabel("Efficiency [%]")
         self.ax_eff.set_yscale(self.eff_scale)
         self.ax_eff.set_title("Efficiency")
-        pf.eff_table(
+        efficiency.eff_table(
             x_lst=x,
             eff_lst=y,
             e_units=self.e_units,
@@ -843,7 +846,9 @@ class NasaGammaApp(QMainWindow):
             x = np.array(self.eff_vals)[:, 0]
             y = np.array(self.eff_vals)[:, 1]
             self.ax_eff.clear()
-            pf.eff_fit(x, y, order=1, plot_table=True, fig=self.fig_eff, ax=self.ax_eff)
+            efficiency.eff_fit(
+                x, y, order=1, plot_table=True, fig=self.fig_eff, ax=self.ax_eff
+            )
             self.ax_eff.set_xlabel(self.fit.x_units)
             self.ax_eff.set_ylabel("Efficiency [%]")
             self.fig_eff.canvas.draw_idle()
@@ -950,7 +955,7 @@ class NasaGammaApp(QMainWindow):
     def perform_fwhm(self):
         try:
             self.which_button_fwhm()
-            self.fwhm_fit = pf.fwhm_vs_erg(
+            self.fwhm_fit = resolution.fwhm_vs_erg(
                 energies=self.fwhm_x,
                 fwhms=self.fwhm,
                 x_units=self.spect.x_units,
@@ -971,7 +976,7 @@ class NasaGammaApp(QMainWindow):
 
     def update_table_fwhm(self):
         self.ax_fwhm_tab.clear()
-        pf.fwhm_table(
+        resolution.fwhm_table(
             x_lst=self.fwhm_x,
             fwhm_lst=self.fwhm,
             e_units=self.e_units,
@@ -1039,7 +1044,7 @@ class NasaGammaApp(QMainWindow):
 
     def extrapolate_fwhm(self):
         if self.button_extrapolate.isChecked():
-            pf.fwhm_extrapolate(
+            resolution.fwhm_extrapolate(
                 energies=self.spect.x,
                 fit=self.fwhm_fit,
                 order=self.n_fwhm,
