@@ -115,12 +115,21 @@ class NasaGammaApp(QMainWindow):
         self.pushButton_poly1.setChecked(True)
         self.pushButton_poly2.setStyleSheet("background-color : lightgreen")
         self.pushButton_poly2.setCheckable(True)
+        self.pushButton_poly3.setStyleSheet("background-color : lightgreen")
+        self.pushButton_poly3.setCheckable(True)
+        self.pushButton_poly4.setStyleSheet("background-color : lightgreen")
+        self.pushButton_poly4.setCheckable(True)
+        self.pushButton_poly5.setStyleSheet("background-color : lightgreen")
+        self.pushButton_poly5.setCheckable(True)
         self.pushButton_exp.setStyleSheet("background-color : lightgreen")
         self.pushButton_exp.setCheckable(True)
         self.btn_grp = QButtonGroup()
         self.btn_grp.setExclusive(True)
         self.btn_grp.addButton(self.pushButton_poly1)
         self.btn_grp.addButton(self.pushButton_poly2)
+        self.btn_grp.addButton(self.pushButton_poly3)
+        self.btn_grp.addButton(self.pushButton_poly4)
+        self.btn_grp.addButton(self.pushButton_poly5)
         self.btn_grp.addButton(self.pushButton_exp)
         self.btn_grp.buttonClicked.connect(self.update_poly)
 
@@ -487,6 +496,12 @@ class NasaGammaApp(QMainWindow):
             self.bg = "poly1"
         elif self.pushButton_poly2.isChecked():
             self.bg = "poly2"
+        elif self.pushButton_poly3.isChecked():
+            self.bg = "poly3"
+        elif self.pushButton_poly4.isChecked():
+            self.bg = "poly4"
+        elif self.pushButton_poly5.isChecked():
+            self.bg = "poly5"
         elif self.pushButton_exp.isChecked():
             self.bg = "exponential"
 
