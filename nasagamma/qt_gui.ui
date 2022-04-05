@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1454</width>
+    <width>1460</width>
     <height>900</height>
    </rect>
   </property>
@@ -24,44 +24,32 @@
        <attribute name="title">
         <string>Spectrum</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="9">
-         <widget class="QPushButton" name="pushButton_poly1">
+       <layout class="QGridLayout" name="gridLayout_14">
+        <item row="0" column="0" rowspan="2">
+         <widget class="QPushButton" name="pushButton_scale">
           <property name="font">
            <font>
             <pointsize>14</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>Bkg1</string>
+           <string>Y-scale</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="10">
-         <widget class="QPushButton" name="pushButton_poly2">
+        <item row="0" column="1" rowspan="2">
+         <widget class="QPushButton" name="button_customize">
           <property name="font">
            <font>
             <pointsize>14</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>Bkg2</string>
+           <string>Customize</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="11">
-         <widget class="QPushButton" name="pushButton_exp">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Exp</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
+        <item row="0" column="2" rowspan="2">
          <spacer name="horizontalSpacer_24">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -74,31 +62,7 @@
           </property>
          </spacer>
         </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="button_customize">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Customize</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="3">
-         <widget class="QPushButton" name="button_remove_cal">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Remove calibration</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4">
          <widget class="QPushButton" name="button_add_cal">
           <property name="font">
            <font>
@@ -110,31 +74,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="pushButton_scale">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Y-scale</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="6">
-         <widget class="QPushButton" name="button_add_eff">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Add to efficiency</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="5">
+        <item row="0" column="4" rowspan="2">
          <widget class="QPushButton" name="button_add_fwhm">
           <property name="font">
            <font>
@@ -146,7 +86,19 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="7">
+        <item row="0" column="5" rowspan="2">
+         <widget class="QPushButton" name="button_add_eff">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Add to efficiency</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6">
          <spacer name="horizontalSpacer_6">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -159,17 +111,7 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="0" colspan="12">
-         <widget class="MplWidget" name="main_plot" native="true">
-          <property name="mouseTracking">
-           <bool>false</bool>
-          </property>
-          <property name="autoFillBackground">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="8">
+        <item row="0" column="7" rowspan="2">
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
            <widget class="QPushButton" name="pushButton_gauss">
@@ -196,6 +138,100 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item row="0" column="8">
+         <widget class="QPushButton" name="pushButton_poly1">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Bkg1</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="9">
+         <widget class="QPushButton" name="pushButton_poly2">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Bkg2</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="10">
+         <widget class="QPushButton" name="pushButton_poly3">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Bkg3</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QPushButton" name="button_remove_cal">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Remove calibration</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="8">
+         <widget class="QPushButton" name="pushButton_poly4">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Bkg4</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="9">
+         <widget class="QPushButton" name="pushButton_poly5">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Bkg5</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="10">
+         <widget class="QPushButton" name="pushButton_exp">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Exp</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="11">
+         <widget class="MplWidget" name="main_plot" native="true">
+          <property name="mouseTracking">
+           <bool>false</bool>
+          </property>
+          <property name="autoFillBackground">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -1200,7 +1236,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1454</width>
+     <width>1460</width>
      <height>26</height>
     </rect>
    </property>
