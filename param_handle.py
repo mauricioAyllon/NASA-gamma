@@ -53,6 +53,7 @@ def get_spect_search(commands):
 
 def read_csv_file(file_name):
     df = pd.read_csv(file_name)
+    df.columns = df.columns.str.replace(" ", "")  # remove white spaces
     ###
     name_lst = ["count", "counts", "cts", "data"]
     e_lst = ["energy", "energies", "erg"]
