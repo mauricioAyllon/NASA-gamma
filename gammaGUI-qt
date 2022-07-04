@@ -41,7 +41,7 @@ from PyQt5.QtCore import pyqtSlot
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.widgets import SpanSelector
-from param_handle import get_spect_search, read_csv_file
+from param_handle import get_spect_search
 from nasagamma import peakfit as pf
 from nasagamma import peaksearch as ps
 from nasagamma import spectrum as sp
@@ -50,6 +50,7 @@ from nasagamma import tlist
 from nasagamma import energy_calibration as ecal
 from nasagamma import efficiency
 from nasagamma import resolution
+from nasagamma import file_reader
 import pkg_resources
 
 
@@ -1283,15 +1284,22 @@ class NasaGammaApp(QMainWindow):
             pass
         else:
             try:
-                print("Open file: ", self.fileName)
+                print("Opening file: ", self.fileName)
                 fileName = self.fileName.lower()
 
                 if fileName[-4:] == ".csv":
-                    self.e_units, self.spect = read_csv_file(fileName)
+                    self.e_units, self.spect = file_reader.read_csv_file(fileName)
                 elif fileName[-4:] == ".cnf":
-                    self.e_units, self.spect = read_cnf.read_cnf_to_spect(fileName)
-                    # self.cnf_dict = read_cnf.read_cnf_file(fileName, False)
-
+                    self.e_units, self.spect = file_reader.read_cnf_to_spect(fileName)
+                elif fileName[-4:] == ".mca":
+                    mca = file_reader.ReadMCA(self.fileName)
+                    self.e_units = "channels"
+                    self.spect = sp.Spectrum(
+                        counts=mca.counts, e_units=self.e_units, livetime=mca.live_time
+                    )
+                else:
+                    print("Could not open file")
+                    fileName = fileName + " ***INVALID FILE TYPE***"
                 self.create_graph(fit=False, reset=False)
                 self.setWindowTitle(f"NASA-gamma: {fileName}")
             except:
