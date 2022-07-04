@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
 """
-Created on Mon Feb 22 18:24:32 2021
-
-@author: mauricio
-parameter handle for GUI
+Initial parameter settings for GUI. It is used only when parameters are 
+passed directly in the command line.
 """
 
 import pandas as pd
@@ -11,6 +8,7 @@ from nasagamma import spectrum as sp
 from nasagamma import peaksearch as ps
 from nasagamma import read_cnf
 import re
+from nasagamma import file_reader
 
 
 def get_spect_search(commands):
@@ -43,46 +41,9 @@ def get_spect_search(commands):
 
     file_name = file_name.lower()
     if file_name[-4:] == ".csv":
-        e_units, spect = read_csv_file(file_name)
+        e_units, spect = file_reader.read_csv_file(file_name)
     elif file_name[-4:] == ".cnf":
-        e_units, spect = read_cnf.read_cnf_to_spect(file_name)
+        e_units, spect = file_reader.read_cnf.read_cnf_to_spect(file_name)
     # peaksearch class
     search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
     return spect, search, e_units, ref_x, fwhm_at_0, ref_fwhm
-
-
-def read_csv_file(file_name):
-    df = pd.read_csv(file_name)
-    df.columns = df.columns.str.replace(" ", "")  # remove white spaces
-    ###
-    name_lst = ["count", "counts", "cts", "data"]
-    e_lst = ["energy", "energies", "erg"]
-    u_lst = ["eV", "keV", "MeV", "GeV"]
-    col_lst = list(df.columns)
-    # cts_col = [s for s in col_lst if "counts" in s.lower()][0]
-    cts_col = 0
-    erg = 0
-    for s in col_lst:
-        s2 = re.split("[^a-zA-Z]", s)  # split by non alphabetic character
-        if s.lower() in name_lst:
-            cts_col = s
-            next
-        for st in s2:
-            if st.lower() in e_lst:
-                erg = s
-            if st in u_lst:
-                unit = st
-    if cts_col == 0:
-        print("ERROR: no column named with counts keyword e.g counts, data, cts")
-    elif erg == 0:
-        # print("working with channel numbers")
-        e_units = "channels"
-        spect = sp.Spectrum(counts=df[cts_col], e_units=e_units)
-        spect.x = spect.channels
-    elif erg != 0:
-        # print("working with energy values")
-        e_units = unit
-        spect = sp.Spectrum(counts=df[cts_col], energies=df[erg], e_units=e_units)
-        spect.x = spect.energies
-
-    return e_units, spect
