@@ -18,7 +18,7 @@ References
 ----------
 
 This script was made as a copy of the c program 'cnfconv' written for the same
-porpouse. That software can be found here:
+purpose. That software can be found here:
 
 https://github.com/messlinger/cnfconv
 
@@ -350,7 +350,7 @@ def get_markers(f, offs_mark):
 
 
 def chan_to_energy(dic):
-    """ Convert channels to energy using energy calibration coefficients."""
+    """Convert channels to energy using energy calibration coefficients."""
 
     A = dic["Energy coefficients"]
     ch = dic["Channels"]
