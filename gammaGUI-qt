@@ -40,7 +40,7 @@ from PyQt5.uic import loadUi
 from PyQt5.QtCore import pyqtSlot
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from matplotlib.widgets import SpanSelector
+from matplotlib.widgets import SpanSelector, RectangleSelector
 from param_handle import get_spect_search
 from nasagamma import peakfit as pf
 from nasagamma import peaksearch as ps
@@ -51,6 +51,7 @@ from nasagamma import energy_calibration as ecal
 from nasagamma import efficiency
 from nasagamma import resolution
 from nasagamma import file_reader
+from nasagamma import read_parquet_api
 import pkg_resources
 
 
@@ -175,6 +176,10 @@ class NasaGammaApp(QMainWindow):
         self.toolbar4 = NavigationToolbar(self.lynx_plot.canvas, self)
         self.addToolBar(self.toolbar4)
         self.toolbar4.setVisible(False)
+
+        self.toolbar5 = NavigationToolbar(self.api_plot.canvas, self)
+        self.addToolBar(self.toolbar5)
+        self.toolbar5.setVisible(False)
 
         self.tabWidget.currentChanged.connect(self.switch_toolbar)
 
@@ -333,6 +338,17 @@ class NasaGammaApp(QMainWindow):
         self.button_filter_lynx_e.setStyleSheet("background-color : ivory")
         self.button_filter_lynx_e.clicked.connect(self.filter_erg)
 
+        ## API
+        self.api_spect_scale = "log"
+        self.api_yscale.setStyleSheet("background-color : lightyellow")
+        self.api_yscale.clicked.connect(self.api_spect_yscale)
+        self.api_send_to_spect.setStyleSheet("background-color : lightgreen")
+        self.api_send_to_spect.clicked.connect(self.send_to_spect_api)
+        self.api_load_file.setStyleSheet("background-color : lightblue")
+        self.api_load_file.clicked.connect(self.load_api_file)
+        self.api_reset.setStyleSheet("background-color : lightcoral")
+        self.api_reset.clicked.connect(self.load_api_file)
+
     def switch_toolbar(self):
         if self.tabWidget.currentIndex() == 0:
             self.toolbar0.setVisible(True)
@@ -340,30 +356,42 @@ class NasaGammaApp(QMainWindow):
             self.toolbar2.setVisible(False)
             self.toolbar3.setVisible(False)
             self.toolbar4.setVisible(False)
+            self.toolbar5.setVisible(False)
         elif self.tabWidget.currentIndex() == 1:
             self.toolbar0.setVisible(False)
             self.toolbar1.setVisible(True)
             self.toolbar2.setVisible(False)
             self.toolbar3.setVisible(False)
             self.toolbar4.setVisible(False)
+            self.toolbar5.setVisible(False)
         elif self.tabWidget.currentIndex() == 2:
             self.toolbar0.setVisible(False)
             self.toolbar1.setVisible(False)
             self.toolbar2.setVisible(True)
             self.toolbar3.setVisible(False)
             self.toolbar4.setVisible(False)
+            self.toolbar5.setVisible(False)
         elif self.tabWidget.currentIndex() == 3:
             self.toolbar0.setVisible(False)
             self.toolbar1.setVisible(False)
             self.toolbar2.setVisible(False)
             self.toolbar3.setVisible(True)
             self.toolbar4.setVisible(False)
+            self.toolbar5.setVisible(False)
         elif self.tabWidget.currentIndex() == 4:
             self.toolbar0.setVisible(False)
             self.toolbar1.setVisible(False)
             self.toolbar2.setVisible(False)
             self.toolbar3.setVisible(False)
             self.toolbar4.setVisible(True)
+            self.toolbar5.setVisible(False)
+        elif self.tabWidget.currentIndex() == 5:
+            self.toolbar0.setVisible(False)
+            self.toolbar1.setVisible(False)
+            self.toolbar2.setVisible(False)
+            self.toolbar3.setVisible(False)
+            self.toolbar4.setVisible(False)
+            self.toolbar5.setVisible(True)
 
     def create_graph(self, fit=True, reset=True):
         self.label_units.setText(self.e_units)
@@ -1171,6 +1199,207 @@ class NasaGammaApp(QMainWindow):
     def send_to_spect(self):
         self.spect = sp.Spectrum(counts=self.tl.spect_cts)
         self.create_graph(fit=False, reset=False)
+
+    ## API
+    def load_api_file(self):
+        self.reset_api_figure()
+        date = self.api_date_txt.text()
+        runnr = int(self.api_run_txt.text())
+        ch = int(self.api_ch_txt.text())
+        try:
+            self.df_api = read_parquet_api.read_parquet_file(date, runnr, ch)
+            self.dfe = []
+            self.dfxy = []
+            self.dft = []
+            self.initialize_plots_api()
+            self.api_spect_yscale()
+            self.fig_api.canvas.draw_idle()
+        except:
+            print("File not found")
+
+    def initialize_plots_api(self):
+        self.trange = [-40, 120]  # dt range
+        self.ebins = 2048  # energy bins
+        self.hexbins = 80  # x-y bins
+        self.tbins = 512  # time bins
+        self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
+        self.colormap = "plasma"
+        self.plot_energy_hist_api(self.df_api)
+        self.ax_api_spe.set_yscale(self.api_spect_scale)
+        self.plot_time_hist_api(self.df_api)
+        self.plot_xy_api(self.df_api)
+        self.espan_api()
+        self.xyspan_api()
+        self.tspan_api()
+
+    def reset_api_figure(self):
+        self.fig_api = self.api_plot.canvas.figure
+        self.fig_api.clear()
+        self.fig_api.set_constrained_layout(True)
+        gs = self.fig_api.add_gridspec(
+            2, 2, width_ratios=[0.5, 0.5], height_ratios=[1, 1]
+        )
+
+        # axes
+        self.ax_api_spe = self.fig_api.add_subplot(gs[0, 0])
+        self.ax_api_dt = self.fig_api.add_subplot(gs[1, 0])
+        self.ax_api_xy = self.fig_api.add_subplot(gs[:, 1])
+
+    def send_to_spect_api(self):
+        self.spect = sp.Spectrum(counts=self.api_gam)
+        self.e_units = "channels"
+        self.create_graph(fit=False, reset=False)
+
+    def plot_energy_hist_api(self, df):
+        self.api_gam, self.api_edg = np.histogram(df["energy"], bins=self.ebins)
+        self.api_ch = np.arange(0, self.ebins, 1)
+        self.ax_api_spe.plot(self.api_ch, self.api_gam, color="green")
+
+    def plot_time_hist_api(self, df):
+        df["dt"].plot.hist(
+            bins=self.tbins,
+            ax=self.ax_api_dt,
+            range=self.trange,
+            alpha=0.7,
+            edgecolor="black",
+        )
+
+    def plot_xy_api(self, df, cbar=True):
+        df.plot.hexbin(
+            x="X2",
+            y="Y2",
+            gridsize=self.hexbins,
+            cmap=self.colormap,
+            ax=self.ax_api_xy,
+            colorbar=cbar,
+            extent=self.xyplane,
+        )  # , bins="log")
+
+    def api_spect_yscale(self):
+        if self.api_spect_scale == "log":
+            self.ax_api_spe.set_yscale("linear")
+            self.api_spect_scale = "linear"
+        else:
+            self.ax_api_spe.set_yscale("log")
+            self.api_spect_scale = "log"
+        self.fig_api.canvas.draw_idle()
+
+    def espan_api(self):
+        self.span_api = SpanSelector(
+            self.ax_api_spe,
+            self.enselect_api,
+            "horizontal",
+            useblit=True,
+            interactive=True,
+            props=dict(alpha=0.3, facecolor="green"),
+        )
+
+    def enselect_api(self, xmin, xmax):
+        bool_df = np.array([len(self.dfe), len(self.dfxy), len(self.dft)])
+        nonzero = np.nonzero(bool_df)[0]
+        if len(nonzero) == 0 or len(nonzero) >= 2:
+            df = self.df_api
+        else:
+            if len(self.dfe) != 0:
+                df = self.df_api
+            elif len(self.dfxy) != 0:
+                df = self.dfxy
+            else:
+                df = self.dft
+
+        idxmin = int(round(xmin, 4))
+        idxmax = int(round(xmax, 4))
+        print("xmin: ", idxmin)
+        print("xmax: ", idxmax)
+        self.ax_api_dt.clear()
+        self.ax_api_xy.clear()
+        elim = (df["energy"] > self.api_edg[idxmin]) & (
+            df["energy"] < self.api_edg[idxmax]
+        )
+        self.dfe = df[elim]
+        self.dfe.reset_index(drop=True, inplace=True)
+        self.plot_time_hist_api(df=self.dfe)
+        self.plot_xy_api(self.dfe, cbar=False)
+        # self.span_api.update()
+        self.fig_api.canvas.draw_idle()
+        #     tspan.update()
+
+    def xyspan_api(self):
+        # drawtype is 'box' or 'line' or 'none'
+        self.toggle_selector = RectangleSelector(
+            self.ax_api_xy,
+            self.xyselect_api,
+            useblit=True,
+            button=[1, 3],  # don't use middle button
+            minspanx=1,
+            minspany=1,
+            spancoords="pixels",
+            interactive=True,
+            props=dict(facecolor="white", edgecolor="black", alpha=0.5, fill=True),
+        )
+
+    def xyselect_api(self, eclick, erelease):
+        "eclick and erelease are the press and release events"
+        bool_df = np.array([len(self.dfe), len(self.dfxy), len(self.dft)])
+        nonzero = np.nonzero(bool_df)[0]
+        if len(nonzero) == 0 or len(nonzero) >= 2:
+            df = self.df_api
+        else:
+            if len(self.dfe) != 0:
+                df = self.dfe
+            elif len(self.dfxy) != 0:
+                df = self.df_api
+            else:
+                df = self.dft
+        self.ax_api_spe.clear()
+        self.ax_api_dt.clear()
+        x1, y1 = eclick.xdata, eclick.ydata
+        x2, y2 = erelease.xdata, erelease.ydata
+        print("(%3.2f, %3.2f) --> (%3.2f, %3.2f)" % (x1, y1, x2, y2))
+        # print(" The button you used were: %s %s" % (eclick.button, erelease.button))
+        xlim = (df["X2"] > x1) & (df["X2"] < x2)
+        ylim = (df["Y2"] > y1) & (df["Y2"] < y2)
+        self.dfxy = df[xlim & ylim]
+        self.dfxy.reset_index(drop=True, inplace=True)
+        self.plot_energy_hist_api(df=self.dfxy)
+        self.plot_time_hist_api(df=self.dfxy)
+        # self.toggle_selector.update()
+        self.fig_api.canvas.draw_idle()
+
+    def tspan_api(self):
+        self.tspan = SpanSelector(
+            self.ax_api_dt,
+            self.tselect_api,
+            "horizontal",
+            useblit=True,
+            interactive=True,
+            props=dict(alpha=0.4, facecolor="yellow"),
+        )
+
+    def tselect_api(self, tmin, tmax):
+        bool_df = np.array([len(self.dfe), len(self.dfxy), len(self.dft)])
+        nonzero = np.nonzero(bool_df)[0]
+        if len(nonzero) == 0 or len(nonzero) >= 2:
+            df = self.df_api
+        else:
+            if len(self.dfe) != 0:
+                df = self.dfe
+            elif len(self.dfxy) != 0:
+                df = self.df_api
+            else:
+                df = self.df_api
+        print("tmin: ", round(tmin, 3))
+        print("tmax: ", round(tmax, 3))
+        self.ax_api_spe.clear()
+        self.ax_api_xy.clear()
+        tlim = (df["dt"] > tmin) & (df["dt"] < tmax)
+        self.dft = df[tlim]
+        self.dft.reset_index(drop=True, inplace=True)
+        self.plot_energy_hist_api(df=self.dft)
+        self.plot_xy_api(self.dft, cbar=False)
+        self.fig_api.canvas.draw_idle()
+        # espan.update()
+        # tspan.update()
 
     ## menu bar
     def apply_params(self):
