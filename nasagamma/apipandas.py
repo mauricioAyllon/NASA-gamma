@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 
 # from mayavi import mlab
 import pandas as pd
-import mpl_scatter_density  # adds projection='scatter_density'
+
+# import mpl_scatter_density  # adds projection='scatter_density'
 from matplotlib.colors import LinearSegmentedColormap
 
 
