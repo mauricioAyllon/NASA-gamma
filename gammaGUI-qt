@@ -1212,14 +1212,14 @@ class NasaGammaApp(QMainWindow):
             self.dfxy = []
             self.dft = []
             self.initialize_plots_api()
-            self.api_spect_yscale()
+            # self.api_spect_yscale()
             self.fig_api.canvas.draw_idle()
         except:
             print("File not found")
 
     def initialize_plots_api(self):
         self.trange = [-40, 120]  # dt range
-        self.ebins = 2048  # energy bins
+        self.ebins = 2 ** 13  # energy bins
         self.hexbins = 80  # x-y bins
         self.tbins = 512  # time bins
         self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
@@ -1254,6 +1254,7 @@ class NasaGammaApp(QMainWindow):
         self.api_gam, self.api_edg = np.histogram(df["energy"], bins=self.ebins)
         self.api_ch = np.arange(0, self.ebins, 1)
         self.ax_api_spe.plot(self.api_ch, self.api_gam, color="green")
+        self.ax_api_spe.set_xlabel("Channels")
 
     def plot_time_hist_api(self, df):
         df["dt"].plot.hist(
@@ -1263,6 +1264,7 @@ class NasaGammaApp(QMainWindow):
             alpha=0.7,
             edgecolor="black",
         )
+        self.ax_api_dt.set_xlabel("dt [ns]")
 
     def plot_xy_api(self, df, cbar=True):
         df.plot.hexbin(
