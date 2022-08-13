@@ -1251,7 +1251,9 @@ class NasaGammaApp(QMainWindow):
         self.create_graph(fit=False, reset=False)
 
     def plot_energy_hist_api(self, df):
-        self.api_gam, self.api_edg = np.histogram(df["energy"], bins=self.ebins)
+        self.api_gam, self.api_edg = np.histogram(
+            df["energy"], bins=self.ebins, range=[0, 8]
+        )
         self.api_ch = np.arange(0, self.ebins, 1)
         self.ax_api_spe.plot(self.api_ch, self.api_gam, color="green")
         self.ax_api_spe.set_xlabel("Channels")
@@ -1337,7 +1339,7 @@ class NasaGammaApp(QMainWindow):
             minspany=1,
             spancoords="pixels",
             interactive=True,
-            props=dict(facecolor="white", edgecolor="black", alpha=0.5, fill=True),
+            props=dict(facecolor="white", edgecolor="black", alpha=0.1, fill=True),
         )
 
     def xyselect_api(self, eclick, erelease):
