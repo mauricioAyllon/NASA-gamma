@@ -3,7 +3,6 @@ Read ROOTS binary file
 """
 
 import dateparser
-import ROOTS
 import sys
 import numpy as np
 import pandas as pd
@@ -18,6 +17,8 @@ from nasagamma import apipandas as api
 
 
 def read_parquet_file(date, runnr, ch):
+    import ROOTS
+
     # only channels 4 (LaBr==True) and 5 (LaBr==False)
     RUNNR = runnr
     DATE = dateparser.parse(date)
@@ -42,6 +43,29 @@ def read_parquet_file(date, runnr, ch):
 
     # load data
     files = list(FILE.glob(f"parquet-data/{fname}-*-pandas.parquet"))
+    df = pd.read_parquet(files[0])
+
+    if len(files) > 1:
+        for f in files[1:]:
+            df0 = pd.read_parquet(f)
+            df = pd.concat([df, df0])
+
+    df["dt"] *= 1e9  # to ns
+    if ch == 4:
+        df = df[df["LaBr[y/n]"] == True]
+    elif ch == 5:
+        df = df[df["LaBr[y/n]"] == False]
+    df = api.calc_own_pos(df)
+    df.reset_index(drop=True, inplace=True)
+    return df
+
+
+def read_parquet_file_from_path(filepath, ch):
+    from pathlib import Path
+
+    # load data
+    path = Path(filepath)
+    files = list(path.glob("parquet-data/*-pandas.parquet"))
     df = pd.read_parquet(files[0])
 
     if len(files) > 1:

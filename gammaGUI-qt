@@ -1203,19 +1203,24 @@ class NasaGammaApp(QMainWindow):
     ## API
     def load_api_file(self):
         self.reset_api_figure()
-        date = self.api_date_txt.text()
-        runnr = int(self.api_run_txt.text())
         ch = int(self.api_ch_txt.text())
         try:
+            date = self.api_date_txt.text()
+            runnr = int(self.api_run_txt.text())
             self.df_api = read_parquet_api.read_parquet_file(date, runnr, ch)
             self.dfe = []
             self.dfxy = []
             self.dft = []
             self.initialize_plots_api()
-            # self.api_spect_yscale()
             self.fig_api.canvas.draw_idle()
         except:
-            print("File not found")
+            filepath = self.api_path_txt.text()
+            self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
+            self.dfe = []
+            self.dfxy = []
+            self.dft = []
+            self.initialize_plots_api()
+            self.fig_api.canvas.draw_idle()
 
     def initialize_plots_api(self):
         self.trange = [-40, 120]  # dt range
