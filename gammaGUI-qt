@@ -1305,7 +1305,7 @@ class NasaGammaApp(QMainWindow):
             df = self.df_api
         else:
             if len(self.dfe) != 0:
-                df = self.df_api
+                df = self.dfe
             elif len(self.dfxy) != 0:
                 df = self.dfxy
             else:
@@ -1352,7 +1352,7 @@ class NasaGammaApp(QMainWindow):
             if len(self.dfe) != 0:
                 df = self.dfe
             elif len(self.dfxy) != 0:
-                df = self.df_api
+                df = self.dfxy
             else:
                 df = self.dft
         self.ax_api_spe.clear()
@@ -1367,6 +1367,7 @@ class NasaGammaApp(QMainWindow):
         self.dfxy.reset_index(drop=True, inplace=True)
         self.plot_energy_hist_api(df=self.dfxy)
         self.plot_time_hist_api(df=self.dfxy)
+        self.plot_xy_api(df=self.dfxy, cbar=False)
         # self.toggle_selector.update()
         self.fig_api.canvas.draw_idle()
 
@@ -1389,9 +1390,9 @@ class NasaGammaApp(QMainWindow):
             if len(self.dfe) != 0:
                 df = self.dfe
             elif len(self.dfxy) != 0:
-                df = self.df_api
+                df = self.dfxy
             else:
-                df = self.df_api
+                df = self.dft
         print("tmin: ", round(tmin, 3))
         print("tmax: ", round(tmax, 3))
         self.ax_api_spe.clear()
