@@ -62,6 +62,7 @@ def calc_own_pos(df, xkey_new="X2", ykey_new="Y2"):
     df2 = df.copy(deep=True)
     df2[xkey_new] = X2
     df2[ykey_new] = Y2
+    df2.fillna(0, inplace=True)
     return df2
 
 
