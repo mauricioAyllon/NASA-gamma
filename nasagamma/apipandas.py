@@ -184,6 +184,21 @@ def plot_dz(z, zbins, zrange):
     plt.legend()
 
 
+def plot_2D_alphas(df, xkey="X", ykey="Y"):
+    hexbins = 80  # x-y bins
+    xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
+    colormap = "plasma"
+    df.plot.hexbin(
+        x=xkey,
+        y=ykey,
+        gridsize=hexbins,
+        cmap=colormap,
+        # ax=ax_api_xy,
+        colorbar=True,
+        extent=xyplane,
+    )  # , bins="log")
+
+
 def plot_2Dposition(X, Y, pbins, Vmax=None):
     """Plot 2D intensity map"""
     result, xedges, yedges = np.histogram2d(X, Y, pbins)

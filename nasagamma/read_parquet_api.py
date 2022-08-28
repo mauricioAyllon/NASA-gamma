@@ -16,7 +16,7 @@ from nasagamma import apipandas as api
 # matplotlib.use('qtagg')
 
 
-def read_parquet_file(date, runnr, ch):
+def read_parquet_file(date, runnr, ch, flat_field=False):
     import ROOTS
 
     # only channels 4 (LaBr==True) and 5 (LaBr==False)
@@ -49,15 +49,17 @@ def read_parquet_file(date, runnr, ch):
         for f in files[1:]:
             df0 = pd.read_parquet(f)
             df = pd.concat([df, df0])
-
-    df["dt"] *= 1e9  # to ns
-    if ch == 4:
-        df = df[df["LaBr[y/n]"] == True]
-    elif ch == 5:
-        df = df[df["LaBr[y/n]"] == False]
     df = api.calc_own_pos(df)
-    df.reset_index(drop=True, inplace=True)
-    return df
+    if flat_field:
+        return df
+    else:
+        df["dt"] *= 1e9  # to ns
+        if ch == 4 or ch == 3:
+            df = df[df["LaBr[y/n]"] == True]
+        elif ch == 5:
+            df = df[df["LaBr[y/n]"] == False]
+        df.reset_index(drop=True, inplace=True)
+        return df
 
 
 def read_parquet_file_from_path(filepath, ch):

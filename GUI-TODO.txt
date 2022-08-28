@@ -1,0 +1,16 @@
+gammaGUI todo:
+1) API: 
+	a) Add slider for vmax (XY plot)
+	b) Add a button logXY
+	c) Fix  filtering logic (up to 3 filters)
+	
+2) Spectrum:
+	a) Add Peak button to add peaks at selected locations
+	b) Isotope ID
+	
+3) Energy calibration:
+	a) Fix e.units=channels
+	b) Add calibration equation for repeatability
+	
+4) Efficiency:
+	a) Add uncertainty in activity and propagate errors

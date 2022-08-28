@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1633</width>
+    <width>2120</width>
     <height>1104</height>
    </rect>
   </property>
@@ -50,6 +50,18 @@
          </widget>
         </item>
         <item row="0" column="2" rowspan="2">
+         <widget class="QPushButton" name="button_add_peak">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Add Peak</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3" rowspan="2">
          <spacer name="horizontalSpacer_24">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -62,7 +74,7 @@
           </property>
          </spacer>
         </item>
-        <item row="0" column="3">
+        <item row="0" column="4">
          <widget class="QPushButton" name="button_add_cal">
           <property name="font">
            <font>
@@ -74,7 +86,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="4" rowspan="2">
+        <item row="0" column="5" rowspan="2">
          <widget class="QPushButton" name="button_add_fwhm">
           <property name="font">
            <font>
@@ -86,7 +98,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="5" rowspan="2">
+        <item row="0" column="6" rowspan="2">
          <widget class="QPushButton" name="button_add_eff">
           <property name="font">
            <font>
@@ -98,7 +110,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="6">
+        <item row="0" column="7">
          <spacer name="horizontalSpacer_6">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -111,7 +123,7 @@
           </property>
          </spacer>
         </item>
-        <item row="0" column="7" rowspan="2">
+        <item row="0" column="8" rowspan="2">
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
            <widget class="QPushButton" name="pushButton_gauss">
@@ -139,7 +151,7 @@
           </item>
          </layout>
         </item>
-        <item row="0" column="8">
+        <item row="0" column="9">
          <widget class="QPushButton" name="pushButton_poly1">
           <property name="font">
            <font>
@@ -151,7 +163,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="9">
+        <item row="0" column="10">
          <widget class="QPushButton" name="pushButton_poly2">
           <property name="font">
            <font>
@@ -163,7 +175,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="10">
+        <item row="0" column="11">
          <widget class="QPushButton" name="pushButton_poly3">
           <property name="font">
            <font>
@@ -175,7 +187,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="3">
+        <item row="1" column="4">
          <widget class="QPushButton" name="button_remove_cal">
           <property name="font">
            <font>
@@ -187,7 +199,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="8">
+        <item row="1" column="9">
          <widget class="QPushButton" name="pushButton_poly4">
           <property name="font">
            <font>
@@ -199,7 +211,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="9">
+        <item row="1" column="10">
          <widget class="QPushButton" name="pushButton_poly5">
           <property name="font">
            <font>
@@ -211,7 +223,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="10">
+        <item row="1" column="11">
          <widget class="QPushButton" name="pushButton_exp">
           <property name="font">
            <font>
@@ -223,7 +235,7 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0" colspan="11">
+        <item row="2" column="0" colspan="12">
          <widget class="MplWidget" name="main_plot" native="true">
           <property name="mouseTracking">
            <bool>false</bool>
@@ -1407,7 +1419,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1633</width>
+     <width>2120</width>
      <height>31</height>
     </rect>
    </property>

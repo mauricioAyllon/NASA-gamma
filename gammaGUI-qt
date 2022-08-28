@@ -40,7 +40,7 @@ from PyQt5.uic import loadUi
 from PyQt5.QtCore import pyqtSlot
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from matplotlib.widgets import SpanSelector, RectangleSelector
+from matplotlib.widgets import SpanSelector, RectangleSelector, Slider
 from param_handle import get_spect_search
 from nasagamma import peakfit as pf
 from nasagamma import peaksearch as ps
@@ -110,6 +110,9 @@ class NasaGammaApp(QMainWindow):
         self.scale = "linear"
         self.pushButton_scale.clicked.connect(self.update_scale)
         self.pushButton_scale.setStyleSheet("background-color : lightgoldenrodyellow")
+        self.button_add_peak.setStyleSheet("background-color : silver")
+        self.button_add_peak.setCheckable(True)
+        self.button_add_peak.clicked.connect(self.add_peak)
         # push buttons
         self.bg = "poly1"
         self.pushButton_poly1.setStyleSheet("background-color : lightgreen")
@@ -222,6 +225,9 @@ class NasaGammaApp(QMainWindow):
             pass
 
         self.button_remove_cal.clicked.connect(self.remove_cal)
+        # peak search range
+        self.x0 = None
+        self.x1 = None
 
         ## energy calibration
         self.mean_vals = [0]
@@ -394,6 +400,7 @@ class NasaGammaApp(QMainWindow):
             self.toolbar5.setVisible(True)
 
     def create_graph(self, fit=True, reset=True):
+        self.reset_api_figure()  # to delete
         self.label_units.setText(self.e_units)
         if reset:
             self.reset_main_figure()
@@ -477,6 +484,10 @@ class NasaGammaApp(QMainWindow):
             self.ax_main.set_yscale("log")
             self.scale = "log"
         self.fig.canvas.draw_idle()
+
+    def add_peak(self):
+        if self.button_add_peak.isChecked():
+            print("Clicked!")
 
     def new_window_custom(self):
         self.w_cust = WindowCust()
@@ -805,13 +816,23 @@ class NasaGammaApp(QMainWindow):
             self.spect = sp.Spectrum(
                 counts=self.spect.counts, energies=self.pred_erg, e_units=self.e_units
             )
-            self.search = ps.PeakSearch(
-                self.spect,
-                self.ref_x,
-                self.ref_fwhm,
-                self.fwhm_at_0,
-                min_snr=self.min_snr,
-            )
+            if x0 is None:
+                self.search = ps.PeakSearch(
+                    self.spect,
+                    self.ref_x,
+                    self.ref_fwhm,
+                    self.fwhm_at_0,
+                    min_snr=self.min_snr,
+                )
+            else:
+                self.search = ps.PeakSearch(
+                    self.spect,
+                    self.ref_x,
+                    self.ref_fwhm,
+                    self.fwhm_at_0,
+                    min_snr=self.min_snr,
+                    xrange=[self.x0, self.x1],
+                )
 
             self.create_graph(fit=True)
         except:
@@ -1220,7 +1241,6 @@ class NasaGammaApp(QMainWindow):
             self.dfxy = []
             self.dft = []
             self.initialize_plots_api()
-            self.fig_api.canvas.draw_idle()
 
     def initialize_plots_api(self):
         self.trange = [-40, 120]  # dt range
@@ -1236,6 +1256,7 @@ class NasaGammaApp(QMainWindow):
         self.espan_api()
         self.xyspan_api()
         self.tspan_api()
+        self.fig_api.canvas.draw_idle()
 
     def reset_api_figure(self):
         self.fig_api = self.api_plot.canvas.figure
@@ -1246,9 +1267,20 @@ class NasaGammaApp(QMainWindow):
         )
 
         # axes
+        axcolor = "lightgoldenrodyellow"
         self.ax_api_spe = self.fig_api.add_subplot(gs[0, 0])
         self.ax_api_dt = self.fig_api.add_subplot(gs[1, 0])
+
         self.ax_api_xy = self.fig_api.add_subplot(gs[:, 1])
+        # self.ax_api_xy.patch.set_facecolor("white")
+
+        # [left, bottom, width, height]
+        self.ax_api_slid = self.fig_api.add_axes(
+            [0.625, 0.95, 0.21, 0.05], facecolor=axcolor
+        )
+        self.ax_api_slid.set_yticks([])
+        self.ax_api_slid.set_xticks([])
+        self.fig_api.canvas.draw_idle()  # to delete
 
     def send_to_spect_api(self):
         self.spect = sp.Spectrum(counts=self.api_gam)
@@ -1274,6 +1306,13 @@ class NasaGammaApp(QMainWindow):
         self.ax_api_dt.set_xlabel("dt [ns]")
 
     def plot_xy_api(self, df, cbar=True):
+        self.vmax = (
+            plt.hexbin(
+                x=df["X2"], y=df["Y2"], gridsize=self.hexbins, extent=self.xyplane
+            )
+            .get_array()
+            .max()
+        )
         df.plot.hexbin(
             x="X2",
             y="Y2",
@@ -1282,7 +1321,14 @@ class NasaGammaApp(QMainWindow):
             ax=self.ax_api_xy,
             colorbar=cbar,
             extent=self.xyplane,
+            vmax=self.vmax,
         )  # , bins="log")
+        # intensity_slider = Slider(
+        # ax=self.ax_api_slid,
+        # label="vmax",
+        # valmin=0.1,
+        # valmax=30,
+        # valinit=init_frequency)
 
     def api_spect_yscale(self):
         if self.api_spect_scale == "log":
@@ -1419,15 +1465,15 @@ class NasaGammaApp(QMainWindow):
         self.ref_fwhm = float(self.text_ref_fwhm.text())
         self.fwhm_at_0 = 1
         if self.text_x0.text() and self.text_x1.text():
-            x0 = float(self.text_x0.text())
-            x1 = float(self.text_x1.text())
+            self.x0 = float(self.text_x0.text())
+            self.x1 = float(self.text_x1.text())
             self.search = ps.PeakSearch(
                 self.spect,
                 self.ref_x,
                 self.ref_fwhm,
                 self.fwhm_at_0,
                 min_snr=self.min_snr,
-                xrange=[x0, x1],
+                xrange=[self.x0, self.x1],
             )
         else:
             self.search = ps.PeakSearch(
