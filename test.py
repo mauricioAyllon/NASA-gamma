@@ -1,19 +1,26 @@
-# -*- coding: utf-8 -*-
 """
-Created on Wed Nov 17 15:05:08 2021
-@author: mauricio
 Test nasagamma modules
 """
 from nasagamma import spectrum as sp
 from nasagamma import peaksearch as ps
 from nasagamma import peakfit as pf
-from nasagamma import read_cnf
-import param_handle
+from nasagamma import file_reader
 import traceback
 import pandas as pd
 
+# import sys, os
+
+# # Disable print
+# def blockPrint():
+#     sys.stdout = open(os.devnull, 'w')
+
+# # Restore print
+# def enablePrint():
+#     sys.stdout = sys.__stdout__
+
+
 file_csv = "examples/data/gui_test_data_labr_uncalibrated.csv"
-file_cnf = "examples/data/03-23-2021-MGS.cnf"
+file_cnf = "examples/data/2021-03-23-MGS.cnf"
 file_cal = "examples/data/gui_test_data_labr.csv"
 file_hpge = "examples/data/gui_test_data_hpge.csv"
 
@@ -50,8 +57,8 @@ def check_nasagamma():
 
 def check_csv_reader():
     try:
-        e_units1, _ = param_handle.read_csv_file(file_csv)
-        e_units2, _ = param_handle.read_csv_file(file_cal)
+        e_units1, _ = file_reader.read_csv_file(file_csv)
+        e_units2, _ = file_reader.read_csv_file(file_cal)
         if e_units1 == "channels" and e_units2 == "MeV":
             log(green("PASS"), "csv file reader OK")
         else:
@@ -62,7 +69,7 @@ def check_csv_reader():
 
 def check_cnf_reader():
     try:
-        e_units, spect = read_cnf.read_cnf_to_spect(file_cnf)
+        e_units, spect = file_reader.read_cnf_to_spect(file_cnf)
         if e_units == "keV" and spect.counts.shape[0] > 0:
             log(green("PASS"), "cnf file reader OK")
     except:
@@ -87,7 +94,7 @@ def check_peaksearch():
         df = pd.read_csv(file_csv)
         cts_np = df["counts"].to_numpy()
         spect_csv = sp.Spectrum(counts=cts_np)
-        _, spect_cnf = read_cnf.read_cnf_to_spect(file_cnf)
+        _, spect_cnf = file_reader.read_cnf_to_spect(file_cnf)
         # without range
         try:
             search1 = ps.PeakSearch(spect_csv, ref_x=420, ref_fwhm=20)
@@ -114,10 +121,12 @@ def check_peaksearch():
 def check_peakfit():
     search1, search2, search3, search4 = check_peaksearch()
     try:
+        # blockPrint()
         fit1 = pf.PeakFit(search1, xrange=[600, 800], bkg="poly1")
         fit2 = pf.PeakFit(search2, xrange=[1080, 1400], bkg="poly1")
         fit3 = pf.PeakFit(search3, xrange=[700, 745], bkg="poly1")
         fit4 = pf.PeakFit(search4, xrange=[550, 700], bkg="poly1")
+        # enablePrint()
         log(green("PASS"), "Peakfit class ok")
     except:
         log(red("FAIL"), "Cannot instantiate a peakfit object")
