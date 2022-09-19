@@ -11,7 +11,7 @@ Usage:
       --ref_x=<xref>            x reference for fwhm_ref
       --ref_fwhm=<ref_fwhm>     fwhm ref corresponding to x_ref
       --cebr                    detector type (cerium bromide)
-      --labr                    detector type (lanthanum broide)
+      --labr                    detector type (lanthanum bromide)
       --hpge                    detector type (HPGe)
       
   
@@ -40,8 +40,8 @@ from PyQt5.uic import loadUi
 from PyQt5.QtCore import pyqtSlot
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from matplotlib.widgets import SpanSelector, RectangleSelector, Slider
-from param_handle import get_spect_search
+from matplotlib.widgets import SpanSelector, RectangleSelector
+from nasagamma import param_handle
 from nasagamma import peakfit as pf
 from nasagamma import peaksearch as ps
 from nasagamma import spectrum as sp
@@ -208,7 +208,7 @@ class NasaGammaApp(QMainWindow):
         self.list_xrange = []
         self.commands = commands
 
-        get_input = get_spect_search(self.commands)
+        get_input = param_handle.get_spect_search(self.commands)
         if get_input is not None:
             (
                 self.spect,
@@ -235,6 +235,7 @@ class NasaGammaApp(QMainWindow):
         self.pred_erg = 0
         self.mean_vals_not_fit = []
         self.e_vals_not_fit = []
+        self.cal_e_units = None
         # push butons
         self.button_add_cal.setStyleSheet("background-color : lightblue")
         self.button_origin.setStyleSheet("background-color : lightgoldenrodyellow")
@@ -346,8 +347,13 @@ class NasaGammaApp(QMainWindow):
 
         ## API
         self.api_spect_scale = "log"
+        self.api_xy_scale = "lin"
         self.api_yscale.setStyleSheet("background-color : lightyellow")
         self.api_yscale.clicked.connect(self.api_spect_yscale)
+        self.api_button_logxy.setStyleSheet("background-color : lightgoldenrodyellow")
+        self.api_button_logxy.setCheckable(True)
+        self.api_button_logxy.clicked.connect(self.api_xylog)
+        self.api_vmax_txt.returnPressed.connect(self.api_on_returnXY)
         self.api_send_to_spect.setStyleSheet("background-color : lightgreen")
         self.api_send_to_spect.clicked.connect(self.send_to_spect_api)
         self.api_load_file.setStyleSheet("background-color : lightblue")
@@ -625,7 +631,7 @@ class NasaGammaApp(QMainWindow):
         try:
             if self.e_units != "channels":
                 self.e_units = "channels"
-                self.spect = sp.Spectrum(counts=self.spect.counts)
+                self.spect = sp.Spectrum(counts=self.spect.counts, e_units=self.e_units)
                 self.search = ps.PeakSearch(
                     self.spect,
                     self.ref_x,
@@ -676,7 +682,6 @@ class NasaGammaApp(QMainWindow):
         )
 
     def add_point_dont_fit(self):
-
         en = self.w_cal.energy_txt.text().split(",")
         mean_lst = self.get_mean_vals(self.fit)
         self.append_to_list_not_repeated(
@@ -734,10 +739,13 @@ class NasaGammaApp(QMainWindow):
     def check_radioButton(self):
         if self.w_cal.radio_button_ev.isChecked():
             self.e_units = "eV"
+            self.cal_e_units = "eV"
         elif self.w_cal.radio_button_kev.isChecked():
             self.e_units = "keV"
+            self.cal_e_units = "keV"
         elif self.w_cal.radio_button_mev.isChecked():
             self.e_units = "MeV"
+            self.cal_e_units = "MeV"
         else:
             msg = "ERROR: energy units not determined. Will use channels instead"
             print(msg)
@@ -755,7 +763,7 @@ class NasaGammaApp(QMainWindow):
             sig_lst=sigs,
             t_scale=[1, 2],
             decimals=3,
-            e_units=self.e_units,
+            e_units=self.cal_e_units,
             fig=self.fig_cal,
             ax=self.ax_cal_tab,
         )
@@ -813,10 +821,20 @@ class NasaGammaApp(QMainWindow):
 
     def apply_cal(self):
         try:
-            self.spect = sp.Spectrum(
-                counts=self.spect.counts, energies=self.pred_erg, e_units=self.e_units
-            )
-            if x0 is None:
+            if self.cal_e_units is None:
+                self.spect = sp.Spectrum(
+                    counts=self.spect.counts,
+                    energies=self.pred_erg,
+                    e_units=self.e_units,
+                )
+            else:
+                self.spect = sp.Spectrum(
+                    counts=self.spect.counts,
+                    energies=self.pred_erg,
+                    e_units=self.cal_e_units,
+                )
+
+            if self.x0 is None:
                 self.search = ps.PeakSearch(
                     self.spect,
                     self.ref_x,
@@ -836,7 +854,7 @@ class NasaGammaApp(QMainWindow):
 
             self.create_graph(fit=True)
         except:
-            pass
+            print("Could not apply calibration")
 
     ## efficiency calibration
     def reset_eff_figure(self):
@@ -918,7 +936,7 @@ class NasaGammaApp(QMainWindow):
             self.ax_eff.set_ylabel("Efficiency [%]")
             self.fig_eff.canvas.draw_idle()
 
-    def eff_fit2(self):
+    def eff_fit2(self):  # TODO
         pass
 
     def eff_yscale(self):
@@ -1225,21 +1243,21 @@ class NasaGammaApp(QMainWindow):
     def load_api_file(self):
         self.reset_api_figure()
         ch = int(self.api_ch_txt.text())
+        self.dt_flag = 0
+        self.xy_flag = 0
+        self.en_flag = 0
         try:
             date = self.api_date_txt.text()
             runnr = int(self.api_run_txt.text())
             self.df_api = read_parquet_api.read_parquet_file(date, runnr, ch)
-            self.dfe = []
-            self.dfxy = []
-            self.dft = []
+            self.df_current = self.df_api.copy()
+            self.df_previous = self.df_api.copy()
             self.initialize_plots_api()
-            self.fig_api.canvas.draw_idle()
         except:
             filepath = self.api_path_txt.text()
             self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
-            self.dfe = []
-            self.dfxy = []
-            self.dft = []
+            self.df_current = self.df_api.copy()
+            self.df_previous = self.df_api.copy()
             self.initialize_plots_api()
 
     def initialize_plots_api(self):
@@ -1267,19 +1285,22 @@ class NasaGammaApp(QMainWindow):
         )
 
         # axes
-        axcolor = "lightgoldenrodyellow"
+        # axcolor = "lightgoldenrodyellow"
         self.ax_api_spe = self.fig_api.add_subplot(gs[0, 0])
         self.ax_api_dt = self.fig_api.add_subplot(gs[1, 0])
 
         self.ax_api_xy = self.fig_api.add_subplot(gs[:, 1])
+        self.api_xy_scale = "lin"
+        self.api_button_logxy.setChecked(False)
+
         # self.ax_api_xy.patch.set_facecolor("white")
 
         # [left, bottom, width, height]
-        self.ax_api_slid = self.fig_api.add_axes(
-            [0.625, 0.95, 0.21, 0.05], facecolor=axcolor
-        )
-        self.ax_api_slid.set_yticks([])
-        self.ax_api_slid.set_xticks([])
+        # self.ax_api_slid = self.fig_api.add_axes(
+        #     [0.625, 0.95, 0.21, 0.05], facecolor=axcolor
+        # )
+        # self.ax_api_slid.set_yticks([])
+        # self.ax_api_slid.set_xticks([])
         self.fig_api.canvas.draw_idle()  # to delete
 
     def send_to_spect_api(self):
@@ -1305,30 +1326,45 @@ class NasaGammaApp(QMainWindow):
         )
         self.ax_api_dt.set_xlabel("dt [ns]")
 
-    def plot_xy_api(self, df, cbar=True):
-        self.vmax = (
-            plt.hexbin(
-                x=df["X2"], y=df["Y2"], gridsize=self.hexbins, extent=self.xyplane
+    def plot_xy_api(self, df, cbar=True, logxy=False, **kwargs):
+        if logxy:
+            df.plot.hexbin(
+                x="X2",
+                y="Y2",
+                gridsize=self.hexbins,
+                cmap=self.colormap,
+                ax=self.ax_api_xy,
+                colorbar=cbar,
+                extent=self.xyplane,
+                bins="log",
+                **kwargs,
             )
-            .get_array()
-            .max()
-        )
-        df.plot.hexbin(
-            x="X2",
-            y="Y2",
-            gridsize=self.hexbins,
-            cmap=self.colormap,
-            ax=self.ax_api_xy,
-            colorbar=cbar,
-            extent=self.xyplane,
-            vmax=self.vmax,
-        )  # , bins="log")
-        # intensity_slider = Slider(
-        # ax=self.ax_api_slid,
-        # label="vmax",
-        # valmin=0.1,
-        # valmax=30,
-        # valinit=init_frequency)
+        else:
+            df.plot.hexbin(
+                x="X2",
+                y="Y2",
+                gridsize=self.hexbins,
+                cmap=self.colormap,
+                ax=self.ax_api_xy,
+                colorbar=cbar,
+                extent=self.xyplane,
+                **kwargs,
+            )
+        self.fig_api.canvas.draw_idle()
+
+    def api_xylog(self):
+        if self.api_xy_scale == "lin":
+            self.plot_xy_api(self.df_current, cbar=False, logxy=True)
+            self.api_xy_scale = "log"
+        elif self.api_xy_scale == "log":
+            self.plot_xy_api(self.df_current, cbar=False, logxy=False)
+            self.api_xy_scale = "lin"
+
+    def api_on_returnXY(self):
+        self.vmax = int(self.api_vmax_txt.text())
+        self.plot_xy_api(self.df_current, cbar=False, logxy=False, vmax=self.vmax)
+        self.api_xy_scale = "lin"
+        self.api_button_logxy.setChecked(False)
 
     def api_spect_yscale(self):
         if self.api_spect_scale == "log":
@@ -1350,31 +1386,27 @@ class NasaGammaApp(QMainWindow):
         )
 
     def enselect_api(self, xmin, xmax):
-        bool_df = np.array([len(self.dfe), len(self.dfxy), len(self.dft)])
-        nonzero = np.nonzero(bool_df)[0]
-        if len(nonzero) == 0 or len(nonzero) >= 2:
-            df = self.df_api
-        else:
-            if len(self.dfe) != 0:
-                df = self.dfe
-            elif len(self.dfxy) != 0:
-                df = self.dfxy
-            else:
-                df = self.dft
-
         idxmin = int(round(xmin, 4))
         idxmax = int(round(xmax, 4))
         print("xmin: ", idxmin)
         print("xmax: ", idxmax)
         self.ax_api_dt.clear()
         self.ax_api_xy.clear()
-        elim = (df["energy"] > self.api_edg[idxmin]) & (
-            df["energy"] < self.api_edg[idxmax]
-        )
-        self.dfe = df[elim]
-        self.dfe.reset_index(drop=True, inplace=True)
-        self.plot_time_hist_api(df=self.dfe)
-        self.plot_xy_api(self.dfe, cbar=False)
+        if self.en_flag == 0:  # energy filter has not been used before
+            elim = (self.df_current["energy"] > self.api_edg[idxmin]) & (
+                self.df_current["energy"] < self.api_edg[idxmax]
+            )
+            self.df_previous = self.df_current.copy()
+            self.df_current = self.df_current[elim]
+            self.en_flag = 1  # set energy filter to used
+        else:
+            elim = (self.df_previous["energy"] > self.api_edg[idxmin]) & (
+                self.df_previous["energy"] < self.api_edg[idxmax]
+            )
+            self.df_current = self.df_previous[elim]
+        self.df_current.reset_index(drop=True, inplace=True)
+        self.plot_time_hist_api(df=self.df_current)
+        self.plot_xy_api(self.df_current, cbar=False)
         # self.span_api.update()
         self.fig_api.canvas.draw_idle()
         #     tspan.update()
@@ -1395,30 +1427,27 @@ class NasaGammaApp(QMainWindow):
 
     def xyselect_api(self, eclick, erelease):
         "eclick and erelease are the press and release events"
-        bool_df = np.array([len(self.dfe), len(self.dfxy), len(self.dft)])
-        nonzero = np.nonzero(bool_df)[0]
-        if len(nonzero) == 0 or len(nonzero) >= 2:
-            df = self.df_api
-        else:
-            if len(self.dfe) != 0:
-                df = self.dfe
-            elif len(self.dfxy) != 0:
-                df = self.dfxy
-            else:
-                df = self.dft
         self.ax_api_spe.clear()
         self.ax_api_dt.clear()
         x1, y1 = eclick.xdata, eclick.ydata
         x2, y2 = erelease.xdata, erelease.ydata
         print("(%3.2f, %3.2f) --> (%3.2f, %3.2f)" % (x1, y1, x2, y2))
         # print(" The button you used were: %s %s" % (eclick.button, erelease.button))
-        xlim = (df["X2"] > x1) & (df["X2"] < x2)
-        ylim = (df["Y2"] > y1) & (df["Y2"] < y2)
-        self.dfxy = df[xlim & ylim]
-        self.dfxy.reset_index(drop=True, inplace=True)
-        self.plot_energy_hist_api(df=self.dfxy)
-        self.plot_time_hist_api(df=self.dfxy)
-        self.plot_xy_api(df=self.dfxy, cbar=False)
+        if self.xy_flag == 0:  # xy filter not used before
+            xlim = (self.df_current["X2"] > x1) & (self.df_current["X2"] < x2)
+            ylim = (self.df_current["Y2"] > y1) & (self.df_current["Y2"] < y2)
+            self.df_previous = self.df_current.copy()
+            self.df_current = self.df_current[xlim & ylim]
+            self.xy_flag = 1  # set energy filter to used
+        else:
+            xlim = (self.df_previous["X2"] > x1) & (self.df_previous["X2"] < x2)
+            ylim = (self.df_previous["Y2"] > y1) & (self.df_previous["Y2"] < y2)
+            self.df_current = self.df_previous[xlim & ylim]
+        self.df_current.fillna(0)
+        self.df_current.reset_index(drop=True, inplace=True)
+        self.plot_energy_hist_api(df=self.df_current)
+        self.plot_time_hist_api(df=self.df_current)
+        self.plot_xy_api(df=self.df_current, cbar=False)
         # self.toggle_selector.update()
         self.fig_api.canvas.draw_idle()
 
@@ -1433,26 +1462,21 @@ class NasaGammaApp(QMainWindow):
         )
 
     def tselect_api(self, tmin, tmax):
-        bool_df = np.array([len(self.dfe), len(self.dfxy), len(self.dft)])
-        nonzero = np.nonzero(bool_df)[0]
-        if len(nonzero) == 0 or len(nonzero) >= 2:
-            df = self.df_api
-        else:
-            if len(self.dfe) != 0:
-                df = self.dfe
-            elif len(self.dfxy) != 0:
-                df = self.dfxy
-            else:
-                df = self.dft
         print("tmin: ", round(tmin, 3))
         print("tmax: ", round(tmax, 3))
         self.ax_api_spe.clear()
         self.ax_api_xy.clear()
-        tlim = (df["dt"] > tmin) & (df["dt"] < tmax)
-        self.dft = df[tlim]
-        self.dft.reset_index(drop=True, inplace=True)
-        self.plot_energy_hist_api(df=self.dft)
-        self.plot_xy_api(self.dft, cbar=False)
+        if self.dt_flag == 0:
+            tlim = (self.df_current["dt"] > tmin) & (self.df_current["dt"] < tmax)
+            self.df_previous = self.df_current.copy()
+            self.df_current = self.df_current[tlim]
+            self.dt_flag = 1
+        else:
+            tlim = (self.df_previous["dt"] > tmin) & (self.df_previous["dt"] < tmax)
+            self.df_current = self.df_previous[tlim]
+        self.df_current.reset_index(drop=True, inplace=True)
+        self.plot_energy_hist_api(df=self.df_current)
+        self.plot_xy_api(self.df_current, cbar=False)
         self.fig_api.canvas.draw_idle()
         # espan.update()
         # tspan.update()
