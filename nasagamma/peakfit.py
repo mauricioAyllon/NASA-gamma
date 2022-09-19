@@ -55,11 +55,11 @@ class PeakFit:
         self.x_units = search.spectrum.x_units
         self.chan = search.spectrum.channels
         if search.spectrum.energies is None:
-            print("Working with channel numbers")
+            # print("Working with channel numbers")
             self.x = search.spectrum.channels
 
         else:
-            print("Working with energy values")
+            # print("Working with energy values")
             self.x = search.spectrum.energies
 
         self.gaussians_bkg(skew)
@@ -86,7 +86,8 @@ class PeakFit:
             print(f"Found 0 peaks within range {self.xrange}")
             print("Make sure the SNR is set low enough")
         else:
-            print(f"Found {sum(mask)} peak(s) within range {self.xrange}")
+            pass
+            # print(f"Found {sum(mask)} peak(s) within range {self.xrange}")
         pidx = self.search.peaks_idx[mask]
         return mask, pidx
 
@@ -183,7 +184,7 @@ class PeakFit:
                 pars[f"g{i+1}_gamma"].set(value=-1)
             model += gauss0
         fit0 = model.fit(y0, pars, x=x0, weights=np.sqrt(1.0 / y0))
-        print(fit0.message)
+        # print(fit0.message)
         components = fit0.eval_components()
         self.fit_result = fit0
 
