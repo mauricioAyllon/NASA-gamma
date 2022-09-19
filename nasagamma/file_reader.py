@@ -179,3 +179,24 @@ class ReadMCA:
                 start_idx = i
                 break
         self.counts = np.array(filelst[start_idx + 1 : -1], dtype=int)
+
+def read_lynx_csv(file_name):
+    with open(file_name, "r") as myfile:
+        filelst = myfile.readlines()
+
+    for i, line in enumerate(filelst):
+        l = line.lower().split()
+        if "channel," in l and "counts" in l:
+            istart = i
+            break
+    df = pd.read_csv(file_name, skiprows=istart, dtype=float)
+    df.columns = df.columns.str.replace(" ", "")  # remove white spaces
+    df.columns = df.columns.str.lower()
+    ###
+    cols = ["channel", "energy(kev)", "counts"] # as listed on lynx
+    # print("working with energy values")
+    e_units = "keV"
+    spect = sp.Spectrum(counts=df[cols[2]], energies=df[cols[1]], e_units=e_units)
+    spect.x = spect.energies
+
+    return e_units, spect
