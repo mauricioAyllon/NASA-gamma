@@ -1596,7 +1596,9 @@ class NasaGammaApp(QMainWindow):
                 print("Opening file: ", self.fileName)
                 fileName = self.fileName.lower()
 
-                if fileName[-4:] == ".csv":
+                if fileName[-9:] == "-lynx.csv":
+                    self.e_units, self.spect = file_reader.read_lynx_csv(fileName)
+                elif fileName[-4:] == ".csv":
                     self.e_units, self.spect = file_reader.read_csv_file(fileName)
                 elif fileName[-4:] == ".cnf":
                     self.e_units, self.spect = file_reader.read_cnf_to_spect(fileName)
