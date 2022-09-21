@@ -180,6 +180,7 @@ class ReadMCA:
                 break
         self.counts = np.array(filelst[start_idx + 1 : -1], dtype=int)
 
+
 def read_lynx_csv(file_name):
     with open(file_name, "r") as myfile:
         filelst = myfile.readlines()
@@ -193,10 +194,43 @@ def read_lynx_csv(file_name):
     df.columns = df.columns.str.replace(" ", "")  # remove white spaces
     df.columns = df.columns.str.lower()
     ###
-    cols = ["channel", "energy(kev)", "counts"] # as listed on lynx
+    cols = ["channel", "energy(kev)", "counts"]  # as listed on lynx
     # print("working with energy values")
     e_units = "keV"
     spect = sp.Spectrum(counts=df[cols[2]], energies=df[cols[1]], e_units=e_units)
     spect.x = spect.energies
 
     return e_units, spect
+
+
+class ReadCsvLynx:
+    def __init__(self, file):
+        """
+        Read -lynx.csv file.
+
+        Parameters
+        ----------
+        file : string.
+            file path.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.file = file
+        self.start_time = None
+        self.energy_calibration = None
+        self.live_time = None
+        self.real_time = None
+        self.elapsed_computational = None
+        self.eunits = None
+        self.counts = None
+        self.energy = None
+        if file[-9:].lower() != "-lynx.csv":
+            print("ERROR: Must be a -lynx.csv file")
+        self.parse_file()
+
+    def parse_file(self):
+        with open(self.file, "r") as myfile:
+            filelst = myfile.readlines()
