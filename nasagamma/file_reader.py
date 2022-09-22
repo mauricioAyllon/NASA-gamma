@@ -203,7 +203,7 @@ def read_lynx_csv(file_name):
     return e_units, spect
 
 
-class ReadCsvLynx:
+class ReadLynxCsv:
     def __init__(self, file):
         """
         Read -lynx.csv file.
@@ -226,7 +226,10 @@ class ReadCsvLynx:
         self.elapsed_computational = None
         self.eunits = None
         self.counts = None
+        self.count_rate = None
         self.energy = None
+        self.spect = None
+        self.nch = None
         if file[-9:].lower() != "-lynx.csv":
             print("ERROR: Must be a -lynx.csv file")
         self.parse_file()
@@ -234,3 +237,33 @@ class ReadCsvLynx:
     def parse_file(self):
         with open(self.file, "r") as myfile:
             filelst = myfile.readlines()
+        for i, line in enumerate(filelst):
+            l = line.lower().split()
+            if "start" in l and "time," in l:
+                self.start_time = " ".join(l[2:])
+            if "energy" in l and "calibration," in l:
+                self.energy_calibration = " ".join(l[2:])
+            if "live" in l and "time" in l:
+                self.live_time = l[-1] + l[-2]
+            if "real" in l and "time" in l:
+                self.real_time = l[-1] + l[-2]
+            if "elapsed" in l and "computational," in l:
+                self.elapsed_computational = l[-1]
+            if "channel," in l and "counts" in l:
+                istart = i
+                break
+        df = pd.read_csv(self.file, skiprows=istart, dtype=float)
+        df.columns = df.columns.str.replace(" ", "")  # remove white spaces
+        df.columns = df.columns.str.lower()
+        cols = ["channel", "energy(kev)", "counts"]  # as listed on lynx
+        e_units = "keV"
+        self.spect = sp.Spectrum(
+            counts=df[cols[2]],
+            energies=df[cols[1]],
+            e_units=e_units,
+            livetime=float(self.live_time[:-4]),
+        )
+        self.spect.x = self.spect.energies
+        self.counts = self.spect.counts.sum()
+        self.count_rate = self.counts / float(self.live_time[0:-4])
+        self.nch = self.spect.counts.shape[0]
