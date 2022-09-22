@@ -1,15 +1,16 @@
 gammaGUI todo:
 1) API: 
-	a) Add text box for vmax (XY plot)  - done
-	b) Add a button logXY - done
-	c) Fix  filtering logic (up to 3 filters) - done
+	a) Add text box for vmax (XY plot)  - DONE
+	b) Add a button logXY - DONE
+	c) Fix  filtering logic (up to 3 filters) - DONE
+	d) Add filter button to perform filters manually
 	
 2) Spectrum:
-	a) Add Peak button to add peaks at selected locations
-	b) Isotope ID
+	a) Add Peak button to add peaks at selected locations - DONE
+	b) Isotope ID for a) 14 MeV neutrons (Talys), b) Baghdad Atlas (~2.2 MeV), c) thermal (Talys), d) check sources
 	
 3) Energy calibration:
-	a) Fix e.units=channels
+	a) Fix e.units=channels - DONE
 	b) Add calibration equation with free parameters for repeatability
 	
 4) Efficiency:
