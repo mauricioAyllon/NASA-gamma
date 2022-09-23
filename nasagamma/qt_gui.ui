@@ -1451,7 +1451,7 @@
      <x>0</x>
      <y>0</y>
      <width>2120</width>
-     <height>26</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1465,7 +1465,7 @@
      <string>Options</string>
     </property>
     <addaction name="clearSpectrum"/>
-    <addaction name="info_cnf_file"/>
+    <addaction name="info_file"/>
     <addaction name="isotopeID"/>
    </widget>
    <widget class="QMenu" name="menuSave">
@@ -1509,9 +1509,9 @@
     <string>Clear spectrum</string>
    </property>
   </action>
-  <action name="info_cnf_file">
+  <action name="info_file">
    <property name="text">
-    <string>Info (cnf file)</string>
+    <string>File info</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+I</string>
