@@ -81,12 +81,12 @@ class WindowEff(QDialog):
         self.setWindowTitle("Efficiency calibration")
 
 
-class WindowCNF(QDialog):
+class WindowInfoFile(QDialog):
     def __init__(self):
         QDialog.__init__(self)
-        ui_file = pkg_resources.resource_filename("nasagamma", "win_cnf.ui")
+        ui_file = pkg_resources.resource_filename("nasagamma", "win_info_file.ui")
         loadUi(ui_file, self)
-        self.setWindowTitle("CNF file information")
+        self.setWindowTitle("File information")
 
 
 class Window_isotID(QDialog):
@@ -190,7 +190,7 @@ class NasaGammaApp(QMainWindow):
         self.saveFitReport.triggered.connect(self.saveReport)
         self.openFile.triggered.connect(self.open_file)
         self.saveSpect.triggered.connect(self.save_spect)
-        self.info_cnf_file.triggered.connect(self.display_info_cnf)
+        self.info_file.triggered.connect(self.display_info_file)
         self.isotopeID.triggered.connect(self.activate_isotope_id)
         self.clearSpectrum.triggered.connect(self.reset_main_figure)
 
@@ -1574,9 +1574,9 @@ class NasaGammaApp(QMainWindow):
             else:
                 df.to_csv(f"{fileName}.csv", index=False)
 
-    def display_info_cnf(self):
-        self.w_cnf = WindowCNF()
-        self.w_cnf.show()
+    def display_info_file(self):
+        self.w_info_file = WindowInfoFile()
+        self.w_info_file.show()
         if self.fileName[-9:] == "-lynx.csv":
             try:
                 lt = float(self.lynxcsv.live_time[0:-4])
@@ -1589,19 +1589,19 @@ class NasaGammaApp(QMainWindow):
                 nch = self.lynxcsv.nch
                 energy_cal = self.lynxcsv.energy_calibration
                 start_time = self.lynxcsv.start_time
-                self.w_cnf.label_lt.setText(str(livetime))
-                self.w_cnf.label_rt.setText(str(realtime))
-                self.w_cnf.label_dt.setText(str(deadtime))
-                self.w_cnf.label_tc.setText(str(total_cts))
-                self.w_cnf.label_cr.setText(str(count_rate))
-                self.w_cnf.label_nch.setText(str(nch))
-                self.w_cnf.label_time.setText(start_time)
-                self.w_cnf.label_energy_cal.setText(str(energy_cal))
+                self.w_info_file.label_lt.setText(str(livetime))
+                self.w_info_file.label_rt.setText(str(realtime))
+                self.w_info_file.label_dt.setText(str(deadtime))
+                self.w_info_file.label_tc.setText(str(total_cts))
+                self.w_info_file.label_cr.setText(str(count_rate))
+                self.w_info_file.label_nch.setText(str(nch))
+                self.w_info_file.label_time.setText(start_time)
+                self.w_info_file.label_energy_cal.setText(str(energy_cal))
             except:
                 invalid_lynxcsv = "Not a valid -lynx.csv file"
                 print(invalid_lynxcsv)
-                self.w_cnf.label_tc.setText(invalid_lynxcsv)
-        else:
+                self.w_info_file.label_tc.setText(invalid_lynxcsv)
+        elif self.fileName.lower()[-4:] == ".cnf":
             try:
                 self.cnf_dict = read_cnf.read_cnf_file(self.fileName, False)
                 livetime = self.cnf_dict["Live time"]
@@ -1611,17 +1611,21 @@ class NasaGammaApp(QMainWindow):
                 count_rate = total_cts / livetime
                 ch_num = self.cnf_dict["Number of channels"]
                 start_time = self.cnf_dict["Start time"]
-                self.w_cnf.label_lt.setText(str(livetime))
-                self.w_cnf.label_rt.setText(str(realtime))
-                self.w_cnf.label_dt.setText(str(deadtime))
-                self.w_cnf.label_tc.setText(str(total_cts))
-                self.w_cnf.label_cr.setText(str(count_rate))
-                self.w_cnf.label_nch.setText(str(ch_num))
-                self.w_cnf.label_time.setText(start_time)
+                self.w_info_file.label_lt.setText(str(livetime))
+                self.w_info_file.label_rt.setText(str(realtime))
+                self.w_info_file.label_dt.setText(str(deadtime))
+                self.w_info_file.label_tc.setText(str(total_cts))
+                self.w_info_file.label_cr.setText(str(count_rate))
+                self.w_info_file.label_nch.setText(str(ch_num))
+                self.w_info_file.label_time.setText(start_time)
             except:
                 invalid_cnf = "Not a valid CNF file"
                 print(invalid_cnf)
                 self.w_cnf.label_tc.setText(invalid_cnf)
+        else:
+            not_implemented_format = "File format not implemented"
+            print(not_implemented_format)
+            self.w_info_file.label_tc.setText(not_implemented_format)
 
     def activate_isotope_id(self):
         self.w_isot_id = Window_isotID()
