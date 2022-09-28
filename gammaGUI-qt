@@ -1415,18 +1415,34 @@ class NasaGammaApp(QMainWindow):
         self.w_api_filt.button_api_apply.clicked.connect(self.apply_api_filters)
 
     def apply_api_filters(self):
-        # TODO: first check if not empty string
-        xmin = float(self.w_api_filt.xmin_txt.text())
-        xmax = float(self.w_api_filt.xmax_txt.text())
-        ymin = float(self.w_api_filt.ymin_txt.text())
-        ymax = float(self.w_api_filt.ymax_txt.text())
-        tmin = float(self.w_api_filt.tmin_txt.text())
-        tmax = float(self.w_api_filt.tmax_txt.text())
-        emin = float(self.w_api_filt.emin_txt.text())
-        emax = float(self.w_api_filt.emax_txt.text())
-        print(
-            f"xmin={xmin}; xmax={xmax}; ymin={ymin}; ymax={ymax}; emin={emin}; emax={emax}; tmin={tmin}; tmax={tmax}"
-        )
+        # TODO: test this function
+        xmin_txt = self.w_api_filt.xmin_txt.text()
+        xmax_txt = self.w_api_filt.xmax_txt.text()
+        ymin_txt = self.w_api_filt.ymin_txt.text()
+        ymax_txt = self.w_api_filt.ymax_txt.text()
+        tmin_txt = self.w_api_filt.tmin_txt.text()
+        tmax_txt = self.w_api_filt.tmax_txt.text()
+        emin_txt = self.w_api_filt.emin_txt.text()
+        emax_txt = self.w_api_filt.emax_txt.text()
+        if (
+            (xmin_txt != "")
+            and (xmax_txt != "")
+            and (ymin_txt != "")
+            and (ymax_txt != "")
+        ):
+            xmin = float(xmin_txt)
+            xmax = float(xmax_txt)
+            ymin = float(ymin_txt)
+            ymax = float(ymax_txt)
+            self.apply_xy_filter(xmin, xmax, ymin, ymax)
+        if (tmin_txt != "") and (tmax_txt != ""):
+            tmin = float(tmin_txt)
+            tmax = float(tmax_txt)
+            self.apply_t_filter(tmin, tmax)
+        if (emin_txt != "") and (emax_txt != ""):
+            emin = int(emin_txt)
+            emax = int(emax_txt)
+            self.apply_energy_filter(emin, emax)
 
     def espan_api(self):
         self.span_api = SpanSelector(
@@ -1443,6 +1459,9 @@ class NasaGammaApp(QMainWindow):
         idxmax = int(round(xmax, 4))
         print("xmin: ", idxmin)
         print("xmax: ", idxmax)
+        self.apply_energy_filter(idxmin, idxmax)
+
+    def apply_energy_filter(self, idxmin, idxmax):
         self.ax_api_dt.clear()
         self.ax_api_xy.clear()
         if self.en_flag == 0:  # energy filter has not been used before
@@ -1480,12 +1499,15 @@ class NasaGammaApp(QMainWindow):
 
     def xyselect_api(self, eclick, erelease):
         "eclick and erelease are the press and release events"
-        self.ax_api_spe.clear()
-        self.ax_api_dt.clear()
         x1, y1 = eclick.xdata, eclick.ydata
         x2, y2 = erelease.xdata, erelease.ydata
         print("(%3.2f, %3.2f) --> (%3.2f, %3.2f)" % (x1, y1, x2, y2))
         # print(" The button you used were: %s %s" % (eclick.button, erelease.button))
+        self.apply_xy_filter(x1, x2, y1, y2)
+
+    def apply_xy_filter(self, x1, x2, y1, y2):
+        self.ax_api_spe.clear()
+        self.ax_api_dt.clear()
         if self.xy_flag == 0:  # xy filter not used before
             xlim = (self.df_current["X2"] > x1) & (self.df_current["X2"] < x2)
             ylim = (self.df_current["Y2"] > y1) & (self.df_current["Y2"] < y2)
@@ -1517,6 +1539,9 @@ class NasaGammaApp(QMainWindow):
     def tselect_api(self, tmin, tmax):
         print("tmin: ", round(tmin, 3))
         print("tmax: ", round(tmax, 3))
+        self.apply_t_filter(tmin, tmax)
+
+    def apply_t_filter(self, tmin, tmax):
         self.ax_api_spe.clear()
         self.ax_api_xy.clear()
         if self.dt_flag == 0:
