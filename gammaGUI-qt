@@ -346,7 +346,7 @@ class NasaGammaApp(QMainWindow):
         self.button_filter_lynx_e.clicked.connect(self.filter_erg)
 
         ## API
-        self.api_spect_scale = "log"
+        self.api_spect_scale = "linear"
         self.api_xy_scale = "lin"
         self.api_yscale.setStyleSheet("background-color : lightyellow")
         self.api_yscale.clicked.connect(self.api_spect_yscale)
@@ -1647,7 +1647,6 @@ class NasaGammaApp(QMainWindow):
             try:
                 print("Opening file: ", self.fileName)
                 fileName = self.fileName.lower()
-
                 if fileName[-9:] == "-lynx.csv":
                     self.lynxcsv = file_reader.ReadLynxCsv(fileName)
                     self.spect = self.lynxcsv.spect
