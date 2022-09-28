@@ -82,6 +82,13 @@ class Spectrum:
             livetime=self.livetime,
         )
 
+    # TODO: replace rebin function with commented function below.
+    # Needs testing first.
+    # def rebin_spect(spe, by=2):
+    #     new_size = int(spe.shape[0]/by)
+    #     new_spe = spe.reshape((new_size,-1)).sum(axis=1)
+    #     return new_spe
+
     def rebin(self):
         """
         Rebins data by adding two adjacent bins at a time.
