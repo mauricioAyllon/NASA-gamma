@@ -1128,6 +1128,18 @@
          </widget>
         </item>
         <item row="0" column="10">
+         <widget class="QPushButton" name="api_button_filters">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Filters</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="11">
          <widget class="QPushButton" name="api_button_logxy">
           <property name="font">
            <font>
@@ -1139,7 +1151,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="11">
+        <item row="0" column="12">
          <widget class="QPushButton" name="api_reset">
           <property name="font">
            <font>
@@ -1151,7 +1163,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0" colspan="12">
+        <item row="1" column="0" colspan="13">
          <widget class="MplWidget" name="api_plot" native="true">
           <property name="mouseTracking">
            <bool>false</bool>
@@ -1451,7 +1463,7 @@
      <x>0</x>
      <y>0</y>
      <width>2120</width>
-     <height>31</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

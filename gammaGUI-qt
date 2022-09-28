@@ -97,6 +97,14 @@ class Window_isotID(QDialog):
         self.setWindowTitle("Isotope ID")
 
 
+class WindowAPIfilters(QDialog):
+    def __init__(self):
+        QDialog.__init__(self)
+        ui_file = pkg_resources.resource_filename("nasagamma", "win_api_filters.ui")
+        loadUi(ui_file, self)
+        self.setWindowTitle("Apply API filters")
+
+
 class NasaGammaApp(QMainWindow):
     def __init__(self, commands):
         QMainWindow.__init__(self)
@@ -360,6 +368,8 @@ class NasaGammaApp(QMainWindow):
         self.api_load_file.clicked.connect(self.load_api_file)
         self.api_reset.setStyleSheet("background-color : lightcoral")
         self.api_reset.clicked.connect(self.load_api_file)
+        self.api_button_filters.setStyleSheet("background-color : silver")
+        self.api_button_filters.clicked.connect(self.api_window_filters)
 
     def switch_toolbar(self):
         if self.tabWidget.currentIndex() == 0:
@@ -1397,6 +1407,26 @@ class NasaGammaApp(QMainWindow):
             self.ax_api_spe.set_yscale("log")
             self.api_spect_scale = "log"
         self.fig_api.canvas.draw_idle()
+
+    def api_window_filters(self):
+        self.w_api_filt = WindowAPIfilters()
+        self.w_api_filt.show()
+        self.button_apply.clicked.connect(self.apply_params)
+        self.w_api_filt.button_api_apply.clicked.connect(self.apply_api_filters)
+
+    def apply_api_filters(self):
+        # TODO: first check if not empty string
+        xmin = float(self.w_api_filt.xmin_txt.text())
+        xmax = float(self.w_api_filt.xmax_txt.text())
+        ymin = float(self.w_api_filt.ymin_txt.text())
+        ymax = float(self.w_api_filt.ymax_txt.text())
+        tmin = float(self.w_api_filt.tmin_txt.text())
+        tmax = float(self.w_api_filt.tmax_txt.text())
+        emin = float(self.w_api_filt.emin_txt.text())
+        emax = float(self.w_api_filt.emax_txt.text())
+        print(
+            f"xmin={xmin}; xmax={xmax}; ymin={ymin}; ymax={ymax}; emin={emin}; emax={emax}; tmin={tmin}; tmax={tmax}"
+        )
 
     def espan_api(self):
         self.span_api = SpanSelector(
