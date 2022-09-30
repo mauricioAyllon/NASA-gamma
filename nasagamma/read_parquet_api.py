@@ -1,5 +1,5 @@
 """
-Read ROOTS binary file 
+Read ROOTS parquet files
 """
 
 import dateparser
@@ -12,34 +12,47 @@ from matplotlib.patches import Rectangle
 from matplotlib.pyplot import cm
 import matplotlib
 from nasagamma import apipandas as api
+import pkg_resources
+from pathlib import Path
 
 # matplotlib.use('qtagg')
+def get_data_path(data_path=None):
+    # directory to monitor
+    if data_path is None:
+        data_path_file = pkg_resources.resource_filename("nasagamma", "data-path.txt")
+        path_file = Path(data_path_file)
+        with path_file.open() as f:
+            data_path_txt = f.readline()
+    else:
+        data_path_txt = data_path
+    return Path(data_path_txt)
 
 
-def read_parquet_file(date, runnr, ch, flat_field=False):
-    import ROOTS
-
+def read_parquet_file(date, runnr, ch, flat_field=False, data_path_txt=None):
     # only channels 4 (LaBr==True) and 5 (LaBr==False)
     RUNNR = runnr
     DATE = dateparser.parse(date)
     if DATE is None:
         print("ERROR: cannot parse date")
-        sys.exit(1)
 
-    # directory to monitor
-    DATA_DIR = (
-        ROOTS.helper.get_save_data_dir()
-        / f"{DATE.year}-{DATE.month:02d}-{DATE.day:02d}"
-    )
+    DATA_PATH = get_data_path(data_path_txt)
+    DATA_DIR = DATA_PATH / f"{DATE.year}-{DATE.month:02d}-{DATE.day:02d}"
+
     if not DATA_DIR.is_dir():
-        print(f"ERROR: cannot find directory {DATA_DIR}.")
-        sys.exit(2)
+        print(
+            (
+                f"ERROR: cannot find directory {DATA_DIR}."
+                "ERROR: Make sure you create a text file with your data path"
+                " named 'data-path.txt' in the directory NASA-gamma/nasagamma"
+                " For example, my data path is: "
+                "C:/Users/mayllonu/Documents/NASA-GSFC/Technical/Data-LBL"
+            )
+        )
 
     fname = f"RUN-{DATE.year}-{DATE.month:02d}-{DATE.day:02d}-{RUNNR:05d}"
     FILE = DATA_DIR / fname
     if not FILE.is_dir():
         print(f"ERROR: cannot find file {FILE}")
-        sys.exit(3)
 
     # load data
     files = list(FILE.glob(f"parquet-data/{fname}-*-pandas.parquet"))
@@ -63,8 +76,6 @@ def read_parquet_file(date, runnr, ch, flat_field=False):
 
 
 def read_parquet_file_from_path(filepath, ch):
-    from pathlib import Path
-
     # load data
     path = Path(filepath)
     files = list(path.glob("parquet-data/*-pandas.parquet"))

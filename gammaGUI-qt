@@ -73,6 +73,14 @@ class WindowCal(QDialog):
         # self.button_ok_cancel.rejected.connect(self.reject)
 
 
+class WindowCalEqns(QDialog):
+    def __init__(self):
+        QDialog.__init__(self)
+        ui_file = pkg_resources.resource_filename("nasagamma", "win_erg_cal_eqns.ui")
+        loadUi(ui_file, self)
+        self.setWindowTitle("Energy calibration: set equations")
+
+
 class WindowEff(QDialog):
     def __init__(self):
         QDialog.__init__(self)
@@ -252,6 +260,7 @@ class NasaGammaApp(QMainWindow):
         self.button_cal1.setStyleSheet("background-color : lightgreen")
         self.button_cal2.setStyleSheet("background-color : lightgreen")
         self.button_cal3.setStyleSheet("background-color : lightgreen")
+        self.button_cal_eqns.setStyleSheet("background-color : silver")
         self.button_origin.clicked.connect(self.set_origin)
 
         self.button_cal1.setCheckable(True)
@@ -286,6 +295,8 @@ class NasaGammaApp(QMainWindow):
         self.button_reset_cal.clicked.connect(self.reset_cal)
         # apply calibration
         self.button_apply_cal.clicked.connect(self.apply_cal)
+        # set calibration equation
+        self.button_cal_eqns.clicked.connect(self.new_window_cal_eqns)
 
         ## Resolution
         # push butons
@@ -355,7 +366,7 @@ class NasaGammaApp(QMainWindow):
 
         ## API
         self.api_spect_scale = "linear"
-        self.api_xy_scale = "lin"
+        self.api_xy_scale = "linear"
         self.api_yscale.setStyleSheet("background-color : lightyellow")
         self.api_yscale.clicked.connect(self.api_spect_yscale)
         self.api_button_logxy.setStyleSheet("background-color : lightgoldenrodyellow")
@@ -416,7 +427,6 @@ class NasaGammaApp(QMainWindow):
             self.toolbar5.setVisible(True)
 
     def create_graph(self, fit=True, reset=True):
-        self.reset_api_figure()  # to delete
         self.label_units.setText(self.e_units)
         if reset:
             self.reset_main_figure()
@@ -835,6 +845,14 @@ class NasaGammaApp(QMainWindow):
             self.fig_cal.canvas.draw_idle()
         except:
             pass
+
+    def new_window_cal_eqns(self):
+        self.w_cal_eqns = WindowCalEqns()
+        self.w_cal_eqns.show()
+        self.w_cal_eqns.accepted.connect(self.add_cal_eqns)
+
+    def add_cal_eqns(self):
+        pass
 
     def reset_cal(self):
         print("Reseting calibration")
@@ -1288,7 +1306,10 @@ class NasaGammaApp(QMainWindow):
             self.initialize_plots_api()
         except:
             filepath = self.api_path_txt.text()
-            self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
+            # self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
+            self.df_api = read_parquet_api.read_parquet_file(
+                date, runnr, ch, flat_field=False, data_path_txt=filepath
+            )
             self.df_current = self.df_api.copy()
             self.df_previous = self.df_api.copy()
             self.initialize_plots_api()
@@ -1301,7 +1322,7 @@ class NasaGammaApp(QMainWindow):
         self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
         self.colormap = "plasma"
         self.plot_energy_hist_api(self.df_api)
-        self.ax_api_spe.set_yscale(self.api_spect_scale)
+        # self.ax_api_spe.set_yscale(self.api_spect_scale)
         self.plot_time_hist_api(self.df_api)
         self.plot_xy_api(self.df_api)
         self.espan_api()
@@ -1323,17 +1344,8 @@ class NasaGammaApp(QMainWindow):
         self.ax_api_dt = self.fig_api.add_subplot(gs[1, 0])
 
         self.ax_api_xy = self.fig_api.add_subplot(gs[:, 1])
-        self.api_xy_scale = "lin"
+        self.api_xy_scale = "linear"
         self.api_button_logxy.setChecked(False)
-
-        # self.ax_api_xy.patch.set_facecolor("white")
-
-        # [left, bottom, width, height]
-        # self.ax_api_slid = self.fig_api.add_axes(
-        #     [0.625, 0.95, 0.21, 0.05], facecolor=axcolor
-        # )
-        # self.ax_api_slid.set_yticks([])
-        # self.ax_api_slid.set_xticks([])
         self.fig_api.canvas.draw_idle()  # to delete
 
     def send_to_spect_api(self):
@@ -1347,6 +1359,7 @@ class NasaGammaApp(QMainWindow):
         )
         self.api_ch = np.arange(0, self.ebins, 1)
         self.ax_api_spe.plot(self.api_ch, self.api_gam, color="green")
+        self.ax_api_spe.set_yscale(self.api_spect_scale)
         self.ax_api_spe.set_xlabel("Channels")
 
     def plot_time_hist_api(self, df):
@@ -1386,17 +1399,17 @@ class NasaGammaApp(QMainWindow):
         self.fig_api.canvas.draw_idle()
 
     def api_xylog(self):
-        if self.api_xy_scale == "lin":
+        if self.api_xy_scale == "linear":
             self.plot_xy_api(self.df_current, cbar=False, logxy=True)
             self.api_xy_scale = "log"
         elif self.api_xy_scale == "log":
             self.plot_xy_api(self.df_current, cbar=False, logxy=False)
-            self.api_xy_scale = "lin"
+            self.api_xy_scale = "linear"
 
     def api_on_returnXY(self):
         self.vmax = int(self.api_vmax_txt.text())
         self.plot_xy_api(self.df_current, cbar=False, logxy=False, vmax=self.vmax)
-        self.api_xy_scale = "lin"
+        self.api_xy_scale = "linear"
         self.api_button_logxy.setChecked(False)
 
     def api_spect_yscale(self):
@@ -1416,6 +1429,7 @@ class NasaGammaApp(QMainWindow):
 
     def apply_api_filters(self):
         # TODO: test this function
+        # Add vertical lines in plot indicating filter values
         xmin_txt = self.w_api_filt.xmin_txt.text()
         xmax_txt = self.w_api_filt.xmax_txt.text()
         ymin_txt = self.w_api_filt.ymin_txt.text()
