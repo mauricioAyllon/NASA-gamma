@@ -200,6 +200,15 @@ class NasaGammaApp(QMainWindow):
         self.addToolBar(self.toolbar5)
         self.toolbar5.setVisible(False)
 
+        self.toolbars = [
+            self.toolbar0,
+            self.toolbar1,
+            self.toolbar2,
+            self.toolbar3,
+            self.toolbar4,
+            self.toolbar5,
+        ]
+
         self.tabWidget.currentChanged.connect(self.switch_toolbar)
 
         # menu bar
@@ -383,48 +392,9 @@ class NasaGammaApp(QMainWindow):
         self.api_button_filters.clicked.connect(self.api_window_filters)
 
     def switch_toolbar(self):
-        if self.tabWidget.currentIndex() == 0:
-            self.toolbar0.setVisible(True)
-            self.toolbar1.setVisible(False)
-            self.toolbar2.setVisible(False)
-            self.toolbar3.setVisible(False)
-            self.toolbar4.setVisible(False)
-            self.toolbar5.setVisible(False)
-        elif self.tabWidget.currentIndex() == 1:
-            self.toolbar0.setVisible(False)
-            self.toolbar1.setVisible(True)
-            self.toolbar2.setVisible(False)
-            self.toolbar3.setVisible(False)
-            self.toolbar4.setVisible(False)
-            self.toolbar5.setVisible(False)
-        elif self.tabWidget.currentIndex() == 2:
-            self.toolbar0.setVisible(False)
-            self.toolbar1.setVisible(False)
-            self.toolbar2.setVisible(True)
-            self.toolbar3.setVisible(False)
-            self.toolbar4.setVisible(False)
-            self.toolbar5.setVisible(False)
-        elif self.tabWidget.currentIndex() == 3:
-            self.toolbar0.setVisible(False)
-            self.toolbar1.setVisible(False)
-            self.toolbar2.setVisible(False)
-            self.toolbar3.setVisible(True)
-            self.toolbar4.setVisible(False)
-            self.toolbar5.setVisible(False)
-        elif self.tabWidget.currentIndex() == 4:
-            self.toolbar0.setVisible(False)
-            self.toolbar1.setVisible(False)
-            self.toolbar2.setVisible(False)
-            self.toolbar3.setVisible(False)
-            self.toolbar4.setVisible(True)
-            self.toolbar5.setVisible(False)
-        elif self.tabWidget.currentIndex() == 5:
-            self.toolbar0.setVisible(False)
-            self.toolbar1.setVisible(False)
-            self.toolbar2.setVisible(False)
-            self.toolbar3.setVisible(False)
-            self.toolbar4.setVisible(False)
-            self.toolbar5.setVisible(True)
+        current = self.tabWidget.currentIndex()
+        for i, tb in enumerate(self.toolbars):
+            tb.setVisible(i == current)
 
     def create_graph(self, fit=True, reset=True):
         self.label_units.setText(self.e_units)
@@ -1060,12 +1030,9 @@ class NasaGammaApp(QMainWindow):
         self.ax_fwhm_tab = self.fig_fwhm.add_subplot(gs[1, 1])
 
         # remove ticks
-        self.ax_fwhm.set_xticks([])
-        self.ax_fwhm.set_yticks([])
-        self.ax_fwhm_tab.set_xticks([])
-        self.ax_fwhm_tab.set_yticks([])
-        self.ax_fwhm_gauss.set_xticks([])
-        self.ax_fwhm_gauss.set_yticks([])
+        for ax in [self.ax_fwhm, self.ax_fwhm_tab, self.ax_fwhm_gauss]:
+            ax.set_xticks([])
+            ax.set_yticks([])
 
         # self.fig.canvas.draw_idle()
 
