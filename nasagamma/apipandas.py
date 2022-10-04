@@ -157,20 +157,19 @@ def time_cut(df, t_start, t_stop, step, xkey="X", ykey="Y", tkey="dt"):
         plt.show()
 
 
-def plot_dt(dt, tbins, trange):
+def plot_dt(dt, tbins, trange, ax=None, **kwargs):
     """plot histogram of time differences"""
-    plt.figure()
-    plt.hist(
+    if ax is None:
+        fig = plt.figure(figsize=(10, 6))
+        ax = fig.add_subplot()
+    ax.hist(
         dt,
         bins=tbins,
         range=trange,
-        alpha=0.7,
         edgecolor="black",
-        label="Time histogram",
+        **kwargs,
     )
-    plt.xlabel("Time [ns]")
-    plt.grid()
-    plt.legend()
+    ax.set_xlabel("Time [ns]")
 
 
 def plot_dz(z, zbins, zrange):
@@ -184,18 +183,28 @@ def plot_dz(z, zbins, zrange):
     plt.legend()
 
 
-def plot_2D_alphas(df, xkey="X", ykey="Y"):
-    hexbins = 80  # x-y bins
-    xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
-    colormap = "plasma"
+def plot_2D_alphas(
+    df,
+    xkey="X",
+    ykey="Y",
+    colormap="plasma",
+    hexbins=80,
+    xyplane=(-0.9, 0.9, -0.9, 0.9),
+    ax=None,
+    **kwargs,
+):
+    if ax is None:
+        fig = plt.figure(figsize=(10, 6))
+        ax = fig.add_subplot()
     df.plot.hexbin(
         x=xkey,
         y=ykey,
         gridsize=hexbins,
         cmap=colormap,
-        # ax=ax_api_xy,
+        ax=ax,
         colorbar=True,
         extent=xyplane,
+        **kwargs,
     )  # , bins="log")
 
 
@@ -218,16 +227,17 @@ def plot_2Dposition(X, Y, pbins, Vmax=None):
     plt.show()
 
 
-def plot_energy(en, ebins, erange, log=True):
+def plot_energy(en, ebins, erange=[0, 10], ax=None, log=True, **kwargs):
     """Plot energy histogram"""
-    en, ed = np.histogram(en, bins=800, range=[0, 40000])
-    plt.figure()
-    plt.plot(en)
+    if ax is None:
+        fig = plt.figure(figsize=(10, 6))
+        ax = fig.add_subplot()
+    ax.hist(en, bins=ebins, range=erange, **kwargs)
     if log:
-        plt.yscale("log")
+        ax.set_yscale("log")
     else:
-        plt.yscale("linear")
-    plt.title("Energy")
+        ax.set_yscale("linear")
+    ax.set_title("Energy")
 
 
 def plot_3D(X, Y, Z, Vmax=None):
