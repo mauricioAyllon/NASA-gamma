@@ -387,7 +387,7 @@ class NasaGammaApp(QMainWindow):
         self.api_load_file.setStyleSheet("background-color : lightblue")
         self.api_load_file.clicked.connect(self.load_api_file)
         self.api_reset.setStyleSheet("background-color : lightcoral")
-        self.api_reset.clicked.connect(self.load_api_file)
+        self.api_reset.clicked.connect(self.reset_button_api)
         self.api_button_filters.setStyleSheet("background-color : silver")
         self.api_button_filters.clicked.connect(self.api_window_filters)
 
@@ -1314,6 +1314,15 @@ class NasaGammaApp(QMainWindow):
         self.api_xy_scale = "linear"
         self.api_button_logxy.setChecked(False)
         self.fig_api.canvas.draw_idle()  # to delete
+
+    def reset_button_api(self):
+        self.reset_api_figure()
+        self.dt_flag = 0
+        self.xy_flag = 0
+        self.en_flag = 0
+        self.df_current = self.df_api.copy()
+        self.df_previous = self.df_api.copy()
+        self.initialize_plots_api()
 
     def send_to_spect_api(self):
         self.spect = sp.Spectrum(counts=self.api_gam)
