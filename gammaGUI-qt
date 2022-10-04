@@ -1667,6 +1667,30 @@ class NasaGammaApp(QMainWindow):
                 invalid_cnf = "Not a valid CNF file"
                 print(invalid_cnf)
                 self.w_cnf.label_tc.setText(invalid_cnf)
+        elif self.fileName.lower()[-8:] == ".pha.txt":
+            try:
+                lt = self.multiscanPHA.live_time
+                rt = self.multiscanPHA.real_time
+                livetime = lt
+                realtime = rt
+                deadtime = round((1 - lt / rt) * 100, 2)
+                total_cts = self.multiscanPHA.counts
+                count_rate = round(self.multiscanPHA.count_rate, 3)
+                nch = self.multiscanPHA.nch
+                energy_cal = self.multiscanPHA.energy_calibration
+                start_time = self.multiscanPHA.start_time
+                self.w_info_file.label_lt.setText(str(livetime))
+                self.w_info_file.label_rt.setText(str(realtime))
+                self.w_info_file.label_dt.setText(str(deadtime))
+                self.w_info_file.label_tc.setText(str(total_cts))
+                self.w_info_file.label_cr.setText(str(count_rate))
+                self.w_info_file.label_nch.setText(str(nch))
+                self.w_info_file.label_time.setText(start_time)
+                self.w_info_file.label_energy_cal.setText(str(energy_cal))
+            except:
+                invalid_mspha = "Not a valid .pha.txt file"
+                print(invalid_mspha)
+                self.w_info_file.label_tc.setText(invalid_mspha)
         else:
             not_implemented_format = "File format not implemented"
             print(not_implemented_format)
@@ -1707,6 +1731,10 @@ class NasaGammaApp(QMainWindow):
                     self.spect = sp.Spectrum(
                         counts=mca.counts, e_units=self.e_units, livetime=mca.live_time
                     )
+                elif fileName[-8:] == ".pha.txt":
+                    self.multiscanPHA = file_reader.ReadMultiscanPHA(fileName)
+                    self.spect = self.multiscanPHA.spect
+                    self.e_units = self.spect.e_units
                 else:
                     print("Could not open file")
                     fileName = fileName + " ***INVALID FILE TYPE***"
