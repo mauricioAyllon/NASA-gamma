@@ -6,6 +6,7 @@ import pandas as pd
 import re
 from nasagamma import spectrum as sp
 from nasagamma import read_cnf
+import datetime
 
 
 def read_csv_file(file_name):
@@ -266,4 +267,56 @@ class ReadLynxCsv:
         self.spect.x = self.spect.energies
         self.counts = self.spect.counts.sum()
         self.count_rate = self.counts / float(self.live_time[0:-4])
+        self.nch = self.spect.counts.shape[0]
+
+
+class ReadMultiscanPHA:
+    def __init__(self, file):
+        self.file = file
+        self.start_time = None
+        self.energy_calibration = None
+        self.live_time = None
+        self.real_time = None
+        self.eunits = None
+        self.counts = None
+        self.count_rate = None
+        self.spect = None
+        self.nch = None
+        if file[-8:].lower() != ".pha.txt":
+            print("ERROR: Must be a .pha.txt file")
+        self.parse_file()
+
+    def parse_file(self):
+        with open(self.file, "r") as myfile:
+            filelst = myfile.readlines()
+        for i, line in enumerate(filelst):
+            l = line.lower().strip().split(",")
+            if "time started" in l:
+                self.start_time = ",".join(l[1:]).strip('"')
+            if "live time when finished" in l:
+                tme = datetime.datetime.strptime(l[1], "%H:%M:%S.%f")
+                self.live_time = tme.hour * 60 * 60 + tme.minute * 60 + tme.second
+            if "real time when finished" in l:
+                tme = datetime.datetime.strptime(l[1], "%H:%M:%S.%f")
+                self.real_time = tme.hour * 60 * 60 + tme.minute * 60 + tme.second
+            if "energy equation" in l:
+                self.energy_calibration = l[1]
+                self.eunits = l[1].split("+")[0][-3:]
+            if "total counts" in l:
+                self.counts = float(l[1])
+            if ["channel", "energy", "counts"] == l:
+                istart = i
+                cols = l
+                break
+        df = pd.read_csv(self.file, skiprows=istart, dtype=float)
+        df.columns = cols
+        self.spect = sp.Spectrum(
+            counts=df["counts"],
+            energies=df["energy"],
+            e_units=self.eunits,
+            livetime=self.live_time,
+        )
+        self.spect.x = self.spect.energies
+        self.counts = self.spect.counts.sum()
+        self.count_rate = self.counts / self.live_time
         self.nch = self.spect.counts.shape[0]
