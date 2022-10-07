@@ -18,31 +18,19 @@ def test_limits(df, elog=True, Vmax=None, ekey="energy", tkey="dt", xkey="X", yk
         raise TypeError("df must be a pandas dataframe")
     plt.figure()
     plt.hist(df[ekey], 256)
-    if elog:
-        plt.yscale("log")
-    else:
-        plt.yscale("linear")
+    plt.yscale("log" if elog else "linear")
     plt.title("Energy")
 
     res, xed, yed = np.histogram2d(df[ykey], df[xkey], bins=100)
     plt.figure()
-    if Vmax != None:
-        plt.imshow(
-            res,
-            extent=[df[xkey].min(), df[xkey].max(), df[ykey].min(), df[ykey].max()],
-            cmap="inferno",
-            interpolation="bilinear",
-            vmax=Vmax,
-            origin="lower",
-        )
-    else:
-        plt.imshow(
-            res,
-            extent=[df[xkey].min(), df[xkey].max(), df[ykey].min(), df[ykey].max()],
-            cmap="inferno",
-            interpolation="bilinear",
-            origin="lower",
-        )
+    plt.imshow(
+        res,
+        extent=[df[xkey].min(), df[xkey].max(), df[ykey].min(), df[ykey].max()],
+        cmap="inferno",
+        interpolation="bilinear",
+        vmax=Vmax,
+        origin="lower",
+    )
     plt.title("All events")
 
     plt.figure()
@@ -212,7 +200,7 @@ def plot_2Dposition(X, Y, pbins, Vmax=None):
     """Plot 2D intensity map"""
     result, xedges, yedges = np.histogram2d(X, Y, pbins)
     plt.figure()
-    if Vmax != None:
+    if Vmax is not None:
         plt.imshow(
             result,
             extent=[-1, 1, -1, 1],
@@ -247,7 +235,7 @@ def plot_3D(X, Y, Z, Vmax=None):
     mlab.figure(1, fgcolor=(0, 0, 0), bgcolor=(1, 1, 1))
     r, ed = np.histogramdd((X, Y, Z), bins=15)
     mlab.figure(1, fgcolor=(0, 0, 0), bgcolor=(1, 1, 1))
-    if Vmax != None:
+    if Vmax is not None:
         mlab.pipeline.volume(mlab.pipeline.scalar_field(r), vmin=0, vmax=Vmax)
     else:
         mlab.pipeline.volume(mlab.pipeline.scalar_field(r))
@@ -286,7 +274,7 @@ def api(df, xrange, yrange, erange, trange, det_pos, toffset=None, use_det=True)
         raise TypeError("df must be a pandas dataframe")
 
     df_txye = dftxye(df, xrange, yrange, erange, trange)
-    if toffset != None:
+    if toffset is not None:
         df_txye["dt"] = df_txye["dt"] - toffset
     # convert alpha detector hits to cm
     res, xed, yed = np.histogram2d(df.Y2, df.X2, bins=1000)
