@@ -3,7 +3,7 @@
 Usage:
   gammaGUI-qt <file_name> [options]
   gammaGUI-qt [options]
-  
+
   options:
       -o                        open a blank window
       --fwhm_at_0=<fwhm0>       fwhm value at x=0
@@ -13,18 +13,17 @@ Usage:
       --cebr                    detector type (cerium bromide)
       --labr                    detector type (lanthanum bromide)
       --hpge                    detector type (HPGe)
-      
-  
+
 
 Reads a csv file with the following column format: counts | energy_EUNITS,
-where EUNITS can be for examle keV or MeV. It can also read a CSV file with a 
+where EUNITS can be for examle keV or MeV. It can also read a CSV file with a
 single column named "counts". No need to have channels because
 they are automatically infered starting from channel = 0.
 
 If detector type is defined e.g. --cebr then the code guesses the x_ref and
 fwhm_ref based on the known detector characteristics.
 
-Note that the detector type input parameters must be changed depending on the 
+Note that the detector type input parameters must be changed depending on the
 particular electronic gain used. The examples here are for our specific
 detector configurations.
 """
@@ -55,67 +54,63 @@ from nasagamma import read_parquet_api
 import pkg_resources
 
 
-class WindowCust(QDialog):
+class Dialog_from_UI(QDialog):
+    """Create a dialog from a UI file with a given window title."""
+
     def __init__(self):
-        QDialog.__init__(self)
-        ui_file = pkg_resources.resource_filename("nasagamma", "win_customize.ui")
+        super().__init__()
+        self.define_ui_vars()
+        ui_file = pkg_resources.resource_filename("nasagamma", self.ui_name)
         loadUi(ui_file, self)
-        self.setWindowTitle("Customize plot")
+        self.setWindowTitle(self.window_title)
 
 
-class WindowCal(QDialog):
-    def __init__(self):
-        QDialog.__init__(self)
-        ui_file = pkg_resources.resource_filename("nasagamma", "win_erg_cal.ui")
-        loadUi(ui_file, self)
-        self.setWindowTitle("Energy calibration")
-        # self.button_ok_cancel.accepted.connect(self.accept)
-        # self.button_ok_cancel.rejected.connect(self.reject)
+class WindowCust(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_customize.ui"
+        self.window_title = "Customize plot"
 
 
-class WindowCalEqns(QDialog):
-    def __init__(self):
-        QDialog.__init__(self)
-        ui_file = pkg_resources.resource_filename("nasagamma", "win_erg_cal_eqns.ui")
-        loadUi(ui_file, self)
-        self.setWindowTitle("Energy calibration: set equations")
+class WindowCal(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_erg_cal.ui"
+        self.window_title = "Energy calibration"
 
 
-class WindowEff(QDialog):
-    def __init__(self):
-        QDialog.__init__(self)
-        ui_file = pkg_resources.resource_filename("nasagamma", "win_eff.ui")
-        loadUi(ui_file, self)
-        self.setWindowTitle("Efficiency calibration")
+class WindowCalEqns(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_erg_cal_eqns.ui"
+        self.window_title = "Energy calibration: set equations"
 
 
-class WindowInfoFile(QDialog):
-    def __init__(self):
-        QDialog.__init__(self)
-        ui_file = pkg_resources.resource_filename("nasagamma", "win_info_file.ui")
-        loadUi(ui_file, self)
-        self.setWindowTitle("File information")
+class WindowEff(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_eff.ui"
+        self.window_title = "Efficiency calibration"
 
 
-class Window_isotID(QDialog):
-    def __init__(self):
-        QDialog.__init__(self)
-        ui_file = pkg_resources.resource_filename("nasagamma", "win_isot_id.ui")
-        loadUi(ui_file, self)
-        self.setWindowTitle("Isotope ID")
+class WindowInfoFile(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_info_file.ui"
+        self.window_title = "File information"
 
 
-class WindowAPIfilters(QDialog):
-    def __init__(self):
-        QDialog.__init__(self)
-        ui_file = pkg_resources.resource_filename("nasagamma", "win_api_filters.ui")
-        loadUi(ui_file, self)
-        self.setWindowTitle("Apply API filters")
+class Window_isotID(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_isot_id.ui"
+        self.window_title = "Isotope ID"
+
+
+class WindowAPIfilters(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_api_filters.ui"
+        self.window_title = "Apply API filters"
 
 
 class NasaGammaApp(QMainWindow):
     def __init__(self, commands):
-        QMainWindow.__init__(self)
+        print(super())
+        super().__init__()
         ui_file = pkg_resources.resource_filename("nasagamma", "qt_gui.ui")
         loadUi(ui_file, self)
         # self.setMinimumSize(1800, 900)
@@ -177,37 +172,20 @@ class NasaGammaApp(QMainWindow):
         self.button_apply.clicked.connect(self.apply_params)
 
         # navigation toolbars
-        self.toolbar0 = NavigationToolbar(self.main_plot.canvas, self)
-        self.addToolBar(self.toolbar0)
-
-        self.toolbar1 = NavigationToolbar(self.cal_plot.canvas, self)
-        self.addToolBar(self.toolbar1)
-        self.toolbar1.setVisible(False)
-
-        self.toolbar2 = NavigationToolbar(self.efficiency_plot.canvas, self)
-        self.addToolBar(self.toolbar2)
-        self.toolbar2.setVisible(False)
-
-        self.toolbar3 = NavigationToolbar(self.resolution_plot.canvas, self)
-        self.addToolBar(self.toolbar3)
-        self.toolbar3.setVisible(False)
-
-        self.toolbar4 = NavigationToolbar(self.lynx_plot.canvas, self)
-        self.addToolBar(self.toolbar4)
-        self.toolbar4.setVisible(False)
-
-        self.toolbar5 = NavigationToolbar(self.api_plot.canvas, self)
-        self.addToolBar(self.toolbar5)
-        self.toolbar5.setVisible(False)
-
-        self.toolbars = [
-            self.toolbar0,
-            self.toolbar1,
-            self.toolbar2,
-            self.toolbar3,
-            self.toolbar4,
-            self.toolbar5,
-        ]
+        self.toolbars = []
+        for tb in [
+            self.main_plot,
+            self.cal_plot,
+            self.efficiency_plot,
+            self.resolution_plot,
+            self.lynx_plot,
+            self.api_plot,
+        ]:
+            tmp = NavigationToolbar(tb.canvas, self)
+            tmp.setVisible(False)
+            self.addToolBar(tmp)
+            self.toolbars.append(tmp)
+        self.toolbars[0].setVisible(True)
 
         self.tabWidget.currentChanged.connect(self.switch_toolbar)
 
@@ -286,9 +264,11 @@ class NasaGammaApp(QMainWindow):
 
         self.reset_cal_figure()
 
-        txt00 = "for peaks that you do not wish to include."
-        txt0 = f"Separate peak energy values with commas and use '-'\n{txt00}"
-        txt = f"Select and add peaks in the 'Spectrum' tab.\n{txt0}"
+        txt = (
+            "Select and add peaks in the 'Spectrum' tab.\n"
+            "Separate peak energy values with commas and use '-'\n"
+            "for peaks that you do not wish to include."
+        )
         self.ax_cal.text(
             0.27,
             0.5,
@@ -1128,19 +1108,14 @@ class NasaGammaApp(QMainWindow):
 
     def reset_fwhm(self):
         print("Reseting calibration")
-        self.ax_fwhm.clear()
-        self.ax_fwhm_tab.clear()
-        self.ax_fwhm_gauss.clear()
         self.fit_lst = []
         self.fwhm_x = [0]
         self.fwhm = [0]
-        # remove ticks
-        self.ax_fwhm.set_xticks([])
-        self.ax_fwhm.set_yticks([])
-        self.ax_fwhm_tab.set_xticks([])
-        self.ax_fwhm_tab.set_yticks([])
-        self.ax_fwhm_gauss.set_xticks([])
-        self.ax_fwhm_gauss.set_yticks([])
+        for ax in [self.ax_fwhm, self.ax_fwhm_tab, self.ax_fwhm_gauss]:
+            ax.clear()
+            # remove ticks
+            ax.set_xticks([])
+            ax.set_yticks([])
         self.fig_fwhm.canvas.draw_idle()
 
     def extrapolate_fwhm(self):
@@ -1283,7 +1258,7 @@ class NasaGammaApp(QMainWindow):
 
     def initialize_plots_api(self):
         self.trange = [-40, 120]  # dt range
-        self.ebins = 2 ** 13  # energy bins
+        self.ebins = 2**13  # energy bins
         self.hexbins = 80  # x-y bins
         self.tbins = 512  # time bins
         self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
@@ -1350,28 +1325,17 @@ class NasaGammaApp(QMainWindow):
 
     def plot_xy_api(self, df, cbar=True, logxy=False, **kwargs):
         if logxy:
-            df.plot.hexbin(
-                x="X2",
-                y="Y2",
-                gridsize=self.hexbins,
-                cmap=self.colormap,
-                ax=self.ax_api_xy,
-                colorbar=cbar,
-                extent=self.xyplane,
-                bins="log",
-                **kwargs,
-            )
-        else:
-            df.plot.hexbin(
-                x="X2",
-                y="Y2",
-                gridsize=self.hexbins,
-                cmap=self.colormap,
-                ax=self.ax_api_xy,
-                colorbar=cbar,
-                extent=self.xyplane,
-                **kwargs,
-            )
+            kwargs["bins"] = "log"
+        df.plot.hexbin(
+            x="X2",
+            y="Y2",
+            gridsize=self.hexbins,
+            cmap=self.colormap,
+            ax=self.ax_api_xy,
+            colorbar=cbar,
+            extent=self.xyplane,
+            **kwargs,
+        )
         self.fig_api.canvas.draw_idle()
 
     def api_xylog(self):
