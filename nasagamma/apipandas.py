@@ -56,14 +56,17 @@ def calc_own_pos(df, xkey_new="X2", ykey_new="Y2"):
     with calculated positions based on the equations below"""
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a pandas dataframe")
-    tot = df["A"] + df["B"] + df["C"] + df["D"]
-    X2 = (df["B"] + df["C"] - df["D"] - df["A"]) / tot
-    Y2 = (df["B"] + df["A"] - df["D"] - df["C"]) / tot
-    df2 = df.copy(deep=True)
-    df2[xkey_new] = X2
-    df2[ykey_new] = Y2
-    df2.fillna(0, inplace=True)
-    return df2
+    if xkey_new in df.columns and ykey_new in df.columns:
+        return df
+    else:
+        tot = df["A"] + df["B"] + df["C"] + df["D"]
+        X2 = (df["B"] + df["C"] - df["D"] - df["A"]) / tot
+        Y2 = (df["B"] + df["A"] - df["D"] - df["C"]) / tot
+        df2 = df.copy(deep=True)
+        df2[xkey_new] = X2
+        df2[ykey_new] = Y2
+        df2.fillna(0, inplace=True)
+        return df2
 
 
 def dfe(df, erange, ekey="energy"):
