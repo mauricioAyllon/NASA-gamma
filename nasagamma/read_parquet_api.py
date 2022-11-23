@@ -22,7 +22,7 @@ def get_data_path(data_path=None):
         data_path_file = pkg_resources.resource_filename("nasagamma", "data-path.txt")
         path_file = Path(data_path_file)
         with path_file.open() as f:
-            data_path_txt = f.readline()
+            data_path_txt = f.readline().strip()
     else:
         data_path_txt = data_path
     return Path(data_path_txt)
