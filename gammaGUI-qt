@@ -435,7 +435,7 @@ class NasaGammaApp(QMainWindow):
         )
         self.w_isot_id.button_plot_vlines.clicked.connect(self.isotID_plot_vlines)
         self.w_isot_id.button_remove_vlines.clicked.connect(self.isotID_remove_vlines)
-        self.w_isot_id.edit_isot_search.returnPressed.connect(self.isotID_textSearch)
+        self.w_isot_id.edit_element_search.returnPressed.connect(self.isotID_textSearch)
 
     def switch_toolbar(self):
         current = self.tabWidget.currentIndex()
@@ -1823,6 +1823,9 @@ class NasaGammaApp(QMainWindow):
                         self.isotID_vlines.append(l22)
 
                 self.isotID_vlines.append(l0)
+                if len(self.isotID_vlines) > 300:
+                    print("Cannot display more than 300 vertical lines.")
+                    break
             self.ax_main.legend()
             self.fig.canvas.draw_idle()
 
@@ -1836,7 +1839,7 @@ class NasaGammaApp(QMainWindow):
 
     def isotID_textSearch(self):
         ## TODO
-        element = self.w_isot_id.edit_isot_search.text()
+        element = self.w_isot_id.edit_element_search.text()
         if element == "":
             pass
         else:
