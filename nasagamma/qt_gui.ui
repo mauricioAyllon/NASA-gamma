@@ -17,6 +17,11 @@
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -1488,7 +1493,7 @@
      <x>0</x>
      <y>0</y>
      <width>2120</width>
-     <height>26</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1521,6 +1526,11 @@
    <property name="text">
     <string>Open</string>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
    </property>
@@ -1528,6 +1538,11 @@
   <action name="saveFitReport">
    <property name="text">
     <string>Save fit report</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
@@ -1537,6 +1552,11 @@
    <property name="text">
     <string>Save spectrum</string>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
    </property>
@@ -1545,10 +1565,20 @@
    <property name="text">
     <string>Clear spectrum</string>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
   </action>
   <action name="info_file">
    <property name="text">
     <string>File info</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Ctrl+I</string>
@@ -1557,6 +1587,11 @@
   <action name="isotopeID">
    <property name="text">
     <string>Isotope ID</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
    </property>
   </action>
   <action name="smoothSpectrum">
