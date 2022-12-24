@@ -31,6 +31,7 @@ import docopt
 import pandas as pd
 import numpy as np
 import datetime
+import re
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QKeySequence, QIcon, QPixmap
 from PyQt5.uic import loadUi
@@ -51,7 +52,12 @@ from nasagamma import efficiency
 from nasagamma import resolution
 from nasagamma import file_reader
 from nasagamma import read_parquet_api
+from nasagamma import parse_NIST
 import pkg_resources
+
+import sys
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
 
 
 class Dialog_from_UI(QDialog):
@@ -107,6 +113,43 @@ class WindowAPIfilters(Dialog_from_UI):
         self.window_title = "Apply API filters"
 
 
+class TableModel(QtCore.QAbstractTableModel):
+    def __init__(self, data):
+        super(TableModel, self).__init__()
+        self._data = data
+
+    def data(self, index, role):
+        if role == Qt.DisplayRole:
+            value = self._data.iloc[index.row(), index.column()]
+            return str(value)
+
+    def rowCount(self, index):
+        return self._data.shape[0]
+
+    def columnCount(self, index):
+        return self._data.shape[1]
+
+    def headerData(self, section, orientation, role):
+        # section is the index of the column/row.
+        if role == Qt.DisplayRole:
+            if orientation == Qt.Horizontal:
+                return str(self._data.columns[section])
+
+            if orientation == Qt.Vertical:
+                return str(self._data.index[section])
+
+    def sort(self, Ncol, order):
+        """Sort table by given column number."""
+        try:
+            self.layoutAboutToBeChanged.emit()
+            self._data = self._data.sort_values(
+                self._data.columns[Ncol], ascending=not order
+            )
+            self.layoutChanged.emit()
+        except Exception as e:
+            print(e)
+
+
 class NasaGammaApp(QMainWindow):
     def __init__(self, commands):
         print(super())
@@ -116,6 +159,7 @@ class NasaGammaApp(QMainWindow):
         # self.setMinimumSize(1800, 900)
         # pixmap = QPixmap("figs/nasa-logo.jpg")
         # self.label_nasa.setPixmap(pixmap)
+        # self.resize(1800, 900)
         self.resize(1800, 900)
         self.setWindowTitle("NASA-gamma")
         self.scale = "linear"
@@ -183,11 +227,13 @@ class NasaGammaApp(QMainWindow):
         ]:
             tmp = NavigationToolbar(tb.canvas, self)
             tmp.setVisible(False)
+            tmp.setStyleSheet("font-size: 24px; background-color : wheat")
             self.addToolBar(tmp)
             self.toolbars.append(tmp)
         self.toolbars[0].setVisible(True)
 
         self.tabWidget.currentChanged.connect(self.switch_toolbar)
+        self.tabWidget.setStyleSheet("background-color : whitesmoke")
 
         # menu bar
         self.saveFitReport.triggered.connect(self.saveReport)
@@ -371,6 +417,26 @@ class NasaGammaApp(QMainWindow):
         self.api_button_filters.setStyleSheet("background-color : silver")
         self.api_button_filters.clicked.connect(self.api_window_filters)
 
+        ## Isotope ID
+        self.df_isotID = []
+        self.isotID_vlines = []
+        self.w_isot_id = Window_isotID()
+        self.w_isot_id.isotID_button_apply.setStyleSheet("background-color : lightblue")
+        self.w_isot_id.isotID_button_clear.setStyleSheet(
+            "background-color : lightcoral"
+        )
+        self.w_isot_id.isotID_button_apply.clicked.connect(self.isotID_apply)
+        self.w_isot_id.isotID_button_clear.clicked.connect(self.isotID_clear)
+        self.w_isot_id.button_plot_vlines.setStyleSheet(
+            "background-color : lightyellow"
+        )
+        self.w_isot_id.button_remove_vlines.setStyleSheet(
+            "background-color : lightcoral"
+        )
+        self.w_isot_id.button_plot_vlines.clicked.connect(self.isotID_plot_vlines)
+        self.w_isot_id.button_remove_vlines.clicked.connect(self.isotID_remove_vlines)
+        self.w_isot_id.edit_isot_search.returnPressed.connect(self.isotID_textSearch)
+
     def switch_toolbar(self):
         current = self.tabWidget.currentIndex()
         for i, tb in enumerate(self.toolbars):
@@ -500,6 +566,11 @@ class NasaGammaApp(QMainWindow):
         yconst = self.w_cust.yconst_txt.text()
         rebin = self.w_cust.rebin_txt.text()
         moving_avg = self.w_cust.smooth_txt.text()
+        gain_shift = self.w_cust.shiftBy_txt.text()
+        if self.w_cust.customize_checkBox_erg.isChecked():
+            bool_erg = True
+        else:
+            bool_erg = False
 
         if xlabel != "":
             self.ax_main.set_xlabel(xlabel)
@@ -528,6 +599,10 @@ class NasaGammaApp(QMainWindow):
         if moving_avg != "":
             n = int(eval(moving_avg))
             self.spect.smooth(num=n)
+            self.create_graph(fit=False, reset=True)
+        if gain_shift != "":
+            gs = eval(gain_shift)
+            self.spect.gain_shift(by=gs, energy=bool_erg)
             self.create_graph(fit=False, reset=True)
 
     def which_button(self):
@@ -572,20 +647,23 @@ class NasaGammaApp(QMainWindow):
     def update_gauss(self):
         if len(self.list_xrange) != 0:
             self.which_button_gauss()
-            self.fit = pf.PeakFit(
-                self.search, self.list_xrange[-1], bkg=self.bg, skew=self.sk_gauss
-            )
-            self.ax_res.clear()
-            self.ax_fit.clear()
-            self.ax_tab.clear()
-            self.fit.plot(
-                plot_type="full",
-                table_scale=[1, 1.8],
-                fig=self.fig,
-                ax_res=self.ax_res,
-                ax_fit=self.ax_fit,
-                ax_tab=self.ax_tab,
-            )
+            try:
+                self.fit = pf.PeakFit(
+                    self.search, self.list_xrange[-1], bkg=self.bg, skew=self.sk_gauss
+                )
+                self.ax_res.clear()
+                self.ax_fit.clear()
+                self.ax_tab.clear()
+                self.fit.plot(
+                    plot_type="full",
+                    table_scale=[1, 1.8],
+                    fig=self.fig,
+                    ax_res=self.ax_res,
+                    ax_fit=self.ax_fit,
+                    ax_tab=self.ax_tab,
+                )
+            except:
+                print("Could not perform fit")
             self.fig.canvas.draw_idle()
 
     def span_select(self):
@@ -608,16 +686,20 @@ class NasaGammaApp(QMainWindow):
         self.ax_res.clear()
         self.ax_fit.clear()
         self.ax_tab.clear()
-        self.fit = pf.PeakFit(self.search, xrange, bkg=self.bg, skew=self.sk_gauss)
-        # plot_fit(fit)
-        self.fit.plot(
-            plot_type="full",
-            table_scale=[1, 1.8],
-            fig=self.fig,
-            ax_res=self.ax_res,
-            ax_fit=self.ax_fit,
-            ax_tab=self.ax_tab,
-        )
+        try:
+            self.fit = pf.PeakFit(self.search, xrange, bkg=self.bg, skew=self.sk_gauss)
+            # plot_fit(fit)
+            self.fit.plot(
+                plot_type="full",
+                table_scale=[1, 1.8],
+                fig=self.fig,
+                ax_res=self.ax_res,
+                ax_fit=self.ax_fit,
+                ax_tab=self.ax_tab,
+            )
+        except:
+            print("Could not perform fit")
+
         self.fig.canvas.draw_idle()
 
     def remove_cal(self):
@@ -1513,6 +1595,254 @@ class NasaGammaApp(QMainWindow):
         # espan.update()
         # tspan.update()
 
+    ## Isotope ID
+    def activate_isotope_id(self):
+        self.w_isot_id.show()
+
+    def isotID_apply(self):
+        df_files = self.isotID_retrieve_data()
+        df_element = self.isotID_filter_by_element(df_files)
+        df_energy = self.isotID_filter_by_energy(df_element)
+        self.df_isotID = df_energy
+        self.activate_table_gammas(self.df_isotID)
+
+    def isotID_clear(self):
+        "Clear entries, uncheck boxes"
+        self.w_isot_id.edit_isot.clear()
+        self.w_isot_id.edit_energy.clear()
+        self.w_isot_id.edit_erange.clear()
+        self.w_isot_id.lab_src.setChecked(False)
+        self.w_isot_id.natural_rad.setChecked(False)
+        self.w_isot_id.neutron_capt.setChecked(False)
+        self.w_isot_id.neutron_inl_talys.setChecked(False)
+        self.w_isot_id.neutron_inl_baghdad.setChecked(False)
+
+    @staticmethod
+    def join_gamma_files(files):
+        data = pd.read_csv(files[0])
+        if len(files) == 1:
+            return data
+        else:
+            for f in files[1:]:
+                df0 = pd.read_csv(f)
+                data = pd.concat([data, df0], ignore_index=True)
+            data["sort"] = (
+                data["Isotope"].str.extract("(\d+)", expand=False).astype(int)
+            )
+            data.sort_values("sort", inplace=True, ascending=True)
+            data = data.drop("sort", axis=1)
+            data.reset_index(inplace=True, drop=True)
+            return data
+
+    def isotID_retrieve_data(self):
+        lab_src_file = pkg_resources.resource_filename(
+            "nasagamma", "data/Common_lab_sources.csv"
+        )
+        nat_rad_file = pkg_resources.resource_filename(
+            "nasagamma", "data/Natural_radiation.csv"
+        )
+        capt_file = pkg_resources.resource_filename(
+            "nasagamma", "data/Capture_CapGam.csv"
+        )
+        inl_talys_file = pkg_resources.resource_filename(
+            "nasagamma", "data/Inelastic_14MeV_Talys.csv"
+        )
+        inl_baghdad_file = pkg_resources.resource_filename(
+            "nasagamma", "data/Inelastic_Baghdad.csv"
+        )
+        files = []
+        if self.w_isot_id.lab_src.isChecked():
+            files.append(lab_src_file)
+        if self.w_isot_id.natural_rad.isChecked():
+            files.append(nat_rad_file)
+        if self.w_isot_id.neutron_capt.isChecked():
+            files.append(capt_file)
+        if self.w_isot_id.neutron_inl_talys.isChecked():
+            files.append(inl_talys_file)
+        if self.w_isot_id.neutron_inl_baghdad.isChecked():
+            files.append(inl_baghdad_file)
+        if len(files) == 0:
+            all_files = [nat_rad_file, capt_file, inl_talys_file]
+            data = self.join_gamma_files(all_files)
+        else:
+            data = self.join_gamma_files(files)
+        return data
+
+    def isotID_filter_by_element(self, df):
+        elements = self.w_isot_id.edit_isot.text()
+        if elements == "":
+            return df
+        elements_lst = elements.split(",")
+        ixs = []  # indices
+        for el in elements_lst:
+            elm = el.strip(" ").lower()
+            isot = re.findall("\d+", elm)
+            if len(isot) == 0:
+                ix = list(
+                    df.index[df["Isotope"].str.match(f"(\d+){elm}(\\b)", case=False)]
+                )
+                ixs.append(ix)
+            else:
+                ix = list(df.index[df["Isotope"].str.lower() == elm])
+                ixs.append(ix)
+        ixs_flat = [item for sublist in ixs for item in sublist]
+        ixs_uniq = sorted(list(set(ixs_flat)))
+        df = df.iloc[ixs_uniq]
+        df.reset_index(inplace=True, drop=True)
+        return df
+
+    @staticmethod
+    def isevaluable(s):
+        "Check if eval(s) is possible"
+        try:
+            eval(s)
+            return True
+        except:
+            return False
+
+    def isotID_filter_by_energy(self, df):
+        energy_txt = self.w_isot_id.edit_energy.text()
+        if energy_txt == "" or self.isevaluable(energy_txt) is False:
+            return df
+        energy = eval(energy_txt)
+        erange_txt = self.w_isot_id.edit_erange.text()
+        if erange_txt == "" or self.isevaluable(erange_txt) is False:
+            erange = 0.01  # keV
+        else:
+            erange = eval(erange_txt)
+        filt = (df["Energy (keV)"] > energy - erange) & (
+            df["Energy (keV)"] < energy + erange
+        )
+        df = df[filt]
+        df.reset_index(inplace=True, drop=True)
+        return df
+
+    ## list of gamma rays
+    def activate_table_gammas(self, data):
+        self.selected_rows = []
+        self.scroll = self.w_isot_id.scrollArea_gammas
+        self.table = QtWidgets.QTableView()
+        self.table.setAlternatingRowColors(True)
+        self.table.setSortingEnabled(True)
+        stylesheet = "::section{Background-color:lightgreen}"
+        self.table.horizontalHeader().setStyleSheet(stylesheet)
+        self.table.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        self.model = TableModel(data)
+        self.table.setModel(self.model)
+        self.scroll.setWidget(self.table)
+        # self.setCentralWidget(self.scroll)
+        self.table.selectionModel().selectionChanged.connect(self.on_selectionChanged)
+
+    def on_selectionChanged(self, selected, deselected):
+        for ix in selected.indexes():
+            self.selected_rows.append(ix.row())
+        for ix in deselected.indexes():
+            try:
+                self.selected_rows.remove(ix.row())
+            except ValueError:
+                pass
+        self.selected_rows = list(set(self.selected_rows))
+        # print(self.selected_rows)
+
+    def isotID_getColor(self):
+        if self.w_isot_id.button_blue.isChecked():
+            return "blue"
+        if self.w_isot_id.button_orange.isChecked():
+            return "C1"
+        if self.w_isot_id.button_green.isChecked():
+            return "green"
+        if self.w_isot_id.button_red.isChecked():
+            return "red"
+
+    def isotID_plot_vlines(self):
+        "Plot vertical lines of energies of selected rows"
+        if len(self.df_isotID) == 0:
+            pass
+        else:
+            if len(self.selected_rows) == 0:
+                self.df_isotID_plot = self.df_isotID.copy()
+            else:
+                self.df_isotID_plot = self.df_isotID.iloc[self.selected_rows]
+            for row in self.df_isotID_plot.index:
+                isot0 = self.df_isotID_plot.loc[row, "Isotope"]
+                e0 = self.df_isotID_plot.loc[row, "Energy (keV)"]
+                info0 = self.df_isotID_plot.loc[row, "Info"]
+                inten0 = self.df_isotID_plot.loc[row, "XS or I"]
+                sep_checked = self.w_isot_id.checkBox_sep.isChecked()
+                dep_checked = self.w_isot_id.checkBox_dep.isChecked()
+                if self.w_isot_id.checkBox_labels.isChecked():
+                    l0 = self.ax_main.axvline(
+                        x=e0,
+                        color=self.isotID_getColor(),
+                        linestyle="-",
+                        alpha=0.5,
+                        label=f"{isot0} : {round(e0,5)} keV",
+                    )
+                    if sep_checked and e0 > 1022:
+                        e1 = e0 - 511
+                        l1 = self.ax_main.axvline(
+                            x=e1,
+                            color=self.isotID_getColor(),
+                            linestyle="--",
+                            alpha=0.5,
+                            label=f"{isot0} : {round(e1,5)} keV",
+                        )
+                        self.isotID_vlines.append(l1)
+                    if dep_checked and e0 > 1022:
+                        e11 = e0 - 511 * 2
+                        l11 = self.ax_main.axvline(
+                            x=e11,
+                            color=self.isotID_getColor(),
+                            linestyle="-.",
+                            alpha=0.5,
+                            label=f"{isot0} : {round(e11,5)} keV",
+                        )
+                        self.isotID_vlines.append(l11)
+
+                else:
+                    l0 = self.ax_main.axvline(
+                        x=e0, color=self.isotID_getColor(), linestyle="-", alpha=0.5
+                    )
+                    if sep_checked and e0 > 1022:
+                        e2 = e0 - 511
+                        l2 = self.ax_main.axvline(
+                            x=e2,
+                            color=self.isotID_getColor(),
+                            linestyle="--",
+                            alpha=0.5,
+                        )
+                        self.isotID_vlines.append(l2)
+                    if dep_checked and e0 > 1022:
+                        e22 = e0 - 511 * 2
+                        l22 = self.ax_main.axvline(
+                            x=e22,
+                            color=self.isotID_getColor(),
+                            linestyle="-.",
+                            alpha=0.5,
+                        )
+                        self.isotID_vlines.append(l22)
+
+                self.isotID_vlines.append(l0)
+            self.ax_main.legend()
+            self.fig.canvas.draw_idle()
+
+    def isotID_remove_vlines(self):
+        if len(self.isotID_vlines) != 0:
+            for l in self.isotID_vlines:
+                l.remove()
+            self.isotID_vlines = []
+            self.ax_main.legend()
+            self.fig.canvas.draw_idle()
+
+    def isotID_textSearch(self):
+        ## TODO
+        element = self.w_isot_id.edit_isot_search.text()
+        if element == "":
+            pass
+        else:
+            out_text = parse_NIST.isotopic_abundance_str(element)
+            self.w_isot_id.text_search.setText(out_text)
+
     ## menu bar
     def apply_params(self):
         self.ax_main.clear()
@@ -1660,13 +1990,9 @@ class NasaGammaApp(QMainWindow):
             print(not_implemented_format)
             self.w_info_file.label_tc.setText(not_implemented_format)
 
-    def activate_isotope_id(self):
-        self.w_isot_id = Window_isotID()
-        self.w_isot_id.show()
-
     def open_file(self):
         options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
+        # options |= QFileDialog.DontUseNativeDialog
         self.fileName, _ = QFileDialog.getOpenFileName(
             self,
             "Open spectrum file",
