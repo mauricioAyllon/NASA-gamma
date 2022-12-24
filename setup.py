@@ -11,8 +11,10 @@ setup(
     packages=["nasagamma"],
     scripts=["gammaGUI-qt"],
     package_data={
-        "": [
-            os.path.join("qt_gui.ui"),
+        "nasagamma": [
+            os.path.join("nasagamma", "data", "*txt"),
+            os.path.join("nasagamma", "data", "*csv"),
+            os.path.join("nasagamma", "*ui"),
         ]
     },
     install_requires=["docopt >= 0.6.2", "lmfit > 1.0.2", "dateparser >= 1.1.1"],
