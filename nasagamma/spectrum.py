@@ -126,6 +126,41 @@ class Spectrum:
                 counts=y, energies=en, e_units=self.e_units, livetime=self.livetime
             )
 
+    def gain_shift(self, by=0, energy=False):
+        """
+        Slide spectrum left or right by 'by' number of channels or energy values.
+        If positive shift, replace low energy values by zeroes. If negative shift,
+        replace high energy values by the value in the last bin.
+
+        Parameters
+        ----------
+        by : integer, optional
+            Number of channels or energy values to shift the spectrum by. The default is 0.
+        energy : double, optional
+            Set to True if shifting by energy values. The default is False.
+
+        Returns
+        -------
+        None.
+
+        """
+        if energy and self.energies is not None:
+            cal = np.diff(self.energies)[0]
+            by = round(by / cal)
+        by = int(by)
+        if by > 0:
+            # positive roll
+            # replace rolled low energy counts with zeros
+            self.counts = np.roll(self.counts, shift=by)
+            self.counts[0:by] = 0
+        elif by < 0:
+            # negative roll
+            # replace rolled high energy counts with the last high energy value
+            self.counts = np.roll(self.counts, shift=by)
+            self.counts[by:] = self.counts[by - 1]
+        else:
+            print(f"Cannot roll by {by} units")
+
     def plot(self, fig=None, ax=None, scale="log"):
         """
         Plot spectrum object using channels and energies (if not None)
