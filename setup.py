@@ -17,5 +17,11 @@ setup(
             os.path.join("nasagamma", "*ui"),
         ]
     },
-    install_requires=["docopt >= 0.6.2", "lmfit > 1.0.2", "dateparser >= 1.1.1"],
+    install_requires=[
+        "docopt >= 0.6.2",
+        "lmfit > 1.0.2",
+        "dateparser >= 1.1.1",
+        "pandas > 1.4.2",
+        "matplotlib > 3.5.1",
+    ],
 )
