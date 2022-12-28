@@ -30,6 +30,16 @@
         <string>Spectrum</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_14">
+        <item row="2" column="0" colspan="14">
+         <widget class="MplWidget" name="main_plot" native="true">
+          <property name="mouseTracking">
+           <bool>false</bool>
+          </property>
+          <property name="autoFillBackground">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="0" rowspan="2">
          <widget class="QPushButton" name="pushButton_scale">
           <property name="font">
@@ -42,6 +52,19 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="9">
+         <spacer name="horizontalSpacer_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>6</width>
+            <height>17</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
         <item row="0" column="1" rowspan="2">
          <widget class="QPushButton" name="button_customize">
           <property name="font">
@@ -51,6 +74,46 @@
           </property>
           <property name="text">
            <string>Customize</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="10" rowspan="2">
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QPushButton" name="pushButton_gauss">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Gauss</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_gauss2">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Sk. Gauss</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="5">
+         <widget class="QPushButton" name="button_add_cal">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Add to calibration</string>
           </property>
          </widget>
         </item>
@@ -79,84 +142,7 @@
           </property>
          </spacer>
         </item>
-        <item row="0" column="4">
-         <widget class="QPushButton" name="button_add_cal">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Add to calibration</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="5" rowspan="2">
-         <widget class="QPushButton" name="button_add_fwhm">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Add to FWHM</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="6" rowspan="2">
-         <widget class="QPushButton" name="button_add_eff">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Add to efficiency</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="7">
-         <spacer name="horizontalSpacer_6">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>6</width>
-            <height>17</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="0" column="8" rowspan="2">
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QPushButton" name="pushButton_gauss">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Gauss</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_gauss2">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Sk. Gauss</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="0" column="9">
+        <item row="0" column="11">
          <widget class="QPushButton" name="pushButton_poly1">
           <property name="font">
            <font>
@@ -168,55 +154,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="10">
-         <widget class="QPushButton" name="pushButton_poly2">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Bkg2</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="11">
-         <widget class="QPushButton" name="pushButton_poly3">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Bkg3</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="4">
-         <widget class="QPushButton" name="button_remove_cal">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Remove calibration</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="9">
-         <widget class="QPushButton" name="pushButton_poly4">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Bkg4</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="10">
+        <item row="1" column="12">
          <widget class="QPushButton" name="pushButton_poly5">
           <property name="font">
            <font>
@@ -228,7 +166,31 @@
           </property>
          </widget>
         </item>
+        <item row="1" column="5">
+         <widget class="QPushButton" name="button_remove_cal">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Remove calibration</string>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="11">
+         <widget class="QPushButton" name="pushButton_poly4">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Bkg4</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="13">
          <widget class="QPushButton" name="pushButton_exp">
           <property name="font">
            <font>
@@ -240,13 +202,75 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0" colspan="12">
-         <widget class="MplWidget" name="main_plot" native="true">
-          <property name="mouseTracking">
-           <bool>false</bool>
+        <item row="0" column="13">
+         <widget class="QPushButton" name="pushButton_poly3">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
           </property>
-          <property name="autoFillBackground">
-           <bool>true</bool>
+          <property name="text">
+           <string>Bkg3</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="12">
+         <widget class="QPushButton" name="pushButton_poly2">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Bkg2</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="7">
+         <widget class="QPushButton" name="button_add_fwhm">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Add to FWHM</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="7">
+         <widget class="QPushButton" name="button_add_eff">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Add to efficiency</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <widget class="QPushButton" name="button_find_peaks">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Find peaks</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QPushButton" name="button_identify_peaks">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Identify peaks</string>
           </property>
          </widget>
         </item>
@@ -1493,7 +1517,7 @@
      <x>0</x>
      <y>0</y>
      <width>2120</width>
-     <height>31</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1508,7 +1532,6 @@
     </property>
     <addaction name="clearSpectrum"/>
     <addaction name="info_file"/>
-    <addaction name="isotopeID"/>
    </widget>
    <widget class="QMenu" name="menuSave">
     <property name="title">
