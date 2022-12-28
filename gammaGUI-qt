@@ -77,6 +77,18 @@ class WindowCust(Dialog_from_UI):
         self.window_title = "Customize plot"
 
 
+class WindowPeakFinder(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_peak_find.ui"
+        self.window_title = "Peak finder"
+
+
+class WindowPeakFinderInfo(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_peak_find_info.ui"
+        self.window_title = "Peak finder info"
+
+
 class WindowCal(Dialog_from_UI):
     def define_ui_vars(self):
         self.ui_name = "win_erg_cal.ui"
@@ -101,7 +113,7 @@ class WindowInfoFile(Dialog_from_UI):
         self.window_title = "File information"
 
 
-class Window_isotID(Dialog_from_UI):
+class WindowIsotID(Dialog_from_UI):
     def define_ui_vars(self):
         self.ui_name = "win_isot_id.ui"
         self.window_title = "Isotope ID"
@@ -240,8 +252,7 @@ class NasaGammaApp(QMainWindow):
         self.openFile.triggered.connect(self.open_file)
         self.saveSpect.triggered.connect(self.save_spect)
         self.info_file.triggered.connect(self.display_info_file)
-        self.isotopeID.triggered.connect(self.activate_isotope_id)
-        self.clearSpectrum.triggered.connect(self.reset_main_figure)
+        self.clearSpectrum.triggered.connect(self.clear_main_figure)
 
         self.reset_main_figure()
 
@@ -417,10 +428,24 @@ class NasaGammaApp(QMainWindow):
         self.api_button_filters.setStyleSheet("background-color : silver")
         self.api_button_filters.clicked.connect(self.api_window_filters)
 
+        ## Find peaks
+        self.button_find_peaks.setStyleSheet("background-color : mediumaquamarine")
+        self.button_find_peaks.clicked.connect(self.activate_peak_finder)
+        self.w_peak_find = WindowPeakFinder()
+        self.w_peak_find.button_kernel_apply.clicked.connect(self.peakFind_kernel_apply)
+        self.w_peak_find.checkBox_hpge.clicked.connect(self.peakFind_check_hpge)
+        self.w_peak_find.checkBox_labr.clicked.connect(self.peakFind_check_labr)
+        self.w_peak_find.checkBox_nai.clicked.connect(self.peakFind_check_nai)
+        self.w_peak_find.checkBox_plastic.clicked.connect(self.peakFind_check_plastic)
+        self.w_peak_find_info = WindowPeakFinderInfo()
+        self.w_peak_find.button_info.clicked.connect(self.peakFind_info_activate)
+        ## TODO
         ## Isotope ID
         self.df_isotID = []
         self.isotID_vlines = []
-        self.w_isot_id = Window_isotID()
+        self.button_identify_peaks.setStyleSheet("background-color : navajowhite")
+        self.button_identify_peaks.clicked.connect(self.activate_isotope_id)
+        self.w_isot_id = WindowIsotID()
         self.w_isot_id.isotID_button_apply.setStyleSheet("background-color : lightblue")
         self.w_isot_id.isotID_button_clear.setStyleSheet(
             "background-color : lightcoral"
@@ -443,7 +468,8 @@ class NasaGammaApp(QMainWindow):
             tb.setVisible(i == current)
 
     def create_graph(self, fit=True, reset=True):
-        self.label_units.setText(self.e_units)
+        txt = f"Xrange (optional) [{self.e_units}]:"
+        self.w_peak_find.label_units.setText(txt)
         if reset:
             self.reset_main_figure()
         else:
@@ -474,6 +500,12 @@ class NasaGammaApp(QMainWindow):
                 bbox={"facecolor": "orange", "alpha": 0.5, "pad": 20},
             )
         self.fig.canvas.draw_idle()
+
+    def clear_main_figure(self):
+        self.spect = 0
+        self.search = 0
+        self.fit = 0
+        self.reset_main_figure()
 
     def reset_main_figure(self):
         self.fig = self.main_plot.canvas.figure
@@ -1595,6 +1627,76 @@ class NasaGammaApp(QMainWindow):
         # espan.update()
         # tspan.update()
 
+    ## Peak finder
+    def peakFind_info_activate(self):
+        self.w_peak_find_info.show()
+
+    def activate_peak_finder(self):
+        self.w_peak_find.show()
+
+    def peakFind_kernel_apply(self):
+        ## TODO
+        # self.ax_main.clear()
+        self.fwhm_at_0 = 1
+        try:
+            self.min_snr = float(self.w_peak_find.edit_snr.text())
+            self.ref_x = float(self.w_peak_find.edit_ref_ch.text())
+            self.ref_fwhm = float(self.w_peak_find.edit_ref_fwhm.text())
+
+            x0 = self.w_peak_find.edit_x0.text()
+            x1 = self.w_peak_find.edit_x1.text()
+            if x0 and x1:
+                self.x0 = float(x0)
+                self.x1 = float(x1)
+                self.search = ps.PeakSearch(
+                    self.spect,
+                    self.ref_x,
+                    self.ref_fwhm,
+                    self.fwhm_at_0,
+                    min_snr=self.min_snr,
+                    xrange=[self.x0, self.x1],
+                )
+            else:
+                if len(self.spect.channels) < 9000:
+                    self.search = ps.PeakSearch(
+                        self.spect,
+                        self.ref_x,
+                        self.ref_fwhm,
+                        self.fwhm_at_0,
+                        min_snr=self.min_snr,
+                    )
+                else:
+                    pass
+            self.create_graph(fit=True)
+        except:
+            print(
+                (
+                    "ERROR: non-numeric entry or if more than 9000 channels,"
+                    "constrain the range using x0 and x1."
+                )
+            )
+            # self.create_graph(fit=False)
+
+    def peakFind_check_hpge(self):
+        self.w_peak_find.edit_snr.setText("5")
+        self.w_peak_find.edit_ref_ch.setText("420")
+        self.w_peak_find.edit_ref_fwhm.setText("3")
+
+    def peakFind_check_labr(self):
+        self.w_peak_find.edit_snr.setText("5")
+        self.w_peak_find.edit_ref_ch.setText("420")
+        self.w_peak_find.edit_ref_fwhm.setText("12")
+
+    def peakFind_check_nai(self):
+        self.w_peak_find.edit_snr.setText("5")
+        self.w_peak_find.edit_ref_ch.setText("420")
+        self.w_peak_find.edit_ref_fwhm.setText("15")
+
+    def peakFind_check_plastic(self):
+        self.w_peak_find.edit_snr.setText("5")
+        self.w_peak_find.edit_ref_ch.setText("420")
+        self.w_peak_find.edit_ref_fwhm.setText("20")
+
     ## Isotope ID
     def activate_isotope_id(self):
         self.w_isot_id.show()
@@ -1838,7 +1940,6 @@ class NasaGammaApp(QMainWindow):
             self.fig.canvas.draw_idle()
 
     def isotID_textSearch(self):
-        ## TODO
         element = self.w_isot_id.edit_element_search.text()
         if element == "":
             pass
