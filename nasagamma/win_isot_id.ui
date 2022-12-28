@@ -185,7 +185,13 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QLineEdit" name="edit_isot"/>
+            <widget class="QLineEdit" name="edit_isot">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+            </widget>
            </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_3">
@@ -200,7 +206,13 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QLineEdit" name="edit_energy"/>
+            <widget class="QLineEdit" name="edit_energy">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+            </widget>
            </item>
            <item row="2" column="0">
             <widget class="QLabel" name="label_4">
@@ -215,7 +227,13 @@
             </widget>
            </item>
            <item row="2" column="1">
-            <widget class="QLineEdit" name="edit_erange"/>
+            <widget class="QLineEdit" name="edit_erange">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+            </widget>
            </item>
            <item row="3" column="0" colspan="2">
             <widget class="QLabel" name="label_6">
@@ -503,7 +521,7 @@ p, li { white-space: pre-wrap; }
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>588</width>
+             <width>571</width>
              <height>666</height>
             </rect>
            </property>
@@ -589,6 +607,11 @@ p, li { white-space: pre-wrap; }
            </item>
            <item row="0" column="1">
             <widget class="QLineEdit" name="edit_element_search">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
              <property name="focusPolicy">
               <enum>Qt::ClickFocus</enum>
              </property>
