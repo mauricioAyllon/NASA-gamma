@@ -744,10 +744,7 @@ class NasaGammaApp(QMainWindow):
                 )
 
                 self.create_graph(fit=False)
-        except AttributeError:
-            self.spect = sp.Spectrum(counts=self.spect.counts)
-            self.create_graph(fit=False)
-        else:
+        except:
             pass
 
     ## calibration
@@ -997,18 +994,21 @@ class NasaGammaApp(QMainWindow):
         self.w_eff.accepted.connect(self.add_eff)
 
     def add_eff(self):
-        self.get_eff_params()
-        eff_class = efficiency.Efficiency(
-            t_half=self.t_half,
-            A0=self.A0,
-            Br=self.B,
-            livetime=self.acq_time,
-            t_elapsed=self.delta_t_sec,
-            which_peak=self.n_peak_eff,
-        )
-        eff_class.calculate_efficiency(self.fit)
-        self.append_to_eff(eff_class.eff * 100, eff_class.mean_val)
-        self.plot_eff_points()
+        try:
+            self.get_eff_params()
+            eff_class = efficiency.Efficiency(
+                t_half=self.t_half,
+                A0=self.A0,
+                Br=self.B,
+                livetime=self.acq_time,
+                t_elapsed=self.delta_t_sec,
+                which_peak=self.n_peak_eff,
+            )
+            eff_class.calculate_efficiency(self.fit)
+            self.append_to_eff(eff_class.eff * 100, eff_class.mean_val)
+            self.plot_eff_points()
+        except:
+            pass
 
     def plot_eff_points(self):
         x = np.array(self.eff_vals)[:, 0]
@@ -1158,11 +1158,7 @@ class NasaGammaApp(QMainWindow):
             self.update_table_fwhm()
             self.update_gauss_fwhm()
             self.fig_fwhm.canvas.draw_idle()
-        except TypeError:
-            print("Failed to fit a second order function. Switching to first order")
-            self.button_fwhm1.setChecked(True)
-            self.perform_fwhm()
-        else:
+        except:
             pass
 
     def update_table_fwhm(self):
@@ -1183,20 +1179,23 @@ class NasaGammaApp(QMainWindow):
         )
 
     def add_fwhm(self):
-        self.ax_fwhm.clear()
-        xvals = self.get_mean_vals(self.fit)
-        fwhms = self.get_fwhm_vals(self.fit)
+        try:
+            self.ax_fwhm.clear()
+            xvals = self.get_mean_vals(self.fit)
+            fwhms = self.get_fwhm_vals(self.fit)
 
-        for x, f in zip(xvals, fwhms):
-            if x not in self.fwhm_x and f not in self.fwhm:
-                self.fwhm_x.append(x)
-                self.fwhm.append(f)
+            for x, f in zip(xvals, fwhms):
+                if x not in self.fwhm_x and f not in self.fwhm:
+                    self.fwhm_x.append(x)
+                    self.fwhm.append(f)
 
-        self.fit_lst.append(self.fit)
-        self.fwhm_x.sort()
-        self.fwhm.sort()
-        self.perform_fwhm()
-        # self.update_fwhm_table()
+            self.fit_lst.append(self.fit)
+            self.fwhm_x.sort()
+            self.fwhm.sort()
+            self.perform_fwhm()
+            # self.update_fwhm_table()
+        except:
+            pass
 
     def update_fwhm_figure(self):
         self.ax_fwhm.clear()
@@ -1229,17 +1228,20 @@ class NasaGammaApp(QMainWindow):
         self.fig_fwhm.canvas.draw_idle()
 
     def extrapolate_fwhm(self):
-        if self.button_extrapolate.isChecked():
-            resolution.fwhm_extrapolate(
-                energies=self.spect.x,
-                fit=self.fwhm_fit,
-                order=self.n_fwhm,
-                ax=self.ax_fwhm,
-                fig=self.fig_fwhm,
-            )
-            self.fig_fwhm.canvas.draw_idle()
-        else:
-            self.update_fwhm_figure()
+        try:
+            if self.button_extrapolate.isChecked():
+                resolution.fwhm_extrapolate(
+                    energies=self.spect.x,
+                    fit=self.fwhm_fit,
+                    order=self.n_fwhm,
+                    ax=self.ax_fwhm,
+                    fig=self.fig_fwhm,
+                )
+                self.fig_fwhm.canvas.draw_idle()
+            else:
+                self.update_fwhm_figure()
+        except:
+            pass
 
     ## Lynx
     def open_tlist_file(self):
@@ -1670,7 +1672,7 @@ class NasaGammaApp(QMainWindow):
                     "constrain the range using x0 and x1."
                 )
             )
-            self.create_graph(fit=False)
+            # self.create_graph(fit=False)
 
     def peakFind_check_hpge(self):
         self.w_peak_find.edit_snr.setText("5")
@@ -1986,76 +1988,72 @@ class NasaGammaApp(QMainWindow):
     def display_info_file(self):
         self.w_info_file = WindowInfoFile()
         self.w_info_file.show()
-        if self.fileName[-9:] == "-lynx.csv":
-            try:
-                lt = float(self.lynxcsv.live_time[0:-4])
-                rt = float(self.lynxcsv.real_time[0:-4])
-                livetime = lt
-                realtime = rt
-                deadtime = round((1 - lt / rt) * 100, 2)
-                total_cts = self.lynxcsv.counts
-                count_rate = round(self.lynxcsv.count_rate, 3)
-                nch = self.lynxcsv.nch
-                energy_cal = self.lynxcsv.energy_calibration
-                start_time = self.lynxcsv.start_time
-                self.w_info_file.label_lt.setText(str(livetime))
-                self.w_info_file.label_rt.setText(str(realtime))
-                self.w_info_file.label_dt.setText(str(deadtime))
-                self.w_info_file.label_tc.setText(str(total_cts))
-                self.w_info_file.label_cr.setText(str(count_rate))
-                self.w_info_file.label_nch.setText(str(nch))
-                self.w_info_file.label_time.setText(start_time)
-                self.w_info_file.label_energy_cal.setText(str(energy_cal))
-            except:
-                invalid_lynxcsv = "Not a valid -lynx.csv file"
-                print(invalid_lynxcsv)
-                self.w_info_file.label_tc.setText(invalid_lynxcsv)
-        elif self.fileName.lower()[-4:] == ".cnf":
-            try:
-                self.cnf_dict = read_cnf.read_cnf_file(self.fileName, False)
-                livetime = self.cnf_dict["Live time"]
-                realtime = self.cnf_dict["Real time"]
-                deadtime = (1 - livetime / realtime) * 100
-                total_cts = self.cnf_dict["Total counts"]
-                count_rate = total_cts / livetime
-                ch_num = self.cnf_dict["Number of channels"]
-                start_time = self.cnf_dict["Start time"]
-                self.w_info_file.label_lt.setText(str(livetime))
-                self.w_info_file.label_rt.setText(str(realtime))
-                self.w_info_file.label_dt.setText(str(deadtime))
-                self.w_info_file.label_tc.setText(str(total_cts))
-                self.w_info_file.label_cr.setText(str(count_rate))
-                self.w_info_file.label_nch.setText(str(ch_num))
-                self.w_info_file.label_time.setText(start_time)
-            except:
-                invalid_cnf = "Not a valid CNF file"
-                print(invalid_cnf)
-                self.w_cnf.label_tc.setText(invalid_cnf)
-        elif self.fileName.lower()[-8:] == ".pha.txt":
-            try:
-                lt = self.multiscanPHA.live_time
-                rt = self.multiscanPHA.real_time
-                livetime = lt
-                realtime = rt
-                deadtime = round((1 - lt / rt) * 100, 2)
-                total_cts = self.multiscanPHA.counts
-                count_rate = round(self.multiscanPHA.count_rate, 3)
-                nch = self.multiscanPHA.nch
-                energy_cal = self.multiscanPHA.energy_calibration
-                start_time = self.multiscanPHA.start_time
-                self.w_info_file.label_lt.setText(str(livetime))
-                self.w_info_file.label_rt.setText(str(realtime))
-                self.w_info_file.label_dt.setText(str(deadtime))
-                self.w_info_file.label_tc.setText(str(total_cts))
-                self.w_info_file.label_cr.setText(str(count_rate))
-                self.w_info_file.label_nch.setText(str(nch))
-                self.w_info_file.label_time.setText(start_time)
-                self.w_info_file.label_energy_cal.setText(str(energy_cal))
-            except:
-                invalid_mspha = "Not a valid .pha.txt file"
-                print(invalid_mspha)
-                self.w_info_file.label_tc.setText(invalid_mspha)
-        else:
+
+        try:
+            lt = float(self.lynxcsv.live_time[0:-4])
+            rt = float(self.lynxcsv.real_time[0:-4])
+            livetime = lt
+            realtime = rt
+            deadtime = round((1 - lt / rt) * 100, 2)
+            total_cts = self.lynxcsv.counts
+            count_rate = round(self.lynxcsv.count_rate, 3)
+            nch = self.lynxcsv.nch
+            energy_cal = self.lynxcsv.energy_calibration
+            start_time = self.lynxcsv.start_time
+            self.w_info_file.label_lt.setText(str(livetime))
+            self.w_info_file.label_rt.setText(str(realtime))
+            self.w_info_file.label_dt.setText(str(deadtime))
+            self.w_info_file.label_tc.setText(str(total_cts))
+            self.w_info_file.label_cr.setText(str(count_rate))
+            self.w_info_file.label_nch.setText(str(nch))
+            self.w_info_file.label_time.setText(start_time)
+            self.w_info_file.label_energy_cal.setText(str(energy_cal))
+        except:
+            not_implemented_format = "File format not implemented"
+            print(not_implemented_format)
+            self.w_info_file.label_tc.setText(not_implemented_format)
+
+        try:
+            self.cnf_dict = read_cnf.read_cnf_file(self.fileName, False)
+            livetime = self.cnf_dict["Live time"]
+            realtime = self.cnf_dict["Real time"]
+            deadtime = (1 - livetime / realtime) * 100
+            total_cts = self.cnf_dict["Total counts"]
+            count_rate = total_cts / livetime
+            ch_num = self.cnf_dict["Number of channels"]
+            start_time = self.cnf_dict["Start time"]
+            self.w_info_file.label_lt.setText(str(livetime))
+            self.w_info_file.label_rt.setText(str(realtime))
+            self.w_info_file.label_dt.setText(str(deadtime))
+            self.w_info_file.label_tc.setText(str(total_cts))
+            self.w_info_file.label_cr.setText(str(count_rate))
+            self.w_info_file.label_nch.setText(str(ch_num))
+            self.w_info_file.label_time.setText(start_time)
+        except:
+            not_implemented_format = "File format not implemented"
+            print(not_implemented_format)
+            self.w_info_file.label_tc.setText(not_implemented_format)
+
+        try:
+            lt = self.multiscanPHA.live_time
+            rt = self.multiscanPHA.real_time
+            livetime = lt
+            realtime = rt
+            deadtime = round((1 - lt / rt) * 100, 2)
+            total_cts = self.multiscanPHA.counts
+            count_rate = round(self.multiscanPHA.count_rate, 3)
+            nch = self.multiscanPHA.nch
+            energy_cal = self.multiscanPHA.energy_calibration
+            start_time = self.multiscanPHA.start_time
+            self.w_info_file.label_lt.setText(str(livetime))
+            self.w_info_file.label_rt.setText(str(realtime))
+            self.w_info_file.label_dt.setText(str(deadtime))
+            self.w_info_file.label_tc.setText(str(total_cts))
+            self.w_info_file.label_cr.setText(str(count_rate))
+            self.w_info_file.label_nch.setText(str(nch))
+            self.w_info_file.label_time.setText(start_time)
+            self.w_info_file.label_energy_cal.setText(str(energy_cal))
+        except:
             not_implemented_format = "File format not implemented"
             print(not_implemented_format)
             self.w_info_file.label_tc.setText(not_implemented_format)
@@ -2076,13 +2074,14 @@ class NasaGammaApp(QMainWindow):
             try:
                 print("Opening file: ", self.fileName)
                 fileName = self.fileName.lower()
-                if fileName[-9:] == "-lynx.csv":
-                    self.lynxcsv = file_reader.ReadLynxCsv(fileName)
-                    self.spect = self.lynxcsv.spect
-                    self.e_units = self.spect.e_units
-                    # self.e_units, self.spect = file_reader.read_lynx_csv(fileName)
-                elif fileName[-4:] == ".csv":
-                    self.e_units, self.spect = file_reader.read_csv_file(fileName)
+                if fileName[-4:] == ".csv":
+                    try:
+                        self.e_units, self.spect = file_reader.read_csv_file(fileName)
+                    except:
+                        self.lynxcsv = file_reader.ReadLynxCsv(fileName)
+                        self.spect = self.lynxcsv.spect
+                        self.e_units = self.spect.e_units
+
                 elif fileName[-4:] == ".cnf":
                     self.e_units, self.spect = file_reader.read_cnf_to_spect(fileName)
                 elif fileName[-4:] == ".mca":
@@ -2111,6 +2110,7 @@ if __name__ == "__main__":
     # initialize figure
     plt.rc("font", size=14)
     plt.style.use("seaborn-darkgrid")
+    # plt.style.use("seaborn-v0_8")
 
     # initialize app
     app = QApplication([])
