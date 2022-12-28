@@ -218,14 +218,10 @@ class NasaGammaApp(QMainWindow):
         self.btn_grp_gauss.addButton(self.pushButton_gauss2)
         self.btn_grp_gauss.buttonClicked.connect(self.update_gauss)
 
-        self.button_apply.setStyleSheet("background-color : lightblue")
         self.button_remove_cal.setStyleSheet("background-color : lightcoral")
 
         self.button_customize.setStyleSheet("background-color : lightsteelblue")
         self.button_customize.clicked.connect(self.new_window_custom)
-
-        # textbox
-        self.button_apply.clicked.connect(self.apply_params)
 
         # navigation toolbars
         self.toolbars = []
@@ -1478,7 +1474,6 @@ class NasaGammaApp(QMainWindow):
     def api_window_filters(self):
         self.w_api_filt = WindowAPIfilters()
         self.w_api_filt.show()
-        self.button_apply.clicked.connect(self.apply_params)
         self.w_api_filt.button_api_apply.clicked.connect(self.apply_api_filters)
 
     def apply_api_filters(self):
@@ -1675,7 +1670,7 @@ class NasaGammaApp(QMainWindow):
                     "constrain the range using x0 and x1."
                 )
             )
-            # self.create_graph(fit=False)
+            self.create_graph(fit=False)
 
     def peakFind_check_hpge(self):
         self.w_peak_find.edit_snr.setText("5")
@@ -1946,35 +1941,6 @@ class NasaGammaApp(QMainWindow):
         else:
             out_text = parse_NIST.isotopic_abundance_str(element)
             self.w_isot_id.text_search.setText(out_text)
-
-    ## menu bar
-    def apply_params(self):
-        self.ax_main.clear()
-        self.min_snr = float(self.text_snr.text())
-        self.ref_x = float(self.text_ref_ch.text())
-        self.ref_fwhm = float(self.text_ref_fwhm.text())
-        self.fwhm_at_0 = 1
-        if self.text_x0.text() and self.text_x1.text():
-            self.x0 = float(self.text_x0.text())
-            self.x1 = float(self.text_x1.text())
-            self.search = ps.PeakSearch(
-                self.spect,
-                self.ref_x,
-                self.ref_fwhm,
-                self.fwhm_at_0,
-                min_snr=self.min_snr,
-                xrange=[self.x0, self.x1],
-            )
-        else:
-            self.search = ps.PeakSearch(
-                self.spect,
-                self.ref_x,
-                self.ref_fwhm,
-                self.fwhm_at_0,
-                min_snr=self.min_snr,
-            )
-
-        self.create_graph(fit=True)
 
     def saveReport(self):
         options = QFileDialog.Options()
