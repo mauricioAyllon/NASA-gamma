@@ -1467,7 +1467,7 @@
               <string/>
              </property>
              <property name="pixmap">
-              <pixmap>../figs/nasa-logo2.png</pixmap>
+              <pixmap>../../../../../.designer/figs/nasa-logo2.png</pixmap>
              </property>
             </widget>
            </item>
@@ -1498,7 +1498,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap>../../../../../.designer/figs/nasa-logo2.png</pixmap>
+           <pixmap>../../../../../../../.designer/figs/nasa-logo2.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
