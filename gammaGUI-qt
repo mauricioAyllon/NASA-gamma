@@ -32,12 +32,15 @@ import pandas as pd
 import numpy as np
 import datetime
 import re
+import sys
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QKeySequence, QIcon, QPixmap
+
+# from PyQt5.QtGui import QKeySequence, QIcon, QPixmap
 from PyQt5.uic import loadUi
 
-# from PyQt5.QtCore import Qt
-from PyQt5.QtCore import pyqtSlot
+# from PyQt5.QtCore import pyqtSlot
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import Qt
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.widgets import SpanSelector, RectangleSelector
@@ -54,10 +57,6 @@ from nasagamma import file_reader
 from nasagamma import read_parquet_api
 from nasagamma import parse_NIST
 import pkg_resources
-
-import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt
 
 
 class Dialog_from_UI(QDialog):
