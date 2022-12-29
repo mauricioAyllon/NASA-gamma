@@ -1272,86 +1272,107 @@ class NasaGammaApp(QMainWindow):
                 print("Could not open file")
 
     def reset_lynx_figure(self):
-        self.fig_lynx = self.lynx_plot.canvas.figure
-        self.fig_lynx.clear()
-        self.fig_lynx.set_constrained_layout(True)
-        gs = self.fig_lynx.add_gridspec(
-            2, 2, width_ratios=[0.5, 0.5], height_ratios=[0.5, 0.5]
-        )
+        try:
+            self.fig_lynx = self.lynx_plot.canvas.figure
+            self.fig_lynx.clear()
+            self.fig_lynx.set_constrained_layout(True)
+            gs = self.fig_lynx.add_gridspec(
+                2, 2, width_ratios=[0.5, 0.5], height_ratios=[0.5, 0.5]
+            )
 
-        # axes
-        self.ax_lynx_dt = self.fig_lynx.add_subplot(gs[0, 0])
-        # self.ax_lynx_buttons = self.fig_lynx.add_subplot(gs[1, 0])
-        self.ax_lynx_spect1 = self.fig_lynx.add_subplot(gs[0, 1])
-        self.ax_lynx_spect2 = self.fig_lynx.add_subplot(gs[1, 1])
-        self.lynx_scale = "linear"
-        self.fig_lynx.canvas.draw_idle()
+            # axes
+            self.ax_lynx_dt = self.fig_lynx.add_subplot(gs[0, 0])
+            # self.ax_lynx_buttons = self.fig_lynx.add_subplot(gs[1, 0])
+            self.ax_lynx_spect1 = self.fig_lynx.add_subplot(gs[0, 1])
+            self.ax_lynx_spect2 = self.fig_lynx.add_subplot(gs[1, 1])
+            self.lynx_scale = "linear"
+            self.fig_lynx.canvas.draw_idle()
+        except:
+            pass
 
     def lynx_yscale(self):
-        if self.lynx_scale == "log":
-            self.ax_lynx_spect1.set_yscale("linear")
-            self.lynx_scale = "linear"
-        else:
-            self.ax_lynx_spect1.set_yscale("log")
-            self.lynx_scale = "log"
-        self.fig_lynx.canvas.draw_idle()
+        try:
+            if self.lynx_scale == "log":
+                self.ax_lynx_spect1.set_yscale("linear")
+                self.lynx_scale = "linear"
+            else:
+                self.ax_lynx_spect1.set_yscale("log")
+                self.lynx_scale = "log"
+            self.fig_lynx.canvas.draw_idle()
+        except:
+            pass
 
     def apply_period_tbins(self):
-        period = self.edit_period.text()
-        tbins = self.edit_tbins.text()
-        if period != "":
-            self.tl.period = float(period)
-            self.tl.change_period(self.tl.period)
-        if tbins != "":
-            self.tl.tbins = int(tbins)
-        self.ax_lynx_dt.clear()
-        self.tl.plot_time_hist(ax=self.ax_lynx_dt)
-        self.fig_lynx.canvas.draw_idle()
+        try:
+            period = self.edit_period.text()
+            tbins = self.edit_tbins.text()
+            if period != "":
+                self.tl.period = float(period)
+                self.tl.change_period(self.tl.period)
+            if tbins != "":
+                self.tl.tbins = int(tbins)
+            self.ax_lynx_dt.clear()
+            self.tl.plot_time_hist(ax=self.ax_lynx_dt)
+            self.fig_lynx.canvas.draw_idle()
+        except:
+            pass
 
     def filter_time(self):
-        self.ax_lynx_dt.clear()
-        t0 = float(self.edit_t0.text())
-        t1 = float(self.edit_t1.text())
-        self.tl.trange = [t0, t1]
-        self.tl.filter_data(self.tl.trange)
-        self.tl.plot_time_hist(ax=self.ax_lynx_dt)
-        self.tl.plot_spect_erg_all(ax=self.ax_lynx_spect1)
-        self.tl.plot_vlines(ax=self.ax_lynx_dt)
-        self.fig_lynx.canvas.draw_idle()
+        try:
+            self.ax_lynx_dt.clear()
+            t0 = float(self.edit_t0.text())
+            t1 = float(self.edit_t1.text())
+            self.tl.trange = [t0, t1]
+            self.tl.filter_data(self.tl.trange)
+            self.tl.plot_time_hist(ax=self.ax_lynx_dt)
+            self.tl.plot_spect_erg_all(ax=self.ax_lynx_spect1)
+            self.tl.plot_vlines(ax=self.ax_lynx_dt)
+            self.fig_lynx.canvas.draw_idle()
+        except:
+            pass
 
     def filter_erg(self):
-        self.ax_lynx_spect2.clear()
-        ch0 = float(self.edit_ch0.text())
-        ch1 = float(self.edit_ch1.text())
-        self.tl.erange = [ch0, ch1]
-        self.tl.filter_edata(self.tl.erange)
-        self.tl.plot_spect_erg_range(ax=self.ax_lynx_spect2)
-        self.fig_lynx.canvas.draw_idle()
-
-    def apply_dt_bins(self):
-        dt_bins = self.edit_dt_bins.text()
-        if dt_bins != "":
-            self.tl.dt_bins = int(dt_bins)
+        try:
             self.ax_lynx_spect2.clear()
+            ch0 = float(self.edit_ch0.text())
+            ch1 = float(self.edit_ch1.text())
+            self.tl.erange = [ch0, ch1]
+            self.tl.filter_edata(self.tl.erange)
             self.tl.plot_spect_erg_range(ax=self.ax_lynx_spect2)
             self.fig_lynx.canvas.draw_idle()
+        except:
+            pass
+
+    def apply_dt_bins(self):
+        try:
+            dt_bins = self.edit_dt_bins.text()
+            if dt_bins != "":
+                self.tl.dt_bins = int(dt_bins)
+                self.ax_lynx_spect2.clear()
+                self.tl.plot_spect_erg_range(ax=self.ax_lynx_spect2)
+                self.fig_lynx.canvas.draw_idle()
+        except:
+            pass
 
     def reset_plot1(self):
         self.ax_lynx_spect1.clear()
         self.fig_lynx.canvas.draw_idle()
 
     def send_to_spect(self):
-        self.spect = sp.Spectrum(counts=self.tl.spect_cts)
-        self.create_graph(fit=False, reset=False)
+        try:
+            self.spect = sp.Spectrum(counts=self.tl.spect_cts)
+            self.create_graph(fit=False, reset=False)
+        except:
+            pass
 
     ## API
     def load_api_file(self):
         self.reset_api_figure()
-        ch = int(self.api_ch_txt.text())
         self.dt_flag = 0
         self.xy_flag = 0
         self.en_flag = 0
         try:
+            ch = int(self.api_ch_txt.text())
             date = self.api_date_txt.text()
             runnr = int(self.api_run_txt.text())
             self.df_api = read_parquet_api.read_parquet_file(date, runnr, ch)
@@ -1359,6 +1380,8 @@ class NasaGammaApp(QMainWindow):
             self.df_previous = self.df_api.copy()
             self.initialize_plots_api()
         except:
+            pass
+        try:
             filepath = self.api_path_txt.text()
             # self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
             self.df_api = read_parquet_api.read_parquet_file(
@@ -1367,6 +1390,8 @@ class NasaGammaApp(QMainWindow):
             self.df_current = self.df_api.copy()
             self.df_previous = self.df_api.copy()
             self.initialize_plots_api()
+        except:
+            pass
 
     def initialize_plots_api(self):
         self.trange = [-40, 120]  # dt range
@@ -1403,18 +1428,24 @@ class NasaGammaApp(QMainWindow):
         self.fig_api.canvas.draw_idle()  # to delete
 
     def reset_button_api(self):
-        self.reset_api_figure()
-        self.dt_flag = 0
-        self.xy_flag = 0
-        self.en_flag = 0
-        self.df_current = self.df_api.copy()
-        self.df_previous = self.df_api.copy()
-        self.initialize_plots_api()
+        try:
+            self.reset_api_figure()
+            self.dt_flag = 0
+            self.xy_flag = 0
+            self.en_flag = 0
+            self.df_current = self.df_api.copy()
+            self.df_previous = self.df_api.copy()
+            self.initialize_plots_api()
+        except:
+            pass
 
     def send_to_spect_api(self):
-        self.spect = sp.Spectrum(counts=self.api_gam)
-        self.e_units = "channels"
-        self.create_graph(fit=False, reset=False)
+        try:
+            self.spect = sp.Spectrum(counts=self.api_gam)
+            self.e_units = "channels"
+            self.create_graph(fit=False, reset=False)
+        except:
+            pass
 
     def plot_energy_hist_api(self, df):
         self.api_gam, self.api_edg = np.histogram(
@@ -1451,32 +1482,44 @@ class NasaGammaApp(QMainWindow):
         self.fig_api.canvas.draw_idle()
 
     def api_xylog(self):
-        if self.api_xy_scale == "linear":
-            self.plot_xy_api(self.df_current, cbar=False, logxy=True)
-            self.api_xy_scale = "log"
-        elif self.api_xy_scale == "log":
-            self.plot_xy_api(self.df_current, cbar=False, logxy=False)
-            self.api_xy_scale = "linear"
+        try:
+            if self.api_xy_scale == "linear":
+                self.plot_xy_api(self.df_current, cbar=False, logxy=True)
+                self.api_xy_scale = "log"
+            elif self.api_xy_scale == "log":
+                self.plot_xy_api(self.df_current, cbar=False, logxy=False)
+                self.api_xy_scale = "linear"
+        except:
+            pass
 
     def api_on_returnXY(self):
-        self.vmax = int(self.api_vmax_txt.text())
-        self.plot_xy_api(self.df_current, cbar=False, logxy=False, vmax=self.vmax)
-        self.api_xy_scale = "linear"
-        self.api_button_logxy.setChecked(False)
+        try:
+            self.vmax = int(self.api_vmax_txt.text())
+            self.plot_xy_api(self.df_current, cbar=False, logxy=False, vmax=self.vmax)
+            self.api_xy_scale = "linear"
+            self.api_button_logxy.setChecked(False)
+        except:
+            pass
 
     def api_spect_yscale(self):
-        if self.api_spect_scale == "log":
-            self.ax_api_spe.set_yscale("linear")
-            self.api_spect_scale = "linear"
-        else:
-            self.ax_api_spe.set_yscale("log")
-            self.api_spect_scale = "log"
-        self.fig_api.canvas.draw_idle()
+        try:
+            if self.api_spect_scale == "log":
+                self.ax_api_spe.set_yscale("linear")
+                self.api_spect_scale = "linear"
+            else:
+                self.ax_api_spe.set_yscale("log")
+                self.api_spect_scale = "log"
+            self.fig_api.canvas.draw_idle()
+        except:
+            pass
 
     def api_window_filters(self):
         self.w_api_filt = WindowAPIfilters()
         self.w_api_filt.show()
-        self.w_api_filt.button_api_apply.clicked.connect(self.apply_api_filters)
+        try:
+            self.w_api_filt.button_api_apply.clicked.connect(self.apply_api_filters)
+        except:
+            pass
 
     def apply_api_filters(self):
         # TODO: test this function
