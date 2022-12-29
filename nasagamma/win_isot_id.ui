@@ -496,6 +496,11 @@ p, li { white-space: pre-wrap; }
           </item>
           <item row="0" column="3">
            <widget class="QCheckBox" name="checkBox_labels">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Include labels</string>
             </property>
