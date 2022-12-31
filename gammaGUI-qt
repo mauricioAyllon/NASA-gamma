@@ -219,8 +219,14 @@ class NasaGammaApp(QMainWindow):
 
         self.button_remove_cal.setStyleSheet("background-color : lightcoral")
 
+        # customize
+        ## TODO
+        self.w_cust = WindowCust()
         self.button_customize.setStyleSheet("background-color : lightsteelblue")
         self.button_customize.clicked.connect(self.new_window_custom)
+        self.w_cust.button_load1.clicked.connect(self.load_file1)
+        self.w_cust.button_load2.clicked.connect(self.load_file2)
+        self.w_cust.button_plot.clicked.connect(self.cust_plot)
 
         # navigation toolbars
         self.toolbars = []
@@ -244,7 +250,7 @@ class NasaGammaApp(QMainWindow):
 
         # menu bar
         self.saveFitReport.triggered.connect(self.saveReport)
-        self.openFile.triggered.connect(self.open_file)
+        self.openFile.triggered.connect(self.load_spe_file)
         self.saveSpect.triggered.connect(self.save_spect)
         self.info_file.triggered.connect(self.display_info_file)
         self.clearSpectrum.triggered.connect(self.clear_main_figure)
@@ -434,7 +440,7 @@ class NasaGammaApp(QMainWindow):
         self.w_peak_find.checkBox_plastic.clicked.connect(self.peakFind_check_plastic)
         self.w_peak_find_info = WindowPeakFinderInfo()
         self.w_peak_find.button_info.clicked.connect(self.peakFind_info_activate)
-        ## TODO
+
         ## Isotope ID
         self.df_isotID = []
         self.isotID_vlines = []
@@ -581,8 +587,8 @@ class NasaGammaApp(QMainWindow):
         self.button_add_peak.setChecked(False)
         self.create_graph(fit=True)
 
+    ## Customize plots
     def new_window_custom(self):
-        self.w_cust = WindowCust()
         self.w_cust.show()
         self.w_cust.accepted.connect(self.customize_plot)
 
@@ -632,6 +638,43 @@ class NasaGammaApp(QMainWindow):
             self.spect.gain_shift(by=gs, energy=bool_erg)
             self.create_graph(fit=False, reset=True)
 
+    def load_file1(self):
+        ## TODO
+        try:
+            self.file1, self.e_units1, self.spect1 = self.open_file()
+        except:
+            self.file1 = "**ERROR loading file**"
+        disp1 = self.file1.split("/")[-1]
+        self.w_cust.filename1.setText(disp1)
+        # self.create_graph(fit=False, reset=False)
+        # self.setWindowTitle(f"NASA-gamma: {self.fileName}")
+
+    def load_file2(self):
+        try:
+            self.file2, self.e_units2, self.spect2 = self.open_file()
+        except:
+            self.file2 = "**ERROR loading file**"
+        disp2 = self.file2.split("/")[-1]
+        self.w_cust.filename2.setText(disp2)
+
+    def cust_plot(self):
+        try:
+            if self.w_cust.checkBox_add.isChecked():
+                cts = self.spect1.counts + self.spect2.counts
+            elif self.w_cust.checkBox_sub.isChecked():
+                cts = self.spect1.counts - self.spect2.counts
+
+            if self.spect1.energies is not None:
+                x = self.spect1.energies
+                self.spect = sp.Spectrum(counts=cts, energies=x, e_units=self.e_units1)
+                self.e_units = self.e_units1
+            else:
+                self.spect = sp.Spectrum(counts=cts, e_units=self.e_units1)
+            self.create_graph(fit=False, reset=False)
+        except:
+            print("Could not perform operation")
+
+    ## Fitting
     def which_button(self):
         if self.pushButton_poly1.isChecked():
             self.bg = "poly1"
@@ -1674,7 +1717,6 @@ class NasaGammaApp(QMainWindow):
         self.w_peak_find.show()
 
     def peakFind_kernel_apply(self):
-        ## TODO
         # self.ax_main.clear()
         self.fwhm_at_0 = 1
         try:
@@ -2100,49 +2142,56 @@ class NasaGammaApp(QMainWindow):
             print(not_implemented_format)
             self.w_info_file.label_tc.setText(not_implemented_format)
 
+    def load_spe_file(self):
+        try:
+            self.fileName, self.e_units, self.spect = self.open_file()
+            self.create_graph(fit=False, reset=False)
+            self.setWindowTitle(f"NASA-gamma: {self.fileName}")
+        except:
+            print("File could not be opened")
+
     def open_file(self):
         options = QFileDialog.Options()
         # options |= QFileDialog.DontUseNativeDialog
-        self.fileName, _ = QFileDialog.getOpenFileName(
+        fileName, _ = QFileDialog.getOpenFileName(
             self,
             "Open spectrum file",
             "",
             "All Files (*);;",
             options=options,
         )
-        if self.fileName == "":
+        if fileName == "":
             pass
         else:
             try:
-                print("Opening file: ", self.fileName)
-                fileName = self.fileName.lower()
-                if fileName[-4:] == ".csv":
+                print("Opening file: ", fileName)
+                fileName_lc = fileName.lower()
+                if fileName_lc[-4:] == ".csv":
                     try:
-                        self.e_units, self.spect = file_reader.read_csv_file(fileName)
+                        e_units, spect = file_reader.read_csv_file(fileName)
                     except:
-                        self.lynxcsv = file_reader.ReadLynxCsv(fileName)
-                        self.spect = self.lynxcsv.spect
-                        self.e_units = self.spect.e_units
+                        lynxcsv = file_reader.ReadLynxCsv(fileName)
+                        spect = lynxcsv.spect
+                        e_units = spect.e_units
 
-                elif fileName[-4:] == ".cnf":
-                    self.e_units, self.spect = file_reader.read_cnf_to_spect(fileName)
-                elif fileName[-4:] == ".mca":
-                    mca = file_reader.ReadMCA(self.fileName)
-                    self.e_units = "channels"
-                    self.spect = sp.Spectrum(
-                        counts=mca.counts, e_units=self.e_units, livetime=mca.live_time
+                elif fileName_lc[-4:] == ".cnf":
+                    e_units, spect = file_reader.read_cnf_to_spect(fileName)
+                elif fileName_lc[-4:] == ".mca":
+                    mca = file_reader.ReadMCA(fileName)
+                    e_units = "channels"
+                    spect = sp.Spectrum(
+                        counts=mca.counts, e_units=e_units, livetime=mca.live_time
                     )
-                elif fileName[-8:] == ".pha.txt":
-                    self.multiscanPHA = file_reader.ReadMultiscanPHA(fileName)
-                    self.spect = self.multiscanPHA.spect
-                    self.e_units = self.spect.e_units
+                elif fileName_lc[-8:] == ".pha.txt":
+                    multiscanPHA = file_reader.ReadMultiscanPHA(fileName)
+                    spect = multiscanPHA.spect
+                    e_units = spect.e_units
                 else:
                     print("Could not open file")
                     fileName = fileName + " ***INVALID FILE TYPE***"
-                self.create_graph(fit=False, reset=False)
-                self.setWindowTitle(f"NASA-gamma: {fileName}")
             except:
                 print("Could not open file")
+        return fileName, e_units, spect
 
 
 if __name__ == "__main__":
