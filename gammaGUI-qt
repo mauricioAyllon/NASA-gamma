@@ -220,7 +220,6 @@ class NasaGammaApp(QMainWindow):
         self.button_remove_cal.setStyleSheet("background-color : lightcoral")
 
         # customize
-        ## TODO
         self.w_cust = WindowCust()
         self.button_customize.setStyleSheet("background-color : lightsteelblue")
         self.button_customize.clicked.connect(self.new_window_custom)
@@ -639,15 +638,12 @@ class NasaGammaApp(QMainWindow):
             self.create_graph(fit=False, reset=True)
 
     def load_file1(self):
-        ## TODO
         try:
             self.file1, self.e_units1, self.spect1 = self.open_file()
         except:
             self.file1 = "**ERROR loading file**"
         disp1 = self.file1.split("/")[-1]
         self.w_cust.filename1.setText(disp1)
-        # self.create_graph(fit=False, reset=False)
-        # self.setWindowTitle(f"NASA-gamma: {self.fileName}")
 
     def load_file2(self):
         try:
@@ -774,22 +770,13 @@ class NasaGammaApp(QMainWindow):
 
     def remove_cal(self):
         try:
-            if self.e_units != "channels":
-                self.e_units = "channels"
-                self.spect = sp.Spectrum(counts=self.spect.counts, e_units=self.e_units)
-                self.search = ps.PeakSearch(
-                    self.spect,
-                    self.ref_x,
-                    self.ref_fwhm,
-                    self.fwhm_at_0,
-                    min_snr=self.min_snr,
-                )
-
-                self.create_graph(fit=False)
+            self.e_units = "channels"
+            self.spect = sp.Spectrum(counts=self.spect.counts, e_units=self.e_units)
+            self.create_graph(fit=False)
         except:
             pass
 
-    ## calibration
+    ## energy calibration
     @staticmethod
     def get_mean_vals(fit):
         mean_lst = []
@@ -951,7 +938,42 @@ class NasaGammaApp(QMainWindow):
         self.w_cal_eqns.accepted.connect(self.add_cal_eqns)
 
     def add_cal_eqns(self):
-        pass
+        try:
+            a_txt = self.w_cal_eqns.a.text()
+            b_txt = self.w_cal_eqns.b.text()
+            c_txt = self.w_cal_eqns.c.text()
+            d_txt = self.w_cal_eqns.d.text()
+            self.which_button_cal_eqn()
+            ch = self.spect.channels
+            erg = 0
+            if self.isevaluable(a_txt):
+                erg = erg + eval(a_txt)
+            if self.isevaluable(b_txt):
+                erg = erg + eval(b_txt) * ch
+            if self.isevaluable(c_txt):
+                erg = erg + eval(c_txt) * ch**2
+            if self.isevaluable(d_txt):
+                erg = erg + eval(d_txt) * ch**3
+            self.pred_erg = erg
+            self.plot_cal_eqns()
+        except:
+            pass
+
+    def plot_cal_eqns(self):
+        ## TODO
+        self.ax_cal.clear()
+        self.ax_cal.plot(self.spect.channels, self.pred_erg, lw=3)
+        self.ax_cal.set_xlabel("Channels")
+        self.ax_cal.set_ylabel(f"Energy ({self.cal_e_units})")
+        self.fig_cal.canvas.draw_idle()
+
+    def which_button_cal_eqn(self):
+        if self.w_cal_eqns.radio_button_ev.isChecked():
+            self.cal_e_units = "eV"
+        elif self.w_cal_eqns.radio_button_kev.isChecked():
+            self.cal_e_units = "keV"
+        elif self.w_cal_eqns.radio_button_mev.isChecked():
+            self.cal_e_units = "MeV"
 
     def reset_cal(self):
         print("Reseting calibration")
@@ -984,25 +1006,25 @@ class NasaGammaApp(QMainWindow):
                     e_units=self.cal_e_units,
                 )
 
-            if self.x0 is None:
-                self.search = ps.PeakSearch(
-                    self.spect,
-                    self.ref_x,
-                    self.ref_fwhm,
-                    self.fwhm_at_0,
-                    min_snr=self.min_snr,
-                )
-            else:
-                self.search = ps.PeakSearch(
-                    self.spect,
-                    self.ref_x,
-                    self.ref_fwhm,
-                    self.fwhm_at_0,
-                    min_snr=self.min_snr,
-                    xrange=[self.x0, self.x1],
-                )
+            # if self.x0 is None:
+            #     self.search = ps.PeakSearch(
+            #         self.spect,
+            #         self.ref_x,
+            #         self.ref_fwhm,
+            #         self.fwhm_at_0,
+            #         min_snr=self.min_snr,
+            #     )
+            # else:
+            #     self.search = ps.PeakSearch(
+            #         self.spect,
+            #         self.ref_x,
+            #         self.ref_fwhm,
+            #         self.fwhm_at_0,
+            #         min_snr=self.min_snr,
+            #         xrange=[self.x0, self.x1],
+            #     )
 
-            self.create_graph(fit=True)
+            self.create_graph(fit=False)
         except:
             print("Could not apply calibration")
 
