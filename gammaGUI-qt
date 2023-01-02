@@ -251,6 +251,7 @@ class NasaGammaApp(QMainWindow):
         self.saveFitReport.triggered.connect(self.saveReport)
         self.openFile.triggered.connect(self.load_spe_file)
         self.saveSpect.triggered.connect(self.save_spect)
+        self.saveIDpeaks.triggered.connect(self.save_ID_peaks)
         self.info_file.triggered.connect(self.display_info_file)
         self.clearSpectrum.triggered.connect(self.clear_main_figure)
 
@@ -441,6 +442,7 @@ class NasaGammaApp(QMainWindow):
         self.w_peak_find.button_info.clicked.connect(self.peakFind_info_activate)
 
         ## Isotope ID
+        self.df_isotID_selected = pd.DataFrame()
         self.df_isotID = []
         self.isotID_vlines = []
         self.button_identify_peaks.setStyleSheet("background-color : navajowhite")
@@ -960,7 +962,6 @@ class NasaGammaApp(QMainWindow):
             pass
 
     def plot_cal_eqns(self):
-        ## TODO
         self.ax_cal.clear()
         self.ax_cal.plot(self.spect.channels, self.pred_erg, lw=3)
         self.ax_cal.set_xlabel("Channels")
@@ -1801,6 +1802,7 @@ class NasaGammaApp(QMainWindow):
         self.w_peak_find.edit_ref_fwhm.setText("20")
 
     ## Isotope ID
+    ## TODO
     def activate_isotope_id(self):
         self.w_isot_id.show()
 
@@ -1948,6 +1950,8 @@ class NasaGammaApp(QMainWindow):
                 pass
         self.selected_rows = list(set(self.selected_rows))
         # print(self.selected_rows)
+        self.selected_indexes = list(self.model._data.index[self.selected_rows])
+        # print(self.selected_indexes)
 
     def isotID_getColor(self):
         if self.w_isot_id.button_blue.isChecked():
@@ -1967,7 +1971,10 @@ class NasaGammaApp(QMainWindow):
             if len(self.selected_rows) == 0:
                 self.df_isotID_plot = self.df_isotID.copy()
             else:
-                self.df_isotID_plot = self.df_isotID.iloc[self.selected_rows]
+                self.df_isotID_plot = self.df_isotID.loc[self.selected_indexes]
+                self.df_isotID_selected = pd.concat(
+                    [self.df_isotID_selected, self.df_isotID_plot], ignore_index=True
+                )
             for row in self.df_isotID_plot.index:
                 isot0 = self.df_isotID_plot.loc[row, "Isotope"]
                 e0 = self.df_isotID_plot.loc[row, "Energy (keV)"]
@@ -2036,6 +2043,7 @@ class NasaGammaApp(QMainWindow):
 
     def isotID_remove_vlines(self):
         if len(self.isotID_vlines) != 0:
+            self.df_isotID_selected = pd.DataFrame()
             for l in self.isotID_vlines:
                 l.remove()
             self.isotID_vlines = []
@@ -2086,6 +2094,22 @@ class NasaGammaApp(QMainWindow):
                 data = cts
 
             df = pd.DataFrame(data=data, columns=cols)
+            if ".csv" in fileName:
+                df.to_csv(f"{fileName}", index=False)
+            else:
+                df.to_csv(f"{fileName}.csv", index=False)
+
+    def save_ID_peaks(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getSaveFileName(
+            self, "Save", "", "All Files (*);;Text Files (*.txt)", options=options
+        )
+        if fileName == "":
+            pass
+        else:
+            print("Saved file: ", fileName)
+            df = self.df_isotID_selected
             if ".csv" in fileName:
                 df.to_csv(f"{fileName}", index=False)
             else:

@@ -1261,6 +1261,7 @@
     </property>
     <addaction name="saveSpect"/>
     <addaction name="saveFitReport"/>
+    <addaction name="saveIDpeaks"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -1348,6 +1349,16 @@
   <action name="smoothSpectrum">
    <property name="text">
     <string>Smooth spectrum</string>
+   </property>
+  </action>
+  <action name="saveIDpeaks">
+   <property name="text">
+    <string>Save identified peaks</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
    </property>
   </action>
  </widget>
