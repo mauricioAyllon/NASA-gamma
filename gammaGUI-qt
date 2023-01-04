@@ -1975,6 +1975,8 @@ class NasaGammaApp(QMainWindow):
                 self.df_isotID_selected = pd.concat(
                     [self.df_isotID_selected, self.df_isotID_plot], ignore_index=True
                 )
+                self.df_isotID_plot.drop_duplicates(inplace=True)
+                self.df_isotID_selected.drop_duplicates(inplace=True)
             for row in self.df_isotID_plot.index:
                 isot0 = self.df_isotID_plot.loc[row, "Isotope"]
                 e0 = self.df_isotID_plot.loc[row, "Energy (keV)"]
