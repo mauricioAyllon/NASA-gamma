@@ -2070,9 +2070,6 @@ class NasaGammaApp(QMainWindow):
         else:
             out_text = parse_NIST.isotopic_abundance_str(element)
             self.w_isot_id.text_search.setText(out_text)
-        self.w_isot_id.edit_element_search.returnPressed.disconnect(
-            self.isotID_textSearch
-        )
 
     def saveReport(self):
         options = QFileDialog.Options()
