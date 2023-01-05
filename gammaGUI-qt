@@ -646,6 +646,7 @@ class NasaGammaApp(QMainWindow):
             gs = eval(gain_shift)
             self.spect.gain_shift(by=gs, energy=bool_erg)
             self.create_graph(fit=False, reset=True)
+        self.w_cust.accepted.disconnect(self.customize_plot)
 
     def load_file1(self):
         try:
