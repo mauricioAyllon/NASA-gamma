@@ -118,6 +118,12 @@ class WindowIsotID(Dialog_from_UI):
         self.window_title = "Isotope ID"
 
 
+class WindowIsotIDInfo(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_isot_id_info.ui"
+        self.window_title = "Isotope ID info"
+
+
 class WindowAPIfilters(Dialog_from_UI):
     def define_ui_vars(self):
         self.ui_name = "win_api_filters.ui"
@@ -463,6 +469,8 @@ class NasaGammaApp(QMainWindow):
         self.w_isot_id.button_plot_vlines.clicked.connect(self.isotID_plot_vlines)
         self.w_isot_id.button_remove_vlines.clicked.connect(self.isotID_remove_vlines)
         self.w_isot_id.edit_element_search.returnPressed.connect(self.isotID_textSearch)
+        self.w_isotID_info = WindowIsotIDInfo()
+        self.w_isot_id.button_info.clicked.connect(self.isotID_info_activate)
 
     def switch_toolbar(self):
         current = self.tabWidget.currentIndex()
@@ -1803,6 +1811,9 @@ class NasaGammaApp(QMainWindow):
 
     ## Isotope ID
     ## TODO
+    def isotID_info_activate(self):
+        self.w_isotID_info.show()
+
     def activate_isotope_id(self):
         self.w_isot_id.show()
 
@@ -2059,6 +2070,9 @@ class NasaGammaApp(QMainWindow):
         else:
             out_text = parse_NIST.isotopic_abundance_str(element)
             self.w_isot_id.text_search.setText(out_text)
+        self.w_isot_id.edit_element_search.returnPressed.disconnect(
+            self.isotID_textSearch
+        )
 
     def saveReport(self):
         options = QFileDialog.Options()
