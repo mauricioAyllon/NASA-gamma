@@ -195,8 +195,9 @@ class PeakFit:
         epar = fit0.params
         for i in range(npeaks):
             mean0 = fit0.best_values[f"g{i+1}_center"]
-            g0 = components[f"g{i+1}_"]
-            area0 = g0.sum()
+            # g0 = components[f"g{i+1}_"]
+            # area0 = g0.sum()
+            area0 = fit0.best_values[f"g{i+1}_amplitude"]
             fwhm0 = fit0.best_values[f"g{i+1}_sigma"] * 2.355
             dict_peak_info = {
                 f"mean{i+1}": mean0,
