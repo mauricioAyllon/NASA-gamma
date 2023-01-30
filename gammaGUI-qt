@@ -754,12 +754,12 @@ class NasaGammaApp(QMainWindow):
         )
 
     def onselect(self, xmin, xmax):
-        idxmin = round(xmin, 4)
-        idxmax = round(xmax, 4)
-        xrange = [idxmin, idxmax]
+        self.idxmin_fit = round(xmin, 4)
+        self.idxmax_fit = round(xmax, 4)
+        xrange = [self.idxmin_fit, self.idxmax_fit]
         self.list_xrange.append(xrange)
-        print("xmin: ", idxmin)
-        print("xmax: ", idxmax)
+        print("xmin: ", self.idxmin_fit)
+        print("xmax: ", self.idxmax_fit)
         self.ax_res.clear()
         self.ax_fit.clear()
         self.ax_tab.clear()
@@ -2082,12 +2082,19 @@ class NasaGammaApp(QMainWindow):
             print("Report file: ", fileName)
             self.save_fit(fileName)
 
+    # TODO
     def save_fit(self, fileName):
         res = self.fit.fit_result
         report = res.fit_report()
+        fn = f"Data_filename: {self.fileName}\n"
+        xunits = f"x_units: {self.spect.x_units}\n"
+        ROI = f"ROI_start_stop: {self.idxmin_fit}, {self.idxmax_fit}\n"
+        npeaks = f"Num_peaks: {len(self.fit.peak_info)}\n"
+        bkgd = f"Background_type: {self.bg}\n"
+        report2 = fn + xunits + ROI + npeaks + bkgd + "\n" + report
 
         with open(f"{fileName}", "w") as text_file:
-            text_file.write(report)
+            text_file.write(report2)
 
     def save_spect(self):
         options = QFileDialog.Options()
