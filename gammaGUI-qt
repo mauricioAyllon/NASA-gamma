@@ -491,24 +491,8 @@ class NasaGammaApp(QMainWindow):
                 yscale=self.scale, snrs="off", fig=self.fig, ax=self.ax_main
             )
             self.span_select()
-            txt = "Drag mouse across peak(s) for fitting"
-            self.ax_fit.text(
-                0.27,
-                0.5,
-                txt,
-                style="italic",
-                bbox={"facecolor": "green", "alpha": 0.5, "pad": 20},
-            )
         else:
             self.spect.plot(fig=self.fig, ax=self.ax_main, scale=self.scale)
-            txt = "Add parameters in 'Parameters' tab for fitting"
-            self.ax_fit.text(
-                0.27,
-                0.5,
-                txt,
-                style="italic",
-                bbox={"facecolor": "orange", "alpha": 0.5, "pad": 20},
-            )
         self.fig.canvas.draw_idle()
 
     def clear_main_figure(self):
@@ -592,9 +576,12 @@ class NasaGammaApp(QMainWindow):
         self.search.fwhm_guess = np.insert(
             self.search.fwhm_guess, x_idx, fwhm_guess_new
         )
+        self.ax_main.axvline(
+            x=self.spect.energies[xnew], color="red", linestyle="--", alpha=0.2
+        )
+        self.fig.canvas.draw_idle()
         self.fig.canvas.mpl_disconnect(self.cid)
         self.button_add_peak.setChecked(False)
-        self.create_graph(fit=True)
 
     ## Customize plots
     def new_window_custom(self):
@@ -2082,7 +2069,6 @@ class NasaGammaApp(QMainWindow):
             print("Report file: ", fileName)
             self.save_fit(fileName)
 
-    # TODO
     def save_fit(self, fileName):
         res = self.fit.fit_result
         report = res.fit_report()
