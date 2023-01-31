@@ -27,7 +27,7 @@ def gaussian(x, mean, sigma):
         Gaussian distribution.
     """
     z = (x - mean) / sigma
-    return np.exp(-(z ** 2) / 2.0)
+    return np.exp(-(z**2) / 2.0)
 
 
 def gaussian_derivative(x, mean, sigma):
@@ -170,7 +170,7 @@ class PeakSearch:
         peak_plus_bkg = kern_mat_pos @ data
         bkg = kern_mat_neg @ data
         signal = kern_mat @ data
-        noise = (kern_mat ** 2) @ data
+        noise = (kern_mat**2) @ data
         # print("other")
         # noise = np.array([np.sqrt(x) for x in noise])
         noise = np.sqrt(noise)
@@ -201,6 +201,9 @@ class PeakSearch:
 
         # find peak indices
         peaks_idx = find_peaks(snr.clip(0), height=self.min_snr)[0]
+
+        # remove first and last index (not real peaks)
+        peaks_idx = peaks_idx[1:-1]
 
         self.fwhm_guess = self.fwhm(peaks_idx)
         self.peak_plus_bkg = peak_plus_bkg
@@ -278,7 +281,7 @@ class PeakSearch:
                 x0 = xc
             else:
                 x0 = self.spectrum.energies[xc]
-            ax.axvline(x=x0, color="red", linestyle="-", alpha=0.2)
+            ax.axvline(x=x0, color="red", linestyle="--", alpha=0.2)
         ax.legend(loc=1)
         ax.set_title(f"SNR > {self.min_snr}")
         # ax.set_ylim(1e-1)

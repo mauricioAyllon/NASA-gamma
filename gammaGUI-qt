@@ -491,24 +491,8 @@ class NasaGammaApp(QMainWindow):
                 yscale=self.scale, snrs="off", fig=self.fig, ax=self.ax_main
             )
             self.span_select()
-            txt = "Drag mouse across peak(s) for fitting"
-            self.ax_fit.text(
-                0.27,
-                0.5,
-                txt,
-                style="italic",
-                bbox={"facecolor": "green", "alpha": 0.5, "pad": 20},
-            )
         else:
             self.spect.plot(fig=self.fig, ax=self.ax_main, scale=self.scale)
-            txt = "Add parameters in 'Parameters' tab for fitting"
-            self.ax_fit.text(
-                0.27,
-                0.5,
-                txt,
-                style="italic",
-                bbox={"facecolor": "orange", "alpha": 0.5, "pad": 20},
-            )
         self.fig.canvas.draw_idle()
 
     def clear_main_figure(self):
@@ -592,9 +576,12 @@ class NasaGammaApp(QMainWindow):
         self.search.fwhm_guess = np.insert(
             self.search.fwhm_guess, x_idx, fwhm_guess_new
         )
+        self.ax_main.axvline(
+            x=self.spect.energies[xnew], color="red", linestyle="--", alpha=0.2
+        )
+        self.fig.canvas.draw_idle()
         self.fig.canvas.mpl_disconnect(self.cid)
         self.button_add_peak.setChecked(False)
-        self.create_graph(fit=True)
 
     ## Customize plots
     def new_window_custom(self):
@@ -754,12 +741,12 @@ class NasaGammaApp(QMainWindow):
         )
 
     def onselect(self, xmin, xmax):
-        idxmin = round(xmin, 4)
-        idxmax = round(xmax, 4)
-        xrange = [idxmin, idxmax]
+        self.idxmin_fit = round(xmin, 4)
+        self.idxmax_fit = round(xmax, 4)
+        xrange = [self.idxmin_fit, self.idxmax_fit]
         self.list_xrange.append(xrange)
-        print("xmin: ", idxmin)
-        print("xmax: ", idxmax)
+        print("xmin: ", self.idxmin_fit)
+        print("xmax: ", self.idxmax_fit)
         self.ax_res.clear()
         self.ax_fit.clear()
         self.ax_tab.clear()
@@ -2086,9 +2073,15 @@ class NasaGammaApp(QMainWindow):
     def save_fit(self, fileName):
         res = self.fit.fit_result
         report = res.fit_report()
+        fn = f"Data_filename: {self.fileName}\n"
+        xunits = f"x_units: {self.spect.x_units}\n"
+        ROI = f"ROI_start_stop: {self.idxmin_fit}, {self.idxmax_fit}\n"
+        npeaks = f"Num_peaks: {len(self.fit.peak_info)}\n"
+        bkgd = f"Background_type: {self.bg}\n"
+        report2 = fn + xunits + ROI + npeaks + bkgd + "\n" + report
 
         with open(f"{fileName}", "w") as text_file:
-            text_file.write(report)
+            text_file.write(report2)
 
     def save_spect(self):
         options = QFileDialog.Options()

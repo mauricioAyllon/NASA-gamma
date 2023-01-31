@@ -13,35 +13,25 @@ from nasagamma import peakfit as pf
 
 
 # dataset 1
-file = "data/SSR-mcnp.hdf"
-df = pd.read_hdf(file, key="data")
-df = df.iloc[1:, :]
-
-
-cts_np = df.cts.to_numpy() * 1e8
-erg = np.array(df.index)
+file = "data/gui_test_data_cebr.csv"
+df = pd.read_csv(file)
 
 # Required input parameters (in channels)
 fwhm_at_0 = 1.0
 ref_fwhm = 31
 ref_x = 1220
-min_snr = 1
+min_snr = 5
 
 # instantiate a Spectrum object
-spect = sp.Spectrum(counts=cts_np, energies=erg)
+spect = sp.Spectrum(counts=df["counts"])
 
 # peaksearch class
 search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
+search.plot_peaks()
 
 # peakfit class
 bkg0 = "poly1"
-xrange = [1.46, 1.86]
-# xrange = [2.1, 2.3]
-xrange = [2.6, 4]
-# xrange = [5, 6.3]
-# xrange = [5, 7.5]
-# xrange = [1.65, 4]
-# xrange = [6.75, 7.25]
+xrange = [1250, 1375]
 fit = pf.PeakFit(search, xrange, bkg=bkg0)
 
 res = fit.fit_result
@@ -51,3 +41,15 @@ res = fit.fit_result
 # search.plot_peaks()
 
 fit.plot(plot_type="full", legend="on", table_scale=[2, 2.3])
+
+
+## check area under the curve
+def gaussian(x, A, mu, sig):
+    return A / np.sqrt(2 * np.pi * sig**2) * np.exp(-((x - mu) ** 2) / (2 * sig**2))
+
+
+xg = fit.x_data
+Ag = res.best_values["g1_amplitude"]  # should also be the area under the curve!
+mug = res.best_values["g1_center"]
+sigg = res.best_values["g1_sigma"]
+gauss = gaussian(xg, Ag, mug, sigg)
