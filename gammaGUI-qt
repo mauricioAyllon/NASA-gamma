@@ -1473,6 +1473,7 @@ class NasaGammaApp(QMainWindow):
         self.hexbins = 80  # x-y bins
         self.tbins = 512  # time bins
         self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
+        self.erange_api = [0, 11000]  # [0,8]
         self.colormap = "plasma"
         self.plot_energy_hist_api(self.df_api)
         # self.ax_api_spe.set_yscale(self.api_spect_scale)
@@ -1523,7 +1524,7 @@ class NasaGammaApp(QMainWindow):
 
     def plot_energy_hist_api(self, df):
         self.api_gam, self.api_edg = np.histogram(
-            df["energy"], bins=self.ebins, range=[0, 8]
+            df["energy_orig"], bins=self.ebins, range=self.erange_api
         )
         self.api_ch = np.arange(0, self.ebins, 1)
         self.ax_api_spe.plot(self.api_ch, self.api_gam, color="green")
@@ -1647,15 +1648,15 @@ class NasaGammaApp(QMainWindow):
         self.ax_api_dt.clear()
         self.ax_api_xy.clear()
         if self.en_flag == 0:  # energy filter has not been used before
-            elim = (self.df_current["energy"] > self.api_edg[idxmin]) & (
-                self.df_current["energy"] < self.api_edg[idxmax]
+            elim = (self.df_current["energy_orig"] > self.api_edg[idxmin]) & (
+                self.df_current["energy_orig"] < self.api_edg[idxmax]
             )
             self.df_previous = self.df_current.copy()
             self.df_current = self.df_current[elim]
             self.en_flag = 1  # set energy filter to used
         else:
-            elim = (self.df_previous["energy"] > self.api_edg[idxmin]) & (
-                self.df_previous["energy"] < self.api_edg[idxmax]
+            elim = (self.df_previous["energy_orig"] > self.api_edg[idxmin]) & (
+                self.df_previous["energy_orig"] < self.api_edg[idxmax]
             )
             self.df_current = self.df_previous[elim]
         self.df_current.reset_index(drop=True, inplace=True)
