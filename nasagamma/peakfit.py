@@ -61,7 +61,6 @@ class PeakFit:
         else:
             # print("Working with energy values")
             self.x = search.spectrum.energies
-
         self.gaussians_bkg(skew)
 
     def find_peaks_range(self):
@@ -134,7 +133,6 @@ class PeakFit:
         None.
 
         """
-
         maskx = (self.x > self.xrange[0]) * (self.x < self.xrange[1])
         m, b, amp, erg, sig = self.init_values()
         # number of peaks detected in range
@@ -261,8 +259,9 @@ class PeakFit:
         # predicted values
         x_pred = np.linspace(x[0], x[-1], num=500)
         y_pred = res.eval(x=x_pred)
-
         comps = res.eval_components()
+        if self.search.spectrum.cps and self.search.spectrum.livetime is not None:
+            res.redchi = res.redchi * self.search.spectrum.livetime
 
         if "poly" in self.bkg:
             n = [int(s) for s in list(self.bkg) if s.isdigit()][0]

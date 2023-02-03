@@ -8,7 +8,13 @@ import pandas as pd
 
 class Spectrum:
     def __init__(
-        self, counts=None, channels=None, energies=None, e_units=None, livetime=None
+        self,
+        counts=None,
+        channels=None,
+        energies=None,
+        e_units=None,
+        livetime=None,
+        cps=False,
     ):
         """
         Initialize the spectrum.
@@ -52,7 +58,11 @@ class Spectrum:
         self.counts = np.asarray(counts, dtype=float)
         self.channels = np.asarray(channels, dtype=int)
         self.livetime = livetime
-        self.y_label = "Cts"
+        self.cps = cps
+        if cps:
+            self.y_label = "CPS"
+        else:
+            self.y_label = "Cts"
         self.plot_label = None
 
     def smooth(self, num=4):

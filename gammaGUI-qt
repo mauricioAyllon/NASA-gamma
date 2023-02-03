@@ -263,15 +263,6 @@ class NasaGammaApp(QMainWindow):
 
         self.reset_main_figure()
 
-        txt1 = "Load a csv file (File -> Open)"
-        self.ax_fit.text(
-            0.27,
-            0.5,
-            txt1,
-            style="italic",
-            bbox={"facecolor": "peachpuff", "alpha": 1, "pad": 20},
-        )
-
         self.list_xrange = []
         self.commands = commands
 
@@ -586,7 +577,13 @@ class NasaGammaApp(QMainWindow):
     ## Customize plots
     def new_window_custom(self):
         self.w_cust.show()
-        self.w_cust.accepted.connect(self.customize_plot)
+        self.w_cust.accepted.connect(self.try_customize_plot)
+
+    def try_customize_plot(self):
+        try:
+            self.customize_plot()
+        except:
+            pass
 
     def customize_plot(self):
         xlabel = self.w_cust.x_label_txt.text()
@@ -596,11 +593,11 @@ class NasaGammaApp(QMainWindow):
         rebin = self.w_cust.rebin_txt.text()
         moving_avg = self.w_cust.smooth_txt.text()
         gain_shift = self.w_cust.shiftBy_txt.text()
+        livetime = self.w_cust.livetime_txt.text()
         if self.w_cust.customize_checkBox_erg.isChecked():
             bool_erg = True
         else:
             bool_erg = False
-
         if xlabel != "":
             self.ax_main.set_xlabel(xlabel)
             self.spect.x_units = xlabel
@@ -632,6 +629,16 @@ class NasaGammaApp(QMainWindow):
         if gain_shift != "":
             gs = eval(gain_shift)
             self.spect.gain_shift(by=gs, energy=bool_erg)
+            self.create_graph(fit=False, reset=True)
+        if self.w_cust.checkBox_CR.isChecked():
+            yl = "CPS"
+            self.ax_main.set_ylabel(yl)
+            self.spect.y_label = yl
+            self.spect.cps = True
+            self.fig.canvas.draw_idle()
+        if livetime != "" and self.isevaluable(livetime) and self.spect.cps:
+            self.spect.livetime = eval(livetime)
+            self.spect.plot_label = None
             self.create_graph(fit=False, reset=True)
         self.w_cust.accepted.disconnect(self.customize_plot)
 
@@ -692,20 +699,23 @@ class NasaGammaApp(QMainWindow):
     def update_poly(self):
         if len(self.list_xrange) != 0:
             self.which_button()
-            self.fit = pf.PeakFit(
-                self.search, self.list_xrange[-1], bkg=self.bg, skew=self.sk_gauss
-            )
-            self.ax_res.clear()
-            self.ax_fit.clear()
-            self.ax_tab.clear()
-            self.fit.plot(
-                plot_type="full",
-                table_scale=[1, 1.8],
-                fig=self.fig,
-                ax_res=self.ax_res,
-                ax_fit=self.ax_fit,
-                ax_tab=self.ax_tab,
-            )
+            try:
+                self.fit = pf.PeakFit(
+                    self.search, self.list_xrange[-1], bkg=self.bg, skew=self.sk_gauss
+                )
+                self.ax_res.clear()
+                self.ax_fit.clear()
+                self.ax_tab.clear()
+                self.fit.plot(
+                    plot_type="full",
+                    table_scale=[1, 1.8],
+                    fig=self.fig,
+                    ax_res=self.ax_res,
+                    ax_fit=self.ax_fit,
+                    ax_tab=self.ax_tab,
+                )
+            except:
+                print("Could not perform fit")
             self.fig.canvas.draw_idle()
 
     def update_gauss(self):

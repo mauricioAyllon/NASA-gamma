@@ -181,13 +181,16 @@ class PeakSearch:
     def calculate(self):
         """Calculate the convolution of the spectrum with the kernel."""
 
+        if self.spectrum.cps and self.spectrum.livetime is not None:
+            spect_cts = self.spectrum.counts * self.spectrum.livetime
+        else:
+            spect_cts = self.spectrum.counts
+
         snr = np.zeros(len(self.spectrum.counts))  # do we need this?
         if self.xrange is None:
             self.edg = np.append(self.spectrum.channels, self.spectrum.channels[-1] + 1)
             # calculate the convolution
-            peak_plus_bkg, bkg, signal, noise, snr = self.convolve(
-                self.edg, self.spectrum.counts
-            )
+            peak_plus_bkg, bkg, signal, noise, snr = self.convolve(self.edg, spect_cts)
         else:
             x0 = self.xrange[0]
             x1 = self.xrange[1]
@@ -195,12 +198,14 @@ class PeakSearch:
                 self.spectrum.channels <= x1
             )
             new_ch = self.spectrum.channels[self.channel_idx]
-            new_cts = self.spectrum.counts[self.channel_idx]
+            new_cts = spect_cts[self.channel_idx]
             self.edg = np.append(new_ch, new_ch[-1] + 1)
             peak_plus_bkg, bkg, signal, noise, snr = self.convolve(self.edg, new_cts)
 
+        clipped_snr = snr.clip(0)
+
         # find peak indices
-        peaks_idx = find_peaks(snr.clip(0), height=self.min_snr)[0]
+        peaks_idx = find_peaks(clipped_snr, height=self.min_snr)[0]
 
         # remove first and last index (not real peaks)
         peaks_idx = peaks_idx[1:-1]
@@ -210,7 +215,7 @@ class PeakSearch:
         self.bkg = bkg
         self.signal = signal
         self.noise = noise
-        self.snr = snr.clip(0)
+        self.snr = clipped_snr
         if self.xrange == None:
             self.peaks_idx = peaks_idx
         else:
