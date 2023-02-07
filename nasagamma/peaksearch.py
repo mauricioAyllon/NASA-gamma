@@ -55,7 +55,14 @@ def gaussian_derivative(x, mean, sigma):
 
 class PeakSearch:
     def __init__(
-        self, spectrum, ref_x, ref_fwhm, fwhm_at_0=1.0, min_snr=2, xrange=None
+        self,
+        spectrum,
+        ref_x,
+        ref_fwhm,
+        fwhm_at_0=1.0,
+        min_snr=2,
+        xrange=None,
+        method="km",
     ):
         """
         Find peaks in a Spectrum object and decompose specrum into components
@@ -76,6 +83,9 @@ class PeakSearch:
             minimum SNR to look for releant peaks. The default is 2.
         xrange : list or numpy array of shape (2,), optional
             specific x range for peak searching. The default is None.
+        method : string, optional
+            peak searching method including kernel method (km) and scipy
+            peak finding method (scipy). The default is km.
 
         Raises
         ------
@@ -106,6 +116,7 @@ class PeakSearch:
         self.fwhm_at_0 = fwhm_at_0
         self.spectrum = spectrum
         self.min_snr = min_snr
+        self.method = method
         self.snr = []
         self.peak_plus_bkg = []
         self.bkg = []
@@ -113,7 +124,10 @@ class PeakSearch:
         self.noise = []
         self.peaks_idx = []
         self.fwhm_guess = []
-        self.calculate()
+        if method == "km":
+            self.calculate_km()
+        if method == "scipy":
+            self.calculate_scipy()
 
     def fwhm(self, x):
         """
@@ -178,7 +192,7 @@ class PeakSearch:
         snr[noise > 0] = signal[noise > 0] / noise[noise > 0]
         return peak_plus_bkg, bkg, signal, noise, snr
 
-    def calculate(self):
+    def calculate_km(self):
         """Calculate the convolution of the spectrum with the kernel."""
 
         if self.spectrum.cps and self.spectrum.livetime is not None:
@@ -221,6 +235,35 @@ class PeakSearch:
         else:
             self.peaks_idx = new_ch[peaks_idx]
         # self.reset()
+
+    def calculate_scipy(self):
+        if self.xrange is None:
+            peaks_idx, _ = find_peaks(
+                self.spectrum.counts,
+                prominence=self.min_snr,
+                width=self.fwhm(self.spectrum.counts),
+            )
+            self.peaks_idx = peaks_idx
+        else:
+            x0 = self.xrange[0]
+            x1 = self.xrange[1]
+            self.channel_idx = (self.spectrum.channels >= x0) & (
+                self.spectrum.channels <= x1
+            )
+            new_ch = self.spectrum.channels[self.channel_idx]
+            new_cts = self.spectrum.counts[self.channel_idx]
+            new_widths = self.fwhm(new_cts)
+            peaks_idx, _ = find_peaks(
+                new_cts, prominence=self.min_snr, width=new_widths
+            )
+            self.peaks_idx = new_ch[peaks_idx]
+
+        self.fwhm_guess = self.fwhm(self.peaks_idx)
+        self.peak_plus_bkg = None
+        self.bkg = None
+        self.signal = None
+        self.noise = None
+        self.snr = None
 
     def plot_kernel(self):
         """Plot the 3D matrix of kernels evaluated across the x values."""
@@ -274,7 +317,7 @@ class PeakSearch:
             ax = fig.add_subplot()
 
         self.spectrum.plot(fig=fig, ax=ax)
-        if snrs == "on":
+        if snrs == "on" and self.method == "km":
             ax.plot(x, self.snr, label="SNR")
         # ax.plot(x, self.spectrum.counts, label="Raw spectrum")
         if yscale == "log":

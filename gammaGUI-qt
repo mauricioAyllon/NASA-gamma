@@ -438,10 +438,12 @@ class NasaGammaApp(QMainWindow):
         self.w_peak_find = WindowPeakFinder()
         # self.check_peak_find_groups()
         self.w_peak_find.button_kernel_apply.clicked.connect(self.peakFind_kernel_apply)
-        self.w_peak_find.checkBox_hpge.clicked.connect(self.peakFind_check_hpge)
-        self.w_peak_find.checkBox_labr.clicked.connect(self.peakFind_check_labr)
-        self.w_peak_find.checkBox_nai.clicked.connect(self.peakFind_check_nai)
-        self.w_peak_find.checkBox_plastic.clicked.connect(self.peakFind_check_plastic)
+        self.w_peak_find.radioButton_hpge.clicked.connect(self.peakFind_check_hpge)
+        self.w_peak_find.radioButton_labr.clicked.connect(self.peakFind_check_labr)
+        self.w_peak_find.radioButton_nai.clicked.connect(self.peakFind_check_nai)
+        self.w_peak_find.radioButton_plastic.clicked.connect(
+            self.peakFind_check_plastic
+        )
         self.w_peak_find_info = WindowPeakFinderInfo()
         self.w_peak_find.button_info.clicked.connect(self.peakFind_info_activate)
 
@@ -567,6 +569,8 @@ class NasaGammaApp(QMainWindow):
         xnew = event.xdata
         if self.spect.energies is not None:
             xnew = np.where(self.spect.energies >= xnew)[0][0]
+        else:
+            xnew = np.where(self.spect.channels >= xnew)[0][0]
         print(xnew)
         # if no search object initialized, initialize a dummy one
         if self.search is None:
@@ -580,9 +584,14 @@ class NasaGammaApp(QMainWindow):
         self.search.fwhm_guess = np.insert(
             self.search.fwhm_guess, x_idx, fwhm_guess_new
         )
-        self.ax_main.axvline(
-            x=self.spect.energies[xnew], color="red", linestyle="--", alpha=0.2
-        )
+        if self.spect.energies is not None:
+            self.ax_main.axvline(
+                x=self.spect.energies[xnew], color="red", linestyle="--", alpha=0.2
+            )
+        else:
+            self.ax_main.axvline(
+                x=self.spect.channels[xnew], color="red", linestyle="--", alpha=0.2
+            )
         self.fig.canvas.draw_idle()
         self.fig.canvas.mpl_disconnect(self.cid)
         self.button_add_peak.setChecked(False)
@@ -1766,6 +1775,10 @@ class NasaGammaApp(QMainWindow):
         # self.ax_main.clear()
         self.fwhm_at_0 = 1
         try:
+            if self.w_peak_find.checkBox_km.isChecked():
+                method = "km"
+            else:
+                method = "scipy"
             self.min_snr = float(self.w_peak_find.edit_snr.text())
             self.ref_x = float(self.w_peak_find.edit_ref_ch.text())
             self.ref_fwhm = float(self.w_peak_find.edit_ref_fwhm.text())
@@ -1782,15 +1795,26 @@ class NasaGammaApp(QMainWindow):
                     self.fwhm_at_0,
                     min_snr=self.min_snr,
                     xrange=[self.x0, self.x1],
+                    method=method,
                 )
             else:
-                if len(self.spect.channels) < 9000:
+                if method == "km" and len(self.spect.channels) < 9000:
                     self.search = ps.PeakSearch(
                         self.spect,
                         self.ref_x,
                         self.ref_fwhm,
                         self.fwhm_at_0,
                         min_snr=self.min_snr,
+                        method=method,
+                    )
+                elif method == "scipy":
+                    self.search = ps.PeakSearch(
+                        self.spect,
+                        self.ref_x,
+                        self.ref_fwhm,
+                        self.fwhm_at_0,
+                        min_snr=self.min_snr,
+                        method=method,
                     )
                 else:
                     pass
