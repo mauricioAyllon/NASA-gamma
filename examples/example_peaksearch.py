@@ -23,8 +23,20 @@ ref_fwhm = 20
 ref_x = 420
 
 # instantiate a peaksearch object
-search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=5)
+search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=5, method="km")
 # plot kernel, peaks, and components
 search.plot_kernel()
 search.plot_peaks()
 search.plot_components()
+
+# Using built-in scipy peak search
+search2 = ps.PeakSearch(
+    spectrum=spect,
+    ref_x=420,
+    ref_fwhm=15,
+    fwhm_at_0=1,
+    min_snr=10,
+    xrange=[1200, 1600],
+    method="scipy",
+)
+search2.plot_peaks(snrs="off")
