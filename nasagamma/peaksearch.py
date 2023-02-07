@@ -290,7 +290,7 @@ class PeakSearch:
         ax.legend(loc=1)
         ax.set_title(f"SNR > {self.min_snr}")
         # ax.set_ylim(1e-1)
-        ax.set_ylabel("Cts")
+        ax.set_ylabel(self.spectrum.y_label)
         ax.set_xlabel(self.spectrum.x_units)
         # plt.style.use("default")
 
@@ -327,6 +327,6 @@ class PeakSearch:
         # plt.xlim(0, len(spec))
         plt.ylim(3e-1)
         plt.xlabel(self.spectrum.x_units)
-        plt.ylabel("Cts")
+        plt.ylabel(self.spectrum.y_label)
         plt.legend(loc=1)
         plt.style.use("default")

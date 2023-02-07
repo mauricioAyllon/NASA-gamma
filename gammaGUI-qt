@@ -72,12 +72,16 @@ class Dialog_from_UI(QDialog):
 
 class WindowCust(Dialog_from_UI):
     def define_ui_vars(self):
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
         self.ui_name = "win_customize.ui"
         self.window_title = "Customize plot"
 
 
 class WindowPeakFinder(Dialog_from_UI):
     def define_ui_vars(self):
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
         self.ui_name = "win_peak_find.ui"
         self.window_title = "Peak finder"
 
@@ -114,6 +118,8 @@ class WindowInfoFile(Dialog_from_UI):
 
 class WindowIsotID(Dialog_from_UI):
     def define_ui_vars(self):
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
         self.ui_name = "win_isot_id.ui"
         self.window_title = "Isotope ID"
 
@@ -222,7 +228,6 @@ class NasaGammaApp(QMainWindow):
         self.btn_grp_gauss.addButton(self.pushButton_gauss)
         self.btn_grp_gauss.addButton(self.pushButton_gauss2)
         self.btn_grp_gauss.buttonClicked.connect(self.update_gauss)
-
         self.button_remove_cal.setStyleSheet("background-color : lightcoral")
 
         # customize
@@ -265,6 +270,7 @@ class NasaGammaApp(QMainWindow):
 
         self.list_xrange = []
         self.commands = commands
+        self.search = None  # initialize dummy search object
 
         get_input = param_handle.get_spect_search(self.commands)
         if get_input is not None:
@@ -430,6 +436,7 @@ class NasaGammaApp(QMainWindow):
         self.button_find_peaks.setStyleSheet("background-color : mediumaquamarine")
         self.button_find_peaks.clicked.connect(self.activate_peak_finder)
         self.w_peak_find = WindowPeakFinder()
+        # self.check_peak_find_groups()
         self.w_peak_find.button_kernel_apply.clicked.connect(self.peakFind_kernel_apply)
         self.w_peak_find.checkBox_hpge.clicked.connect(self.peakFind_check_hpge)
         self.w_peak_find.checkBox_labr.clicked.connect(self.peakFind_check_labr)
@@ -561,6 +568,12 @@ class NasaGammaApp(QMainWindow):
         if self.spect.energies is not None:
             xnew = np.where(self.spect.energies >= xnew)[0][0]
         print(xnew)
+        # if no search object initialized, initialize a dummy one
+        if self.search is None:
+            self.search = ps.PeakSearch(
+                self.spect, 420, 20, min_snr=1000, xrange=[0, 5]
+            )
+            self.span_select()
         x_idx = np.searchsorted(self.search.peaks_idx, xnew)
         self.search.peaks_idx = np.insert(self.search.peaks_idx, x_idx, xnew)
         fwhm_guess_new = self.search.fwhm(xnew)
@@ -576,6 +589,7 @@ class NasaGammaApp(QMainWindow):
 
     ## Customize plots
     def new_window_custom(self):
+        self.w_cust.activateWindow()
         self.w_cust.show()
         self.w_cust.accepted.connect(self.try_customize_plot)
 
@@ -639,7 +653,7 @@ class NasaGammaApp(QMainWindow):
         if livetime != "" and self.isevaluable(livetime) and self.spect.cps:
             self.spect.livetime = eval(livetime)
             self.spect.plot_label = None
-            self.create_graph(fit=False, reset=True)
+            self.fig.canvas.draw_idle()
         self.w_cust.accepted.disconnect(self.customize_plot)
 
     def load_file1(self):
@@ -1741,9 +1755,11 @@ class NasaGammaApp(QMainWindow):
 
     ## Peak finder
     def peakFind_info_activate(self):
+        self.w_peak_find_info.activateWindow()
         self.w_peak_find_info.show()
 
     def activate_peak_finder(self):
+        self.w_peak_find.activateWindow()
         self.w_peak_find.show()
 
     def peakFind_kernel_apply(self):
@@ -1811,9 +1827,11 @@ class NasaGammaApp(QMainWindow):
     ## Isotope ID
     ## TODO
     def isotID_info_activate(self):
+        self.w_isotID_info.activateWindow()
         self.w_isotID_info.show()
 
     def activate_isotope_id(self):
+        self.w_isot_id.activateWindow()
         self.w_isot_id.show()
 
     def isotID_apply(self):
