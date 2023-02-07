@@ -146,7 +146,7 @@ class PeakFit:
         self.y_data = y0
         self.x_data = x0
 
-        # For the linear and quadratic models below, we manually guess
+        # For the linear model below, we manually guess
         # the initial parameters. For the others, we have LMfit
         # guess for us
         if self.bkg == "linear":
