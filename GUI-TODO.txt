@@ -4,7 +4,7 @@ gammaGUI todo:
 	b) Add a button logXY - DONE
 	c) Fix  filtering logic (up to 3 filters) - DONE
 	d) Add filter button to perform filters manually - DONE
-	e) Add data folder source directory to a text file so there is no need to import ROOTS
+	e) Add data folder source directory to a text file so there is no need to import ROOTS - DONE
 	
 2) Spectrum:
 	a) Add Peak button to add peaks at selected locations - DONE
