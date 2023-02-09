@@ -502,18 +502,19 @@ class NasaGammaApp(QMainWindow):
         self.reset_main_figure()
 
     def reset_main_figure(self):
-        self.fig = self.main_plot.canvas.figure
+        self.fig = self.main_plot.canvas.figure  # spectrum
+        self.fig_res = self.fit_plot.canvas.figure  # residual
         self.fig.clear()
+        self.fig_res.clear()
         self.fig.set_constrained_layout(True)
-        gs = self.fig.add_gridspec(
-            3, 2, width_ratios=[0.5, 0.5], height_ratios=[0.3, 1.5, 1]
-        )
+        self.fig_res.set_constrained_layout(True)
+        gs = self.fig_res.add_gridspec(2, 1, height_ratios=[0.3, 1.5])
 
         # axes
-        self.ax_main = self.fig.add_subplot(gs[:, 0])
-        self.ax_res = self.fig.add_subplot(gs[0, 1])
-        self.ax_fit = self.fig.add_subplot(gs[1, 1])
-        self.ax_tab = self.fig.add_subplot(gs[2, 1])
+        self.ax_main = self.fig.add_subplot()
+        self.ax_res = self.fig.add_subplot(gs[0, 0])
+        self.ax_fit = self.fig.add_subplot(gs[1, 0])
+
         # remove ticks
         # self.ax_main.set_xticks([])
         # self.ax_main.set_yticks([])
@@ -521,8 +522,6 @@ class NasaGammaApp(QMainWindow):
         self.ax_res.set_yticks([])
         self.ax_fit.set_xticks([])
         self.ax_fit.set_yticks([])
-        self.ax_tab.set_xticks([])
-        self.ax_tab.set_yticks([])
 
         if self.button_add_peak.isChecked():
             self.fig.canvas.mpl_disconnect(self.cid)

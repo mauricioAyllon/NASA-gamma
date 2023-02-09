@@ -29,8 +29,8 @@
        <attribute name="title">
         <string>Spectrum</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_18">
-        <item row="0" column="0">
+       <layout class="QGridLayout" name="gridLayout_17">
+        <item row="0" column="0" colspan="2">
          <layout class="QGridLayout" name="gridLayout_14">
           <item row="0" column="5">
            <layout class="QGridLayout" name="gridLayout_3">
@@ -174,43 +174,7 @@
           </item>
           <item row="0" column="3">
            <layout class="QGridLayout" name="gridLayout_12">
-            <item row="0" column="0">
-             <widget class="QPushButton" name="button_find_peaks">
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Find peaks</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QPushButton" name="button_add_cal">
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Add to calibration</string>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="2">
-             <widget class="QPushButton" name="button_add_fwhm">
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Add to FWHM</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
              <widget class="QPushButton" name="button_identify_peaks">
               <property name="font">
                <font>
@@ -222,7 +186,19 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
+            <item row="0" column="1">
+             <widget class="QPushButton" name="button_find_peaks">
+              <property name="font">
+               <font>
+                <pointsize>14</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Find peaks</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
              <widget class="QPushButton" name="button_remove_cal">
               <property name="font">
                <font>
@@ -231,18 +207,6 @@
               </property>
               <property name="text">
                <string>Remove calibration</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="2">
-             <widget class="QPushButton" name="button_add_eff">
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Add to efficiency</string>
               </property>
              </widget>
             </item>
@@ -303,62 +267,117 @@
          </layout>
         </item>
         <item row="1" column="0">
-         <layout class="QGridLayout" name="gridLayout_17">
+         <widget class="MplWidget" name="main_plot" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>921</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="mouseTracking">
+           <bool>false</bool>
+          </property>
+          <property name="autoFillBackground">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <layout class="QGridLayout" name="gridLayout_16">
           <item row="0" column="0">
-           <widget class="MplWidget" name="main_plot" native="true">
-            <property name="minimumSize">
+           <widget class="MplWidget" name="fit_plot" native="true">
+            <property name="maximumSize">
              <size>
-              <width>921</width>
-              <height>0</height>
+              <width>16777215</width>
+              <height>571</height>
              </size>
-            </property>
-            <property name="mouseTracking">
-             <bool>false</bool>
             </property>
             <property name="autoFillBackground">
              <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <layout class="QGridLayout" name="gridLayout_16">
+          <item row="1" column="0">
+           <layout class="QGridLayout" name="gridLayout_18">
             <item row="0" column="0">
-             <widget class="MplWidget" name="fit_plot" native="true">
-              <property name="autoFillBackground">
-               <bool>true</bool>
+             <widget class="QPushButton" name="button_add_cal">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Add to calibration</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QScrollArea" name="table_area">
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>241</height>
-               </size>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="button_add_fwhm">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
               </property>
-              <property name="autoFillBackground">
-               <bool>false</bool>
+              <property name="text">
+               <string>Add to FWHM</string>
               </property>
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="button_add_eff">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
               </property>
-              <property name="widgetResizable">
-               <bool>true</bool>
+              <property name="text">
+               <string>Add to efficiency</string>
               </property>
-              <widget class="QWidget" name="scrollAreaWidgetContents">
-               <property name="geometry">
-                <rect>
-                 <x>0</x>
-                 <y>0</y>
-                 <width>1083</width>
-                 <height>237</height>
-                </rect>
-               </property>
-              </widget>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QPushButton" name="pushButton">
+              <property name="text">
+               <string>Fit details</string>
+              </property>
              </widget>
             </item>
            </layout>
+          </item>
+          <item row="2" column="0">
+           <widget class="QScrollArea" name="table_area">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>180</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>241</height>
+             </size>
+            </property>
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Box</enum>
+            </property>
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>1085</width>
+               <height>237</height>
+              </rect>
+             </property>
+            </widget>
+           </widget>
           </item>
          </layout>
         </item>
