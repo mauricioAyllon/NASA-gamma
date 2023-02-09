@@ -2022,6 +2022,7 @@ class NasaGammaApp(QMainWindow):
         else:
             if len(self.selected_rows) == 0:
                 self.df_isotID_plot = self.df_isotID.copy()
+                self.df_isotID_selected = self.df_isotID.copy()
             else:
                 self.df_isotID_plot = self.df_isotID.loc[self.selected_indexes]
                 self.df_isotID_selected = pd.concat(
