@@ -198,7 +198,7 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="0">
+            <item row="0" column="3">
              <widget class="QPushButton" name="button_remove_cal">
               <property name="font">
                <font>
@@ -349,13 +349,13 @@
             <property name="minimumSize">
              <size>
               <width>0</width>
-              <height>180</height>
+              <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>241</height>
+              <height>190</height>
              </size>
             </property>
             <property name="autoFillBackground">
@@ -373,7 +373,7 @@
                <x>0</x>
                <y>0</y>
                <width>1085</width>
-               <height>237</height>
+               <height>186</height>
               </rect>
              </property>
             </widget>

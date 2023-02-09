@@ -503,17 +503,17 @@ class NasaGammaApp(QMainWindow):
 
     def reset_main_figure(self):
         self.fig = self.main_plot.canvas.figure  # spectrum
-        self.fig_res = self.fit_plot.canvas.figure  # residual
+        self.fig_fit = self.fit_plot.canvas.figure  # residual
         self.fig.clear()
-        self.fig_res.clear()
+        self.fig_fit.clear()
         self.fig.set_constrained_layout(True)
-        self.fig_res.set_constrained_layout(True)
-        gs = self.fig_res.add_gridspec(2, 1, height_ratios=[0.3, 1.5])
+        self.fig_fit.set_constrained_layout(True)
+        gs = self.fig_fit.add_gridspec(2, 1, height_ratios=[0.3, 1.5])
 
         # axes
         self.ax_main = self.fig.add_subplot()
-        self.ax_res = self.fig.add_subplot(gs[0, 0])
-        self.ax_fit = self.fig.add_subplot(gs[1, 0])
+        self.ax_res = self.fig_fit.add_subplot(gs[0, 0])
+        self.ax_fit = self.fig_fit.add_subplot(gs[1, 0])
 
         # remove ticks
         # self.ax_main.set_xticks([])
@@ -560,6 +560,7 @@ class NasaGammaApp(QMainWindow):
         if self.button_add_peak.isChecked():
             print("Waiting to add a new peak...")
             self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
+            self.span.set_active(False)
             # xnew = self.get_xvalue_from_click
         else:
             self.fig.canvas.mpl_disconnect(self.cid)
@@ -574,7 +575,7 @@ class NasaGammaApp(QMainWindow):
         # if no search object initialized, initialize a dummy one
         if self.search is None:
             self.search = ps.PeakSearch(
-                self.spect, 420, 20, min_snr=1000, xrange=[0, 5]
+                self.spect, 420, 20, min_snr=1e6, method="scipy"
             )
             self.span_select()
         x_idx = np.searchsorted(self.search.peaks_idx, xnew)
@@ -594,6 +595,7 @@ class NasaGammaApp(QMainWindow):
         self.fig.canvas.draw_idle()
         self.fig.canvas.mpl_disconnect(self.cid)
         self.button_add_peak.setChecked(False)
+        self.span.set_active(True)
 
     ## Customize plots
     def new_window_custom(self):
@@ -727,18 +729,15 @@ class NasaGammaApp(QMainWindow):
                 )
                 self.ax_res.clear()
                 self.ax_fit.clear()
-                self.ax_tab.clear()
                 self.fit.plot(
-                    plot_type="full",
-                    table_scale=[1, 1.8],
-                    fig=self.fig,
+                    plot_type="simple",
+                    fig=self.fig_fit,
                     ax_res=self.ax_res,
                     ax_fit=self.ax_fit,
-                    ax_tab=self.ax_tab,
                 )
             except:
-                print("Could not perform fit")
-            self.fig.canvas.draw_idle()
+                print("update_poly: could not perform fit")
+            self.fig_fit.canvas.draw_idle()
 
     def update_gauss(self):
         if len(self.list_xrange) != 0:
@@ -749,18 +748,15 @@ class NasaGammaApp(QMainWindow):
                 )
                 self.ax_res.clear()
                 self.ax_fit.clear()
-                self.ax_tab.clear()
                 self.fit.plot(
-                    plot_type="full",
-                    table_scale=[1, 1.8],
+                    plot_type="simple",
                     fig=self.fig,
                     ax_res=self.ax_res,
                     ax_fit=self.ax_fit,
-                    ax_tab=self.ax_tab,
                 )
             except:
-                print("Could not perform fit")
-            self.fig.canvas.draw_idle()
+                print("update_gauss:could not perform fit")
+            self.fig_fit.canvas.draw_idle()
 
     def span_select(self):
         self.span = SpanSelector(
@@ -781,22 +777,19 @@ class NasaGammaApp(QMainWindow):
         print("xmax: ", self.idxmax_fit)
         self.ax_res.clear()
         self.ax_fit.clear()
-        self.ax_tab.clear()
         try:
             self.fit = pf.PeakFit(self.search, xrange, bkg=self.bg, skew=self.sk_gauss)
             # plot_fit(fit)
             self.fit.plot(
-                plot_type="full",
-                table_scale=[1, 1.8],
-                fig=self.fig,
+                plot_type="simple",
+                fig=self.fig_fit,
                 ax_res=self.ax_res,
                 ax_fit=self.ax_fit,
-                ax_tab=self.ax_tab,
             )
         except:
-            print("Could not perform fit")
+            print("onselect: Could not perform fit")
 
-        self.fig.canvas.draw_idle()
+        self.fig_fit.canvas.draw_idle()
 
     def remove_cal(self):
         try:
