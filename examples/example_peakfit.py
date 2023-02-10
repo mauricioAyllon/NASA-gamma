@@ -31,7 +31,7 @@ search.plot_peaks()
 
 # peakfit class
 bkg0 = "poly1"
-xrange = [1250, 1375]
+xrange = [1200, 1600]
 fit = pf.PeakFit(search, xrange, bkg=bkg0)
 
 res = fit.fit_result

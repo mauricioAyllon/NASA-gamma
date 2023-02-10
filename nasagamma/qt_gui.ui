@@ -32,7 +32,7 @@
        <layout class="QGridLayout" name="gridLayout_17">
         <item row="0" column="0" colspan="2">
          <layout class="QGridLayout" name="gridLayout_14">
-          <item row="0" column="5">
+          <item row="0" column="4">
            <layout class="QGridLayout" name="gridLayout_3">
             <item row="1" column="0">
              <widget class="QPushButton" name="pushButton_gauss2">
@@ -132,7 +132,7 @@
             </item>
            </layout>
           </item>
-          <item row="0" column="1">
+          <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_13">
             <item row="0" column="0">
              <widget class="QPushButton" name="pushButton_scale">
@@ -172,7 +172,7 @@
             </item>
            </layout>
           </item>
-          <item row="0" column="3">
+          <item row="0" column="2">
            <layout class="QGridLayout" name="gridLayout_12">
             <item row="0" column="2">
              <widget class="QPushButton" name="button_identify_peaks">
@@ -212,20 +212,7 @@
             </item>
            </layout>
           </item>
-          <item row="0" column="0">
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="0" column="2">
+          <item row="0" column="1">
            <spacer name="horizontalSpacer_24">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -238,7 +225,7 @@
             </property>
            </spacer>
           </item>
-          <item row="0" column="4">
+          <item row="0" column="3">
            <spacer name="horizontalSpacer_6">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -251,7 +238,7 @@
             </property>
            </spacer>
           </item>
-          <item row="0" column="6">
+          <item row="0" column="5">
            <spacer name="horizontalSpacer_9">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -336,26 +323,31 @@
              </widget>
             </item>
             <item row="0" column="3">
-             <widget class="QPushButton" name="pushButton">
+             <widget class="QPushButton" name="button_adv_fit">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
               <property name="text">
-               <string>Fit details</string>
+               <string>Advanced fitting</string>
               </property>
              </widget>
             </item>
            </layout>
           </item>
           <item row="2" column="0">
-           <widget class="QScrollArea" name="table_area">
+           <widget class="QScrollArea" name="table_fit_area">
             <property name="minimumSize">
              <size>
               <width>0</width>
-              <height>0</height>
+              <height>130</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>190</height>
+              <height>600</height>
              </size>
             </property>
             <property name="autoFillBackground">
@@ -373,7 +365,7 @@
                <x>0</x>
                <y>0</y>
                <width>1085</width>
-               <height>186</height>
+               <height>596</height>
               </rect>
              </property>
             </widget>
