@@ -182,8 +182,7 @@ class NasaGammaApp(QMainWindow):
         # self.setMinimumSize(1800, 900)
         # pixmap = QPixmap("figs/nasa-logo.jpg")
         # self.label_nasa.setPixmap(pixmap)
-        # self.resize(1800, 900)
-        self.resize(1800, 900)
+        self.resize(1800, 950)
         self.setWindowTitle("NASA-gamma")
         self.scale = "linear"
         self.pushButton_scale.clicked.connect(self.update_scale)
