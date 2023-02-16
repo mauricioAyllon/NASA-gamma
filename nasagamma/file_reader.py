@@ -31,7 +31,7 @@ def read_csv_file(file_name):
     df = pd.read_csv(file_name)
     df.columns = df.columns.str.replace(" ", "")  # remove white spaces
     ###
-    name_lst = ["count", "counts", "cts", "data"]
+    name_lst = ["count", "counts", "cts", "data", "countrate(cps)"]
     e_lst = ["energy", "energies", "erg"]
     u_lst = ["eV", "keV", "MeV", "GeV"]
     col_lst = list(df.columns)
