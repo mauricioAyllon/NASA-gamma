@@ -98,7 +98,7 @@ class PeakSearch:
 
         """
         if not isinstance(spectrum, sp.Spectrum):
-            raise Exception("'spectrum' must be a Spectrum object")
+            raise Exception("spectrum must be a Spectrum object")
         if xrange is None:
             self.channel_idx = spectrum.channels
             self.xrange = xrange
@@ -222,7 +222,7 @@ class PeakSearch:
         peaks_idx = find_peaks(clipped_snr, height=self.min_snr)[0]
 
         # remove first and last index (not real peaks)
-        peaks_idx = peaks_idx[1:-1]
+        # peaks_idx = peaks_idx[1:-1]
 
         self.fwhm_guess = self.fwhm(peaks_idx)
         self.peak_plus_bkg = peak_plus_bkg

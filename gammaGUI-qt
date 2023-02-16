@@ -192,6 +192,7 @@ class NasaGammaApp(QMainWindow):
         self.button_add_peak.setCheckable(True)
         self.button_add_peak.clicked.connect(self.add_peak)
         # push buttons
+        self.enable_fitButtons(False)
         self.bg = "poly1"
         self.pushButton_poly1.setStyleSheet("background-color : lightgreen")
         self.pushButton_poly1.setCheckable(True)
@@ -270,7 +271,7 @@ class NasaGammaApp(QMainWindow):
 
         self.list_xrange = []
         self.commands = commands
-        self.search = None  # initialize dummy search object
+        self.search = 0  # initialize dummy search object
 
         get_input = param_handle.get_spect_search(self.commands)
         if get_input is not None:
@@ -578,7 +579,7 @@ class NasaGammaApp(QMainWindow):
             xnew = np.where(self.spect.channels >= xnew)[0][0]
         print(xnew)
         # if no search object initialized, initialize a dummy one
-        if self.search is None:
+        if self.search == 0:
             self.search = ps.PeakSearch(
                 self.spect, 420, 20, min_snr=1e6, method="scipy"
             )
@@ -740,6 +741,8 @@ class NasaGammaApp(QMainWindow):
                     ax_res=self.ax_res,
                     ax_fit=self.ax_fit,
                 )
+                data = self.get_values_table_fit()
+                self.activate_fit_table(data)
             except:
                 print("update_poly: could not perform fit")
             self.fig_fit.canvas.draw_idle()
@@ -759,6 +762,8 @@ class NasaGammaApp(QMainWindow):
                     ax_res=self.ax_res,
                     ax_fit=self.ax_fit,
                 )
+                data = self.get_values_table_fit()
+                self.activate_fit_table(data)
             except:
                 print("update_gauss:could not perform fit")
             self.fig_fit.canvas.draw_idle()
@@ -772,6 +777,12 @@ class NasaGammaApp(QMainWindow):
             interactive=True,
             props=dict(alpha=0.3, facecolor="green"),
         )
+
+    def enable_fitButtons(self, boolV):
+        self.button_adv_fit.setEnabled(boolV)
+        self.button_add_cal.setEnabled(boolV)
+        self.button_add_fwhm.setEnabled(boolV)
+        self.button_add_eff.setEnabled(boolV)
 
     def onselect(self, xmin, xmax):
         self.idxmin_fit = round(xmin, 4)
@@ -793,24 +804,40 @@ class NasaGammaApp(QMainWindow):
             )
             data = self.get_values_table_fit()
             self.activate_fit_table(data)
+            self.enable_fitButtons(True)
         except:
             print("onselect: Could not perform fit")
-
         self.fig_fit.canvas.draw_idle()
 
     # TODO
     def get_values_table_fit(self):
-        cols = [f"Mean ({self.spect.x_units})", "Peak Area", "FWHM (%)"]
+        cols = [
+            f"Mean ({self.spect.x_units})",
+            "Peak area",
+            "FWHM",
+            "FWHM (%)",
+            "Sigma Area",
+            "Sigma Area (%)",
+        ]
         mean = []
         area = []
         fwhm = []
-        for i in self.fit.peak_info:
+        fwhm_p = []
+        std_mu = []
+        std_A = []
+        std_A_p = []
+        std_fwhm = []
+        for i, e in zip(self.fit.peak_info, self.fit.peak_err):
             ls = list(i.values())
+            lse = list(e.values())
             mean.append(round(ls[0], 3))
             area.append(round(ls[1], 3))
-            fwhm.append(round(ls[2] / ls[0] * 100, 3))
+            fwhm.append(round(ls[2], 3))
+            fwhm_p.append(round(ls[2] / ls[0] * 100, 3))
+            std_A.append(round(lse[1], 3))
+            std_A_p.append(round(lse[1] / ls[1] * 100, 3))
 
-        rs = np.array([mean, area, fwhm]).T
+        rs = np.array([mean, area, fwhm, fwhm_p, std_A, std_A_p]).T
         df = pd.DataFrame(columns=cols, data=rs)
         return df
 
@@ -818,15 +845,19 @@ class NasaGammaApp(QMainWindow):
         # self.selected_rows = []
         self.scroll_fit = self.table_fit_area
         self.table_fit = QtWidgets.QTableView()
-        self.table_fit.setAlternatingRowColors(True)
+        # self.table_fit.setAlternatingRowColors(True)
         self.table_fit.setSortingEnabled(True)
-        stylesheet = "::section{Background-color:lightgreen}"
-        self.table_fit.horizontalHeader().setStyleSheet(stylesheet)
+        stylesheet_header = "::section{Background-color:lightgreen}"
+        self.table_fit.horizontalHeader().setStyleSheet(stylesheet_header)
         self.table_fit.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        # self.table_fit.resizeColumnsToContents()
         self.model_fit = TableModel(data)
         self.table_fit.setModel(self.model_fit)
         self.scroll_fit.setWidget(self.table_fit)
-        # self.table_fit.selectionModel().selectionChanged.connect(self.on_selectionChanged)
+        # print(self.table_fit.columnWidth(0))
+        stylesheet_ix = "::section{Background-color:lightgoldenrodyellow}"
+        self.table_fit.setStyleSheet(stylesheet_ix)
+        self.table_fit.setColumnWidth(0, 150)
 
     ## energy calibration
     def remove_cal(self):

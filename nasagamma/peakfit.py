@@ -42,7 +42,7 @@ class PeakFit:
         """
 
         if not isinstance(search, ps.PeakSearch):
-            raise Exception("'search must be a PeakSearch object")
+            raise Exception("search must be a PeakSearch object")
         self.search = search
         self.xrange = xrange
         self.continuum = 0
