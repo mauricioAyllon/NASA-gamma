@@ -182,8 +182,7 @@ class NasaGammaApp(QMainWindow):
         # self.setMinimumSize(1800, 900)
         # pixmap = QPixmap("figs/nasa-logo.jpg")
         # self.label_nasa.setPixmap(pixmap)
-        # self.resize(1800, 900)
-        self.resize(1800, 900)
+        self.resize(1800, 950)
         self.setWindowTitle("NASA-gamma")
         self.scale = "linear"
         self.pushButton_scale.clicked.connect(self.update_scale)
@@ -192,6 +191,7 @@ class NasaGammaApp(QMainWindow):
         self.button_add_peak.setCheckable(True)
         self.button_add_peak.clicked.connect(self.add_peak)
         # push buttons
+        self.enable_fitButtons(False)
         self.bg = "poly1"
         self.pushButton_poly1.setStyleSheet("background-color : lightgreen")
         self.pushButton_poly1.setCheckable(True)
@@ -270,7 +270,7 @@ class NasaGammaApp(QMainWindow):
 
         self.list_xrange = []
         self.commands = commands
-        self.search = None  # initialize dummy search object
+        self.search = 0  # initialize dummy search object
 
         get_input = param_handle.get_spect_search(self.commands)
         if get_input is not None:
@@ -293,6 +293,9 @@ class NasaGammaApp(QMainWindow):
         self.x0 = None
         self.x1 = None
 
+        # peak fitting
+        self.span = None
+
         ## energy calibration
         self.mean_vals = [0]
         self.e_vals = [0]
@@ -309,6 +312,7 @@ class NasaGammaApp(QMainWindow):
         self.button_cal2.setStyleSheet("background-color : lightgreen")
         self.button_cal3.setStyleSheet("background-color : lightgreen")
         self.button_cal_eqns.setStyleSheet("background-color : silver")
+        self.button_adv_fit.setStyleSheet("background-color : limegreen")
         self.button_origin.clicked.connect(self.set_origin)
 
         self.button_cal1.setCheckable(True)
@@ -502,18 +506,19 @@ class NasaGammaApp(QMainWindow):
         self.reset_main_figure()
 
     def reset_main_figure(self):
-        self.fig = self.main_plot.canvas.figure
+        self.fig = self.main_plot.canvas.figure  # spectrum
+        self.fig_fit = self.fit_plot.canvas.figure  # residual
         self.fig.clear()
+        self.fig_fit.clear()
         self.fig.set_constrained_layout(True)
-        gs = self.fig.add_gridspec(
-            3, 2, width_ratios=[0.5, 0.5], height_ratios=[0.3, 1.5, 1]
-        )
+        self.fig_fit.set_constrained_layout(True)
+        gs = self.fig_fit.add_gridspec(2, 1, height_ratios=[0.3, 1.5])
 
         # axes
-        self.ax_main = self.fig.add_subplot(gs[:, 0])
-        self.ax_res = self.fig.add_subplot(gs[0, 1])
-        self.ax_fit = self.fig.add_subplot(gs[1, 1])
-        self.ax_tab = self.fig.add_subplot(gs[2, 1])
+        self.ax_main = self.fig.add_subplot()
+        self.ax_res = self.fig_fit.add_subplot(gs[0, 0])
+        self.ax_fit = self.fig_fit.add_subplot(gs[1, 0])
+
         # remove ticks
         # self.ax_main.set_xticks([])
         # self.ax_main.set_yticks([])
@@ -521,8 +526,6 @@ class NasaGammaApp(QMainWindow):
         self.ax_res.set_yticks([])
         self.ax_fit.set_xticks([])
         self.ax_fit.set_yticks([])
-        self.ax_tab.set_xticks([])
-        self.ax_tab.set_yticks([])
 
         if self.button_add_peak.isChecked():
             self.fig.canvas.mpl_disconnect(self.cid)
@@ -561,6 +564,8 @@ class NasaGammaApp(QMainWindow):
         if self.button_add_peak.isChecked():
             print("Waiting to add a new peak...")
             self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
+            if self.span is not None:
+                self.span.set_active(False)
             # xnew = self.get_xvalue_from_click
         else:
             self.fig.canvas.mpl_disconnect(self.cid)
@@ -573,9 +578,9 @@ class NasaGammaApp(QMainWindow):
             xnew = np.where(self.spect.channels >= xnew)[0][0]
         print(xnew)
         # if no search object initialized, initialize a dummy one
-        if self.search is None:
+        if self.search == 0:
             self.search = ps.PeakSearch(
-                self.spect, 420, 20, min_snr=1000, xrange=[0, 5]
+                self.spect, 420, 20, min_snr=1e6, method="scipy"
             )
             self.span_select()
         x_idx = np.searchsorted(self.search.peaks_idx, xnew)
@@ -595,6 +600,7 @@ class NasaGammaApp(QMainWindow):
         self.fig.canvas.draw_idle()
         self.fig.canvas.mpl_disconnect(self.cid)
         self.button_add_peak.setChecked(False)
+        self.span.set_active(True)
 
     ## Customize plots
     def new_window_custom(self):
@@ -728,18 +734,17 @@ class NasaGammaApp(QMainWindow):
                 )
                 self.ax_res.clear()
                 self.ax_fit.clear()
-                self.ax_tab.clear()
                 self.fit.plot(
-                    plot_type="full",
-                    table_scale=[1, 1.8],
-                    fig=self.fig,
+                    plot_type="simple",
+                    fig=self.fig_fit,
                     ax_res=self.ax_res,
                     ax_fit=self.ax_fit,
-                    ax_tab=self.ax_tab,
                 )
+                data = self.get_values_table_fit()
+                self.activate_fit_table(data)
             except:
-                print("Could not perform fit")
-            self.fig.canvas.draw_idle()
+                print("update_poly: could not perform fit")
+            self.fig_fit.canvas.draw_idle()
 
     def update_gauss(self):
         if len(self.list_xrange) != 0:
@@ -750,18 +755,17 @@ class NasaGammaApp(QMainWindow):
                 )
                 self.ax_res.clear()
                 self.ax_fit.clear()
-                self.ax_tab.clear()
                 self.fit.plot(
-                    plot_type="full",
-                    table_scale=[1, 1.8],
+                    plot_type="simple",
                     fig=self.fig,
                     ax_res=self.ax_res,
                     ax_fit=self.ax_fit,
-                    ax_tab=self.ax_tab,
                 )
+                data = self.get_values_table_fit()
+                self.activate_fit_table(data)
             except:
-                print("Could not perform fit")
-            self.fig.canvas.draw_idle()
+                print("update_gauss:could not perform fit")
+            self.fig_fit.canvas.draw_idle()
 
     def span_select(self):
         self.span = SpanSelector(
@@ -773,6 +777,12 @@ class NasaGammaApp(QMainWindow):
             props=dict(alpha=0.3, facecolor="green"),
         )
 
+    def enable_fitButtons(self, boolV):
+        self.button_adv_fit.setEnabled(boolV)
+        self.button_add_cal.setEnabled(boolV)
+        self.button_add_fwhm.setEnabled(boolV)
+        self.button_add_eff.setEnabled(boolV)
+
     def onselect(self, xmin, xmax):
         self.idxmin_fit = round(xmin, 4)
         self.idxmax_fit = round(xmax, 4)
@@ -782,23 +792,73 @@ class NasaGammaApp(QMainWindow):
         print("xmax: ", self.idxmax_fit)
         self.ax_res.clear()
         self.ax_fit.clear()
-        self.ax_tab.clear()
         try:
             self.fit = pf.PeakFit(self.search, xrange, bkg=self.bg, skew=self.sk_gauss)
             # plot_fit(fit)
             self.fit.plot(
-                plot_type="full",
-                table_scale=[1, 1.8],
-                fig=self.fig,
+                plot_type="simple",
+                fig=self.fig_fit,
                 ax_res=self.ax_res,
                 ax_fit=self.ax_fit,
-                ax_tab=self.ax_tab,
             )
+            data = self.get_values_table_fit()
+            self.activate_fit_table(data)
+            self.enable_fitButtons(True)
         except:
-            print("Could not perform fit")
+            print("onselect: Could not perform fit")
+        self.fig_fit.canvas.draw_idle()
 
-        self.fig.canvas.draw_idle()
+    # TODO
+    def get_values_table_fit(self):
+        cols = [
+            f"Mean ({self.spect.x_units})",
+            "Peak area",
+            "FWHM",
+            "FWHM (%)",
+            "Sigma Area",
+            "Sigma Area (%)",
+        ]
+        mean = []
+        area = []
+        fwhm = []
+        fwhm_p = []
+        std_mu = []
+        std_A = []
+        std_A_p = []
+        std_fwhm = []
+        for i, e in zip(self.fit.peak_info, self.fit.peak_err):
+            ls = list(i.values())
+            lse = list(e.values())
+            mean.append(round(ls[0], 3))
+            area.append(round(ls[1], 3))
+            fwhm.append(round(ls[2], 3))
+            fwhm_p.append(round(ls[2] / ls[0] * 100, 3))
+            std_A.append(round(lse[1], 3))
+            std_A_p.append(round(lse[1] / ls[1] * 100, 3))
 
+        rs = np.array([mean, area, fwhm, fwhm_p, std_A, std_A_p]).T
+        df = pd.DataFrame(columns=cols, data=rs)
+        return df
+
+    def activate_fit_table(self, data):
+        # self.selected_rows = []
+        self.scroll_fit = self.table_fit_area
+        self.table_fit = QtWidgets.QTableView()
+        # self.table_fit.setAlternatingRowColors(True)
+        self.table_fit.setSortingEnabled(True)
+        stylesheet_header = "::section{Background-color:lightgreen}"
+        self.table_fit.horizontalHeader().setStyleSheet(stylesheet_header)
+        self.table_fit.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        # self.table_fit.resizeColumnsToContents()
+        self.model_fit = TableModel(data)
+        self.table_fit.setModel(self.model_fit)
+        self.scroll_fit.setWidget(self.table_fit)
+        # print(self.table_fit.columnWidth(0))
+        stylesheet_ix = "::section{Background-color:lightgoldenrodyellow}"
+        self.table_fit.setStyleSheet(stylesheet_ix)
+        self.table_fit.setColumnWidth(0, 150)
+
+    ## energy calibration
     def remove_cal(self):
         try:
             self.e_units = "channels"
@@ -807,7 +867,6 @@ class NasaGammaApp(QMainWindow):
         except:
             pass
 
-    ## energy calibration
     @staticmethod
     def get_mean_vals(fit):
         mean_lst = []
@@ -1849,7 +1908,6 @@ class NasaGammaApp(QMainWindow):
         self.w_peak_find.edit_ref_fwhm.setText("20")
 
     ## Isotope ID
-    ## TODO
     def isotID_info_activate(self):
         self.w_isotID_info.activateWindow()
         self.w_isotID_info.show()

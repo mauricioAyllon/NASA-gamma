@@ -42,7 +42,7 @@ class PeakFit:
         """
 
         if not isinstance(search, ps.PeakSearch):
-            raise Exception("'search must be a PeakSearch object")
+            raise Exception("search must be a PeakSearch object")
         self.search = search
         self.xrange = xrange
         self.continuum = 0
@@ -273,15 +273,28 @@ class PeakFit:
         if plot_type == "simple":
             plt.rc("font", size=14)
             plt.style.use("seaborn-darkgrid")
-            plt.figure(figsize=(10, 8))
-            plt.title(f"Reduced $\chi^2$ = {round(res.redchi,4)}")
-            plt.plot(x, y, "bo", alpha=0.5, label="data")
-            plt.plot(x_pred, y_pred, "r", lw=3, alpha=0.5, label="Best fit")
-            plt.plot(x, comps[f"{bkg_label}"], "g--", lw=3, label=f"bkg: {self.bkg}")
+            if fig is None:
+                fig = plt.figure(constrained_layout=True, figsize=(8, 6))
+                gs = fig.add_gridspec(2, 1, height_ratios=[1, 4])
+            if ax_res is None:
+                ax_res = fig.add_subplot(gs[0, 0])
+            if ax_fit is None:
+                ax_fit = fig.add_subplot(gs[1, 0])
+            ax_res.plot(x, res.residual, ".", ms=10, alpha=0.5)
+            ax_res.hlines(y=0, xmin=x.min(), xmax=x.max(), lw=3)
+            ax_res.set_ylabel("Residual")
+            ax_res.set_xlim([x.min(), x.max()])
+            ax_res.set_xticks([])
+
+            ax_fit.set_title(f"Reduced $\chi^2$ = {round(res.redchi,4)}")
+            ax_fit.plot(x, y, "bo", alpha=0.5, label="data")
+            ax_fit.plot(x_pred, y_pred, "r", lw=3, alpha=0.5, label="Best fit")
+            # ax_fit.set_xlim([x.min(), x.max()])
+            ax_fit.plot(x, comps[f"{bkg_label}"], "g--", lw=3, label=f"bkg: {self.bkg}")
             m = 1
             for cp in range(len(comps) - 1):
                 if m == 1:
-                    plt.plot(
+                    ax_fit.plot(
                         x,
                         comps[f"{bkg_label}"] + comps[f"g{cp+1}_"],
                         "k--",
@@ -290,19 +303,21 @@ class PeakFit:
                     )
                     m = 0
                 else:
-                    plt.plot(x, comps[f"{bkg_label}"] + comps[f"g{cp+1}_"], "k--", lw=2)
+                    ax_fit.plot(
+                        x, comps[f"{bkg_label}"] + comps[f"g{cp+1}_"], "k--", lw=2
+                    )
+
             dely = res.eval_uncertainty(x=x_pred, sigma=3)
-            plt.fill_between(
+            ax_fit.fill_between(
                 x_pred,
                 y_pred - dely,
                 y_pred + dely,
                 color="#ABABAB",
                 label="3-$\sigma$ uncertainty band",
             )
-            plt.xlabel(self.x_units)
+            ax_fit.set_xlabel(self.x_units)
             if legend == "on":
-                plt.legend()
-            plt.style.use("default")
+                ax_fit.legend(loc="upper left", ncol=2)
 
         elif plot_type == "full":
             cols = ["Mean", "Net_area", "FWHM"]
