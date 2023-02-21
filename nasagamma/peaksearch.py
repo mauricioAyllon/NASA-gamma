@@ -238,7 +238,7 @@ class PeakSearch:
 
     def calculate_scipy(self):
         if self.xrange is None:
-            peaks_idx, _ = find_peaks(
+            peaks_idx, params = find_peaks(
                 self.spectrum.counts,
                 prominence=self.min_snr,
                 width=self.fwhm(self.spectrum.counts),
@@ -253,7 +253,7 @@ class PeakSearch:
             new_ch = self.spectrum.channels[self.channel_idx]
             new_cts = self.spectrum.counts[self.channel_idx]
             new_widths = self.fwhm(new_cts)
-            peaks_idx, _ = find_peaks(
+            peaks_idx, params = find_peaks(
                 new_cts, prominence=self.min_snr, width=new_widths
             )
             self.peaks_idx = new_ch[peaks_idx]
@@ -263,7 +263,7 @@ class PeakSearch:
         self.bkg = None
         self.signal = None
         self.noise = None
-        self.snr = None
+        self.snr = params["prominences"]
 
     def plot_kernel(self):
         """Plot the 3D matrix of kernels evaluated across the x values."""

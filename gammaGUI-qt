@@ -506,7 +506,7 @@ class NasaGammaApp(QMainWindow):
             self.ax_fit.set_yticks([])
         if fit:
             self.search.plot_peaks(
-                yscale=self.scale, snrs="off", fig=self.fig, ax=self.ax_main
+                yscale=self.scale, snrs=self.snr_state, fig=self.fig, ax=self.ax_main
             )
             self.span_select()
         else:
@@ -1918,6 +1918,10 @@ class NasaGammaApp(QMainWindow):
                     )
                 else:
                     pass
+            if self.w_peak_find.checkBox_SNR.isChecked():
+                self.snr_state = "on"
+            else:
+                self.snr_state = "off"
             self.create_graph(fit=True)
         except:
             print(
