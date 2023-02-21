@@ -23,5 +23,6 @@ setup(
         "dateparser >= 1.1.1",
         "pandas > 1.4.2",
         "matplotlib > 3.5.1",
+        "mplcursors >= 0.5.2",
     ],
 )

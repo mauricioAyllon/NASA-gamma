@@ -48,6 +48,7 @@ from nasagamma import param_handle
 from nasagamma import peakfit as pf
 from nasagamma import peaksearch as ps
 from nasagamma import spectrum as sp
+from nasagamma import peakarea as pa
 from nasagamma import read_cnf
 from nasagamma import tlist
 from nasagamma import energy_calibration as ecal
@@ -128,6 +129,12 @@ class WindowIsotIDInfo(Dialog_from_UI):
     def define_ui_vars(self):
         self.ui_name = "win_isot_id_info.ui"
         self.window_title = "Isotope ID info"
+
+
+class WindowAdvFit(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_adv_fit.ui"
+        self.window_title = "Advanced Fitting"
 
 
 class WindowAPIfilters(Dialog_from_UI):
@@ -296,6 +303,14 @@ class NasaGammaApp(QMainWindow):
         # peak fitting
         self.span = None
 
+        # advanced fitting
+        # TODO
+        self.parea = None
+        self.button_adv_fit.setStyleSheet("background-color : limegreen")
+        self.w_adv_fit = WindowAdvFit()
+        self.button_adv_fit.clicked.connect(self.open_adv_fit)
+        self.w_adv_fit.button_plot_area.clicked.connect(self.calculate_peak_area)
+
         ## energy calibration
         self.mean_vals = [0]
         self.e_vals = [0]
@@ -312,7 +327,6 @@ class NasaGammaApp(QMainWindow):
         self.button_cal2.setStyleSheet("background-color : lightgreen")
         self.button_cal3.setStyleSheet("background-color : lightgreen")
         self.button_cal_eqns.setStyleSheet("background-color : silver")
-        self.button_adv_fit.setStyleSheet("background-color : limegreen")
         self.button_origin.clicked.connect(self.set_origin)
 
         self.button_cal1.setCheckable(True)
@@ -602,6 +616,34 @@ class NasaGammaApp(QMainWindow):
         self.button_add_peak.setChecked(False)
         self.span.set_active(True)
 
+    ## Advanced fitting
+    ## TODO
+    def open_adv_fit(self):
+        self.w_adv_fit.activateWindow()
+        self.parea = pa.PeakArea(spectrum=self.spect, xrange=self.fit.xrange)
+        self.w_adv_fit.show()
+        self.reset_plot_area()
+        self.plot_area(bool_area=False)
+
+    def reset_plot_area(self):
+        self.fig_adv_fit = self.w_adv_fit.plot_area.canvas.figure
+        self.fig_adv_fit.clear()
+        self.fig_adv_fit.set_constrained_layout(True)
+        self.ax_area = self.fig_adv_fit.add_subplot()
+
+    def plot_area(self, bool_area=False):
+        self.parea.plot(ax=self.ax_area, areas=bool_area)
+        self.fig_adv_fit.canvas.draw_idle()
+
+    def calculate_peak_area(self):
+        x1 = self.w_adv_fit.x1.text()
+        x2 = self.w_adv_fit.x2.text()
+        if self.isevaluable(x1) and self.isevaluable(x2) and self.parea is not None:
+            peak_range = [eval(x1), eval(x2)]
+            self.parea.calculate_peak_area(prange=peak_range)
+            self.reset_plot_area()
+            self.plot_area(bool_area=True)
+
     ## Customize plots
     def new_window_custom(self):
         self.w_cust.activateWindow()
@@ -778,7 +820,7 @@ class NasaGammaApp(QMainWindow):
         )
 
     def enable_fitButtons(self, boolV):
-        self.button_adv_fit.setEnabled(boolV)
+        # self.button_adv_fit.setEnabled(boolV)
         self.button_add_cal.setEnabled(boolV)
         self.button_add_fwhm.setEnabled(boolV)
         self.button_add_eff.setEnabled(boolV)
@@ -808,7 +850,6 @@ class NasaGammaApp(QMainWindow):
             print("onselect: Could not perform fit")
         self.fig_fit.canvas.draw_idle()
 
-    # TODO
     def get_values_table_fit(self):
         cols = [
             f"Mean ({self.spect.x_units})",
@@ -2260,7 +2301,7 @@ class NasaGammaApp(QMainWindow):
         except:
             not_implemented_format = "File format not implemented"
             print(not_implemented_format)
-            self.w_info_file.label_tc.setText(not_implemented_format)
+            # self.w_info_file.label_tc.setText(not_implemented_format)
 
         try:
             self.cnf_dict = read_cnf.read_cnf_file(self.fileName, False)
@@ -2281,7 +2322,7 @@ class NasaGammaApp(QMainWindow):
         except:
             not_implemented_format = "File format not implemented"
             print(not_implemented_format)
-            self.w_info_file.label_tc.setText(not_implemented_format)
+            # self.w_info_file.label_tc.setText(not_implemented_format)
 
         try:
             lt = self.multiscanPHA.live_time
@@ -2305,7 +2346,7 @@ class NasaGammaApp(QMainWindow):
         except:
             not_implemented_format = "File format not implemented"
             print(not_implemented_format)
-            self.w_info_file.label_tc.setText(not_implemented_format)
+            # self.w_info_file.label_tc.setText(not_implemented_format)
 
     def load_spe_file(self):
         try:
@@ -2335,8 +2376,8 @@ class NasaGammaApp(QMainWindow):
                     try:
                         e_units, spect = file_reader.read_csv_file(fileName)
                     except:
-                        lynxcsv = file_reader.ReadLynxCsv(fileName)
-                        spect = lynxcsv.spect
+                        self.lynxcsv = file_reader.ReadLynxCsv(fileName)
+                        spect = self.lynxcsv.spect
                         e_units = spect.e_units
 
                 elif fileName_lc[-4:] == ".cnf":
