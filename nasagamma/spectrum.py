@@ -92,49 +92,22 @@ class Spectrum:
             livetime=self.livetime,
         )
 
-    # TODO: replace rebin function with commented function below.
-    # Needs testing first.
-    # def rebin_spect(spe, by=2):
-    #     new_size = int(spe.shape[0]/by)
-    #     new_spe = spe.reshape((new_size,-1)).sum(axis=1)
-    #     return new_spe
-
-    def rebin(self):
+    def rebin(self, by=2):
         """
-        Rebins data by adding two adjacent bins at a time.
-
-        Returns
-        -------
-        numpy array
-            Rebinned counts
-        If energies are passed, returns both rebinned counts and average
-        energies
-
+        Rebins data by adding 'by' adjacent bins at a time.
         """
-        arr_cts = self.counts
-        if arr_cts.shape[0] % 2 != 0:
-            arr_cts = arr_cts[:-1]
-        y0 = arr_cts[::2]
-        y1 = arr_cts[1::2]
-        y = y0 + y1
+        by = 4
+        new_size = int(self.counts.shape[0] / by)
+        new_cts = self.counts.reshape((new_size, -1)).sum(axis=1)
+        self.counts = new_cts
+        self.channels = np.arange(0, len(new_cts), 1)
 
-        if self.energies is None:
-            self.__init__(
-                counts=y,
-                energies=self.energies,
-                e_units=self.e_units,
-                livetime=self.livetime,
-            )
+        if self.energies is not None:
+            new_erg = self.energies.reshape((new_size, -1)).mean(axis=1)
+            self.energies = new_erg
+            self.x = new_erg
         else:
-            erg = self.energies
-            if erg.shape[0] % 2 != 0:
-                erg = erg[:-1]
-            en0 = erg[::2]
-            en1 = erg[1::2]
-            en = (en0 + en1) / 2
-            self.__init__(
-                counts=y, energies=en, e_units=self.e_units, livetime=self.livetime
-            )
+            self.x = self.channels
 
     def gain_shift(self, by=0, energy=False):
         """
@@ -170,6 +143,20 @@ class Spectrum:
             self.counts[by:] = self.counts[by - 1]
         else:
             print(f"Cannot roll by {by} units")
+
+    def replace_neg_vals(self):
+        """
+        Replaces negative values in spectrum with 1/10th of the minimum
+
+        Returns
+        -------
+        None.
+
+        """
+        # find min greater than zero
+        y0_min = np.amin(self.counts[self.counts > 0.0])
+        # replace negative values and zeros by 1/10th of the minimum
+        self.counts[self.counts < 0.0] = y0_min * 1e-1
 
     def plot(self, fig=None, ax=None, scale="log"):
         """
