@@ -205,7 +205,11 @@ class PeakFit:
             self.peak_info.append(dict_peak_info)
             # errors
             mean_err = epar[f"g{i+1}_center"].stderr
-            area_err = np.sqrt(area0)
+            # TODO
+            if self.search.spectrum.livetime is None:
+                area_err = np.sqrt(area0)
+            else:
+                area_err = np.sqrt(area0 / self.search.spectrum.livetime)
             # fwhm_err = epar[f"g{i+1}_fwhm"].stderr
             fwhm_err = epar[f"g{i+1}_sigma"].stderr * 2.355
             dict_peak_err = {
