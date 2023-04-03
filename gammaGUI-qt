@@ -1589,11 +1589,11 @@ class NasaGammaApp(QMainWindow):
 
     def initialize_plots_api(self):
         self.trange = [-40, 120]  # dt range
-        self.ebins = 2**13  # energy bins
+        self.ebins = 2**16  # energy bins
         self.hexbins = 80  # x-y bins
         self.tbins = 512  # time bins
         self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
-        self.erange_api = [0, 11000]  # [0,8]
+        self.erange_api = [0, 2**16]  # [0,8]
         self.colormap = "plasma"
         self.plot_energy_hist_api(self.df_api)
         # self.ax_api_spe.set_yscale(self.api_spect_scale)
@@ -2227,17 +2227,20 @@ class NasaGammaApp(QMainWindow):
             self.save_fit(fileName)
 
     def save_fit(self, fileName):
-        res = self.fit.fit_result
-        report = res.fit_report()
-        fn = f"Data_filename: {self.fileName}\n"
-        xunits = f"x_units: {self.spect.x_units}\n"
-        ROI = f"ROI_start_stop: {self.idxmin_fit}, {self.idxmax_fit}\n"
-        npeaks = f"Num_peaks: {len(self.fit.peak_info)}\n"
-        bkgd = f"Background_type: {self.bg}\n"
-        report2 = fn + xunits + ROI + npeaks + bkgd + "\n" + report
+        try:
+            res = self.fit.fit_result
+            report = res.fit_report()
+            fn = f"Data_filename: {self.fileName}\n"
+            xunits = f"x_units: {self.spect.x_units}\n"
+            ROI = f"ROI_start_stop: {self.idxmin_fit}, {self.idxmax_fit}\n"
+            npeaks = f"Num_peaks: {len(self.fit.peak_info)}\n"
+            bkgd = f"Background_type: {self.bg}\n"
+            report2 = fn + xunits + ROI + npeaks + bkgd + "\n" + report
 
-        with open(f"{fileName}", "w") as text_file:
-            text_file.write(report2)
+            with open(f"{fileName}", "w") as text_file:
+                text_file.write(report2)
+        except:
+            print("Cannot save file with fit info")
 
     def save_spect(self):
         options = QFileDialog.Options()
@@ -2245,9 +2248,7 @@ class NasaGammaApp(QMainWindow):
         fileName, _ = QFileDialog.getSaveFileName(
             self, "Save", "", "All Files (*);;Text Files (*.txt)", options=options
         )
-        if fileName == "":
-            pass
-        else:
+        try:
             print("Saved file: ", fileName)
             cts = self.spect.counts
             if self.spect.energies is not None:
@@ -2262,6 +2263,8 @@ class NasaGammaApp(QMainWindow):
                 df.to_csv(f"{fileName}", index=False)
             else:
                 df.to_csv(f"{fileName}.csv", index=False)
+        except:
+            print("Cannot save file")
 
     def save_ID_peaks(self):
         options = QFileDialog.Options()
@@ -2269,15 +2272,15 @@ class NasaGammaApp(QMainWindow):
         fileName, _ = QFileDialog.getSaveFileName(
             self, "Save", "", "All Files (*);;Text Files (*.txt)", options=options
         )
-        if fileName == "":
-            pass
-        else:
+        try:
             print("Saved file: ", fileName)
             df = self.df_isotID_selected
             if ".csv" in fileName:
                 df.to_csv(f"{fileName}", index=False)
             else:
                 df.to_csv(f"{fileName}.csv", index=False)
+        except:
+            print("Cannot save file with peak info")
 
     def display_info_file(self):
         self.w_info_file = WindowInfoFile()
