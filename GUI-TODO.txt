@@ -1,19 +1,27 @@
-gammaGUI todo:
+NASA-gamma todo:
 1) API: 
-	a) Add text box for vmax (XY plot)  - DONE
-	b) Add a button logXY - DONE
-	c) Fix  filtering logic (up to 3 filters) - DONE
-	d) Add filter button to perform filters manually - DONE
-	e) Add data folder source directory to a text file so there is no need to import ROOTS - DONE
+	a) Add 3D plotting. Need to input detector and target positions.
+	   Implement this on a separate window.
 	
 2) Spectrum:
-	a) Add Peak button to add peaks at selected locations - DONE
-	b) Isotope ID for 1) 14 MeV neutrons (Talys),
-		2) Baghdad Atlas (~2.2 MeV), 3) thermal (Talys), 4) check sources
+	a) Add info and reset buttons.
+	b) Isotope ID - add 1) Baghdad Atlas (~2.2 MeV), 2) check sources.
+	c) Isotope ID - add option to plot Compton edge.
+	d) Redo "Customize" so each window has its own OK button, and remove
+	   multiple file upload. Make it a separate option under File -> Open multiple files.
+	e) When setting as "count rate", refresh spectrum.
+
+3) Advanced fitting:
+	a) Activate button only when a region is selected.
+	b) Fix left and right boundaries when using energy units.
 	
 3) Energy calibration:
-	a) Fix e.units=channels - DONE
-	b) Add calibration equation with free parameters for repeatability
+	a) Add calibration equation with free parameters for repeatability.
+	b) Change to interactive table where individual points can be removed.
+	c) Allow for piecewise energy calibration.
 	
 4) Efficiency:
-	a) Add uncertainty in activity and propagate errors
+	a) Add uncertainty in activity and propagate errors.
+	
+Suggestions / ideas:
+- API: allow for file size reduction after filtering.
