@@ -478,9 +478,6 @@ class NasaGammaApp(QMainWindow):
         )
         self.w_isot_id.isotID_button_apply.clicked.connect(self.isotID_apply)
         self.w_isot_id.isotID_button_clear.clicked.connect(self.isotID_clear)
-        self.w_isot_id.button_plot_vlines.setStyleSheet(
-            "background-color : lightyellow"
-        )
         self.w_isot_id.button_remove_vlines.setStyleSheet(
             "background-color : lightcoral"
         )
@@ -527,6 +524,7 @@ class NasaGammaApp(QMainWindow):
         self.fig.set_constrained_layout(True)
         self.fig_fit.set_constrained_layout(True)
         gs = self.fig_fit.add_gridspec(2, 1, height_ratios=[0.3, 1.5])
+        self.fig.patch.set_alpha(0.3)
 
         # axes
         self.ax_main = self.fig.add_subplot()
@@ -1963,10 +1961,13 @@ class NasaGammaApp(QMainWindow):
 
     def isotID_apply(self):
         df_files = self.isotID_retrieve_data()
-        df_element = self.isotID_filter_by_element(df_files)
-        df_energy = self.isotID_filter_by_energy(df_element)
-        self.df_isotID = df_energy
-        self.activate_table_gammas(self.df_isotID)
+        if len(df_files) == 0:
+            print("Cannot retrieve data")
+        else:
+            df_element = self.isotID_filter_by_element(df_files)
+            df_energy = self.isotID_filter_by_energy(df_element)
+            self.df_isotID = df_energy
+            self.activate_table_gammas(self.df_isotID)
 
     def isotID_clear(self):
         "Clear entries, uncheck boxes"
@@ -2000,11 +2001,17 @@ class NasaGammaApp(QMainWindow):
         lab_src_file = pkg_resources.resource_filename(
             "nasagamma", "data/Common_lab_sources.csv"
         )
+        delay_act_file = pkg_resources.resource_filename(
+            "nasagamma", "data/Delayed_activation_IAEA.csv"
+        )
         nat_rad_file = pkg_resources.resource_filename(
             "nasagamma", "data/Natural_radiation.csv"
         )
         capt_file = pkg_resources.resource_filename(
             "nasagamma", "data/Capture_CapGam.csv"
+        )
+        capt_IAEA_file = pkg_resources.resource_filename(
+            "nasagamma", "data/Capture_IAEA.csv"
         )
         inl_talys_file = pkg_resources.resource_filename(
             "nasagamma", "data/Inelastic_14MeV_Talys.csv"
@@ -2012,23 +2019,28 @@ class NasaGammaApp(QMainWindow):
         inl_baghdad_file = pkg_resources.resource_filename(
             "nasagamma", "data/Inelastic_Baghdad.csv"
         )
-        files = []
+        file = 0
         if self.w_isot_id.lab_src.isChecked():
-            files.append(lab_src_file)
-        if self.w_isot_id.natural_rad.isChecked():
-            files.append(nat_rad_file)
-        if self.w_isot_id.neutron_capt.isChecked():
-            files.append(capt_file)
-        if self.w_isot_id.neutron_inl_talys.isChecked():
-            files.append(inl_talys_file)
-        if self.w_isot_id.neutron_inl_baghdad.isChecked():
-            files.append(inl_baghdad_file)
-        if len(files) == 0:
-            all_files = [nat_rad_file, capt_file, inl_talys_file]
-            data = self.join_gamma_files(all_files)
+            file = lab_src_file
+        elif self.w_isot_id.delayed_activation.isChecked():
+            file = delay_act_file
+        elif self.w_isot_id.natural_rad.isChecked():
+            file = nat_rad_file
+        elif self.w_isot_id.neutron_capt.isChecked():
+            file = capt_file
+        elif self.w_isot_id.neutron_capt_IAEA.isChecked():
+            file = capt_IAEA_file
+        elif self.w_isot_id.neutron_inl_talys.isChecked():
+            file = inl_talys_file
+        elif self.w_isot_id.neutron_inl_baghdad.isChecked():
+            file = inl_baghdad_file
         else:
-            data = self.join_gamma_files(files)
-        return data
+            print("ERROR: Select a database from the menu")
+        if file == 0:
+            return []
+        else:
+            data = self.join_gamma_files([file])
+            return data
 
     def isotID_filter_by_element(self, df):
         elements = self.w_isot_id.edit_isot.text()
@@ -2120,10 +2132,10 @@ class NasaGammaApp(QMainWindow):
 
     def isotID_plot_vlines(self):
         "Plot vertical lines of energies of selected rows"
-        if len(self.df_isotID) == 0:
+        if len(self.df_isotID) == 0:  # do nothing if empty
             pass
         else:
-            if len(self.selected_rows) == 0:
+            if len(self.selected_rows) == 0:  # do all if none selected
                 self.df_isotID_plot = self.df_isotID.copy()
                 self.df_isotID_selected = self.df_isotID.copy()
             else:
@@ -2136,67 +2148,55 @@ class NasaGammaApp(QMainWindow):
             for row in self.df_isotID_plot.index:
                 isot0 = self.df_isotID_plot.loc[row, "Isotope"]
                 e0 = self.df_isotID_plot.loc[row, "Energy (keV)"]
-                info0 = self.df_isotID_plot.loc[row, "Info"]
-                inten0 = self.df_isotID_plot.loc[row, "XS or I"]
                 sep_checked = self.w_isot_id.checkBox_sep.isChecked()
                 dep_checked = self.w_isot_id.checkBox_dep.isChecked()
-                if self.w_isot_id.checkBox_labels.isChecked():
-                    l0 = self.ax_main.axvline(
-                        x=e0,
+                compton_edge = self.w_isot_id.checkBox_CE.isChecked()
+
+                photopeak = self.ax_main.axvline(
+                    x=e0,
+                    color=self.isotID_getColor(),
+                    linestyle="-",
+                    alpha=0.5,
+                    label=f"{isot0} : {round(e0,5)} keV",
+                )
+                if sep_checked and e0 > 1022:
+                    e1 = e0 - 511
+                    sep = self.ax_main.axvline(
+                        x=e1,
                         color=self.isotID_getColor(),
-                        linestyle="-",
+                        linestyle="--",
                         alpha=0.5,
-                        label=f"{isot0} : {round(e0,5)} keV",
+                        label=f"{isot0} : {round(e1,5)} keV (SEP)",
                     )
-                    if sep_checked and e0 > 1022:
-                        e1 = e0 - 511
-                        l1 = self.ax_main.axvline(
-                            x=e1,
-                            color=self.isotID_getColor(),
-                            linestyle="--",
-                            alpha=0.5,
-                            label=f"{isot0} : {round(e1,5)} keV",
-                        )
-                        self.isotID_vlines.append(l1)
-                    if dep_checked and e0 > 1022:
-                        e11 = e0 - 511 * 2
-                        l11 = self.ax_main.axvline(
-                            x=e11,
-                            color=self.isotID_getColor(),
-                            linestyle="-.",
-                            alpha=0.5,
-                            label=f"{isot0} : {round(e11,5)} keV",
-                        )
-                        self.isotID_vlines.append(l11)
-
-                else:
-                    l0 = self.ax_main.axvline(
-                        x=e0, color=self.isotID_getColor(), linestyle="-", alpha=0.5
+                    self.isotID_vlines.append(sep)
+                if dep_checked and e0 > 1022:
+                    e11 = e0 - 511 * 2
+                    dep = self.ax_main.axvline(
+                        x=e11,
+                        color=self.isotID_getColor(),
+                        linestyle="-.",
+                        alpha=0.5,
+                        label=f"{isot0} : {round(e11,5)} keV (DEP)",
                     )
-                    if sep_checked and e0 > 1022:
-                        e2 = e0 - 511
-                        l2 = self.ax_main.axvline(
-                            x=e2,
-                            color=self.isotID_getColor(),
-                            linestyle="--",
-                            alpha=0.5,
-                        )
-                        self.isotID_vlines.append(l2)
-                    if dep_checked and e0 > 1022:
-                        e22 = e0 - 511 * 2
-                        l22 = self.ax_main.axvline(
-                            x=e22,
-                            color=self.isotID_getColor(),
-                            linestyle="-.",
-                            alpha=0.5,
-                        )
-                        self.isotID_vlines.append(l22)
+                    self.isotID_vlines.append(dep)
 
-                self.isotID_vlines.append(l0)
+                if compton_edge:
+                    e111 = e0 - e0 / (1 + 2 * e0 / 511)
+                    ce = self.ax_main.axvline(
+                        x=e111,
+                        color=self.isotID_getColor(),
+                        linestyle=":",
+                        alpha=0.5,
+                        label=f"{isot0} : {round(e111,5)} keV (CE)",
+                    )
+                    self.isotID_vlines.append(ce)
+
+                self.isotID_vlines.append(photopeak)
                 if len(self.isotID_vlines) > 300:
                     print("Cannot display more than 300 vertical lines.")
                     break
-            self.ax_main.legend()
+            if self.w_isot_id.checkBox_labels.isChecked():
+                self.ax_main.legend()
             self.fig.canvas.draw_idle()
 
     def isotID_remove_vlines(self):

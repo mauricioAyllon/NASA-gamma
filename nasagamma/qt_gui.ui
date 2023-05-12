@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(193, 229, 195);</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
@@ -24,6 +27,12 @@
        <font>
         <pointsize>12</pointsize>
        </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
       </property>
       <property name="currentIndex">
        <number>0</number>
@@ -321,7 +330,7 @@
            <item row="0" column="0">
             <widget class="MplWidget" name="main_plot" native="true">
              <property name="autoFillBackground">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -360,7 +369,7 @@
                 </size>
                </property>
                <property name="autoFillBackground">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
               </widget>
              </item>
@@ -627,7 +636,7 @@
            <bool>false</bool>
           </property>
           <property name="autoFillBackground">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -744,7 +753,7 @@
            <bool>false</bool>
           </property>
           <property name="autoFillBackground">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -851,7 +860,7 @@
            <bool>false</bool>
           </property>
           <property name="autoFillBackground">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -929,7 +938,7 @@
            <bool>false</bool>
           </property>
           <property name="autoFillBackground">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <widget class="QWidget" name="layoutWidget">
            <property name="geometry">
@@ -1402,7 +1411,7 @@
            <bool>false</bool>
           </property>
           <property name="autoFillBackground">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>

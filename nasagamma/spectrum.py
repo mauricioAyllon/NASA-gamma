@@ -179,6 +179,7 @@ class Spectrum:
             fig = plt.figure(figsize=(10, 6))
         if ax is None:
             ax = fig.add_subplot()
+        fig.patch.set_alpha(0.3)
 
         integral = round(self.counts.sum())
         if self.plot_label is None:

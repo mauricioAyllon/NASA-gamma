@@ -289,6 +289,7 @@ class PeakFit:
             ax_res.set_ylabel("Residual")
             ax_res.set_xlim([x.min(), x.max()])
             ax_res.set_xticks([])
+            fig.patch.set_alpha(0.3)
 
             ax_fit.set_title(f"Reduced $\chi^2$ = {round(res.redchi,4)}")
             ax_fit.plot(x, y, "bo", alpha=0.5, label="data")
@@ -354,6 +355,7 @@ class PeakFit:
             ax_res.set_ylabel("Residual")
             ax_res.set_xlim([x.min(), x.max()])
             ax_res.set_xticks([])
+            fig.patch.set_alpha(0.3)
 
             ax_fit.set_title(f"Reduced $\chi^2$ = {round(res.redchi,4)}")
             ax_fit.plot(x, y, "bo", alpha=0.5, label="data")
