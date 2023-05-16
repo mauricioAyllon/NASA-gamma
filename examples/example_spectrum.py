@@ -11,19 +11,19 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # dataset 1
-file = "data/SSR-mcnp.hdf"
-df = pd.read_hdf(file, key="data")
+file = "data/gui_test_data_cebr_calibrated.csv"
+df = pd.read_csv(file)
 
-# delete first (large) bin
-df = df.iloc[1:, :]
-
-cts_np = df.cts.to_numpy() * 1e8
-erg = np.array(df.index)
-chan = np.arange(0, len(cts_np), 1)
 
 # instantiate a Spectrum object
-spect = sp.Spectrum(counts=cts_np, energies=erg)
+spect = sp.Spectrum(counts=df["counts"], energies=df["Energy [keV]"])
 
 fig = plt.figure(figsize=(10, 6))
 ax = fig.add_subplot()
+spect.plot(fig=fig, ax=ax)
+
+spect.rebin(by=2)
+spect.plot(fig=fig, ax=ax)
+
+spect.smooth(num=6)
 spect.plot(fig=fig, ax=ax)

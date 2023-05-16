@@ -29,13 +29,19 @@ search.plot_kernel()
 search.plot_peaks()
 search.plot_components()
 
+# instantiate a peaksearch object with predetermined range
+search1 = ps.PeakSearch(
+    spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=5, xrange=[1200, 1600], method="km"
+)
+search1.plot_peaks(snrs="off")
+
 # Using built-in scipy peak search
 search2 = ps.PeakSearch(
     spectrum=spect,
     ref_x=420,
     ref_fwhm=15,
     fwhm_at_0=1,
-    min_snr=10,
+    min_snr=5,
     xrange=[1200, 1600],
     method="scipy",
 )
