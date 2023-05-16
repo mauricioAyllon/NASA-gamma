@@ -222,7 +222,8 @@ class PeakSearch:
         peaks_idx = find_peaks(clipped_snr, height=self.min_snr)[0]
 
         # remove first and last index (not real peaks)
-        # peaks_idx = peaks_idx[1:-1]
+        if len(peaks_idx) > 2:
+            peaks_idx = peaks_idx[1:-1]
 
         self.fwhm_guess = self.fwhm(peaks_idx)
         self.peak_plus_bkg = peak_plus_bkg
@@ -316,7 +317,6 @@ class PeakSearch:
         if ax is None:
             ax = fig.add_subplot()
 
-        self.spectrum.plot(fig=fig, ax=ax)
         if snrs == "on" and self.method == "km":
             ax.plot(x, self.snr, label="SNR")
         # ax.plot(x, self.spectrum.counts, label="Raw spectrum")
@@ -330,6 +330,7 @@ class PeakSearch:
             else:
                 x0 = self.spectrum.energies[xc]
             ax.axvline(x=x0, color="red", linestyle="--", alpha=0.2)
+        self.spectrum.plot(fig=fig, ax=ax)
         ax.legend(loc=1)
         ax.set_title(f"SNR > {self.min_snr}")
         # ax.set_ylim(1e-1)
