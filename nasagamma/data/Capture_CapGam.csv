@@ -1,4 +1,4 @@
-Isotope,Energy (keV),XS or I,Info
+Isotope,Energy (keV),Intensity (%),Info
 1H,2223.245,100,"(n,g) I-P"
 6Li,7245.91,100,"(n,g) I-P"
 6Li,477.595,61.2903,"(n,g) I-S"
