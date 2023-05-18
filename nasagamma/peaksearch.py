@@ -222,7 +222,10 @@ class PeakSearch:
         peaks_idx = find_peaks(clipped_snr, height=self.min_snr)[0]
 
         # remove first and last index (not real peaks)
-        if len(peaks_idx) > 2:
+        # only when restricting x-range
+        if self.xrange == None:
+            pass
+        else:
             peaks_idx = peaks_idx[1:-1]
 
         self.fwhm_guess = self.fwhm(peaks_idx)
