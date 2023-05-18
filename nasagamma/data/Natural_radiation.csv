@@ -1,4 +1,4 @@
-Isotope,Energy (keV),XS or I,Info
+Isotope,Energy (keV),Intensity (%),Info
 40K,1460.82,10.66,Nat-40K
 208Tl,722.04,0.201,Nat-232Th
 208Tl,2614.533,99.0,Nat-232Th
