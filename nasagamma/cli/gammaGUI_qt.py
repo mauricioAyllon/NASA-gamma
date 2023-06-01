@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Usage:
   gammaGUI-qt <file_name> [options]
@@ -32,7 +31,6 @@ import pandas as pd
 import numpy as np
 import datetime
 import re
-import sys
 from PyQt5.QtWidgets import *
 
 # from PyQt5.QtGui import QKeySequence, QIcon, QPixmap
@@ -2407,7 +2405,7 @@ class NasaGammaApp(QMainWindow):
         return fileName, e_units, spect
 
 
-if __name__ == "__main__":
+def main():
     commands = docopt.docopt(__doc__)
     print(commands)
 
@@ -2421,3 +2419,7 @@ if __name__ == "__main__":
     window = NasaGammaApp(commands)
     window.show()
     app.exec_()
+
+
+if __name__ == "__main__":
+    main()
