@@ -96,7 +96,6 @@ class Spectrum:
         """
         Rebins data by adding 'by' adjacent bins at a time.
         """
-        by = 4
         new_size = int(self.counts.shape[0] / by)
         new_cts = self.counts.reshape((new_size, -1)).sum(axis=1)
         self.counts = new_cts
@@ -173,7 +172,7 @@ class Spectrum:
 
         """
         plt.rc("font", size=14)
-        plt.style.use("seaborn-darkgrid")
+        plt.style.use("seaborn-v0_8-darkgrid")
 
         if fig is None:
             fig = plt.figure(figsize=(10, 6))

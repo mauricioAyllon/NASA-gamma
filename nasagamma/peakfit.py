@@ -276,7 +276,7 @@ class PeakFit:
 
         if plot_type == "simple":
             plt.rc("font", size=14)
-            plt.style.use("seaborn-darkgrid")
+            plt.style.use("seaborn-v0_8-darkgrid")
             if fig is None:
                 fig = plt.figure(constrained_layout=True, figsize=(8, 6))
                 gs = fig.add_gridspec(2, 1, height_ratios=[1, 4])
@@ -338,7 +338,7 @@ class PeakFit:
             rs = np.array([mean, area, fwhm]).T
             colors = [["lightblue"] * len(cols)] * len(rs)
             plt.rc("font", size=14)
-            plt.style.use("seaborn-darkgrid")
+            plt.style.use("seaborn-v0_8-darkgrid")
 
             if fig is None:
                 fig = plt.figure(constrained_layout=True, figsize=(16, 8))
@@ -500,7 +500,7 @@ class GaussianComponents:
     def plot_gauss(self, plot_type="simple", table_scale=[1, 3], fig=None, ax=None):
         if plot_type == "simple":
             plt.rc("font", size=14)
-            plt.style.use("seaborn-darkgrid")
+            plt.style.use("seaborn-v0_8-darkgrid")
             plt.figure(figsize=(12, 8))
             for i in range(self.npeaks):
                 x = self.x_data[i]
@@ -523,7 +523,7 @@ class GaussianComponents:
             rs = np.array([mean, area, fwhm]).T
             rs = np.round(rs, decimals=2)
             plt.rc("font", size=14)
-            plt.style.use("seaborn-darkgrid")
+            plt.style.use("seaborn-v0_8-darkgrid")
             fig = plt.figure(constrained_layout=False, figsize=(18, 8))
             gs = fig.add_gridspec(1, 2, width_ratios=[3, 2.5])  # 5 , 3
             f_ax1 = fig.add_subplot(gs[0, 0])
@@ -587,7 +587,7 @@ class GaussianComponents:
         elif plot_type == "fwhm":
             if fig is None:
                 plt.rc("font", size=14)
-                plt.style.use("seaborn-darkgrid")
+                plt.style.use("seaborn-v0_8-darkgrid")
                 fig = plt.figure(constrained_layout=False, figsize=(18, 8))
             if ax is None:
                 ax = fig.add_subplot()
