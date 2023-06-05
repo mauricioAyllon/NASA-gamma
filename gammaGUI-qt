@@ -39,7 +39,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
 
 # from PyQt5.QtCore import pyqtSlot
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import Qt
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -191,6 +191,7 @@ class NasaGammaApp(QMainWindow):
         # self.label_nasa.setPixmap(pixmap)
         self.resize(1800, 950)
         self.setWindowTitle("NASA-gamma")
+        self.setWindowIcon(QtGui.QIcon("figs/NASA-gamma-logo.png"))
         self.scale = "linear"
         self.pushButton_scale.clicked.connect(self.update_scale)
         self.pushButton_scale.setStyleSheet("background-color : lightgoldenrodyellow")
@@ -222,6 +223,9 @@ class NasaGammaApp(QMainWindow):
         self.btn_grp.addButton(self.pushButton_poly5)
         self.btn_grp.addButton(self.pushButton_exp)
         self.btn_grp.buttonClicked.connect(self.update_poly)
+
+        # reset main figure
+        self.button_reset.clicked.connect(self.reset_file)
 
         # Gaussian or skewed Gaussian?
         self.sk_gauss = False
@@ -544,6 +548,7 @@ class NasaGammaApp(QMainWindow):
             self.button_add_peak.setChecked(False)
 
         self.fig.canvas.draw_idle()
+        self.fig_fit.canvas.draw_idle()
 
     def reset_cal_figure(self):
         self.fig_cal = self.cal_plot.canvas.figure
@@ -2355,9 +2360,20 @@ class NasaGammaApp(QMainWindow):
             print(not_implemented_format)
             # self.w_info_file.label_tc.setText(not_implemented_format)
 
+    def reset_file(self):
+        try:
+            self.clear_main_figure()
+            self.spect = self.spect_orig
+            self.e_units = self.e_units_orig
+            self.create_graph(fit=False, reset=False)
+        except:
+            print("Could not reset file")
+
     def load_spe_file(self):
         try:
             self.fileName, self.e_units, self.spect = self.open_file()
+            self.e_units_orig = self.e_units
+            self.spect_orig = self.spect
             self.create_graph(fit=False, reset=False)
             self.setWindowTitle(f"NASA-gamma: {self.fileName}")
         except:
@@ -2413,8 +2429,7 @@ if __name__ == "__main__":
 
     # initialize figure
     plt.rc("font", size=14)
-    plt.style.use("seaborn-darkgrid")
-    # plt.style.use("seaborn-v0_8")
+    plt.style.use("seaborn-v0_8-darkgrid")
 
     # initialize app
     app = QApplication([])
