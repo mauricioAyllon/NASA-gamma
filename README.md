@@ -11,7 +11,7 @@ Gamma spectrocopy tools and visualizations. Some of its capabilitis include:
 8. Efficiency calibration
 9. FWHM vs. energy plots
 10. Time analysis from LYNX data
-11. Data visualization for PIXIE data in the contect of Associated Particle Imaging (API)
+11. Data visualization for PIXIE data in the context of Associated Particle Imaging (API)
 12. Gamma energy identification with built-in databases. Emphasis is placed on neutron induced gamma ray emission.
 
 ## Installation
