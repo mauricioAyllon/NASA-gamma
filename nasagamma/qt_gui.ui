@@ -29,7 +29,7 @@
        </font>
       </property>
       <property name="autoFillBackground">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
       <property name="styleSheet">
        <string notr="true"/>
@@ -211,7 +211,7 @@
                   </font>
                  </property>
                  <property name="styleSheet">
-                  <string notr="true">background-color: rgb(255, 255, 0);</string>
+                  <string notr="true">background-color: rgb(255, 255, 127);</string>
                  </property>
                  <property name="text">
                   <string>Info</string>
@@ -226,7 +226,7 @@
                   </font>
                  </property>
                  <property name="styleSheet">
-                  <string notr="true">background-color: rgb(170, 170, 255);</string>
+                  <string notr="true">background-color: rgb(166, 206, 106);</string>
                  </property>
                  <property name="text">
                   <string>Reset</string>

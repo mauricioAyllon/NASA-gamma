@@ -383,11 +383,16 @@ background-color: rgb(255, 255, 127);</string>
          <widget class="QScrollArea" name="scrollArea_gammas">
           <property name="font">
            <font>
-            <pointsize>12</pointsize>
+            <family>MS Shell Dlg 2</family>
+            <pointsize>10</pointsize>
+            <weight>50</weight>
+            <italic>false</italic>
+            <bold>false</bold>
            </font>
           </property>
           <property name="styleSheet">
-           <string notr="true">background-color: rgb(223, 223, 223);</string>
+           <string notr="true">background-color: rgb(223, 223, 223);
+font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
           </property>
           <property name="widgetResizable">
            <bool>true</bool>
