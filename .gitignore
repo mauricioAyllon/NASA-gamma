@@ -2,3 +2,4 @@ nasagamma.egg-info
 __pycache__
 *~
 nasagamma/version.py
+*.ipynb_checkpoints*

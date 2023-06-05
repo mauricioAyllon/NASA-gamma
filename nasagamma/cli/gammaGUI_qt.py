@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Usage:
   gammaGUI-qt <file_name> [options]
@@ -27,13 +26,20 @@ Note that the detector type input parameters must be changed depending on the
 particular electronic gain used. The examples here are for our specific
 detector configurations.
 """
+import datetime
+import re
+import pkg_resources
+
 import docopt
 import pandas as pd
 import numpy as np
-import datetime
-import re
-import sys
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import (
+    QDialog,
+    QMainWindow,
+    QButtonGroup,
+    QFileDialog,
+    QApplication,
+)
 
 # from PyQt5.QtGui import QKeySequence, QIcon, QPixmap
 from PyQt5.uic import loadUi
@@ -57,7 +63,6 @@ from nasagamma import resolution
 from nasagamma import file_reader
 from nasagamma import read_parquet_api
 from nasagamma import parse_NIST
-import pkg_resources
 
 
 class Dialog_from_UI(QDialog):
@@ -2423,7 +2428,7 @@ class NasaGammaApp(QMainWindow):
         return fileName, e_units, spect
 
 
-if __name__ == "__main__":
+def main():
     commands = docopt.docopt(__doc__)
     print(commands)
 
@@ -2436,3 +2441,7 @@ if __name__ == "__main__":
     window = NasaGammaApp(commands)
     window.show()
     app.exec_()
+
+
+if __name__ == "__main__":
+    main()
