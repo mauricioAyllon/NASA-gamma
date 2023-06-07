@@ -79,6 +79,20 @@ class WindowCust(Dialog_from_UI):
         self.window_title = "Customize plot"
 
 
+class WindowCustInfo(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_info_customize.ui"
+        self.window_title = "Customize info"
+
+
+class WindowAddSubtract(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        self.ui_name = "win_add_subtract.ui"
+        self.window_title = "Add/Subtract Spectra"
+
+
 class WindowPeakFinder(Dialog_from_UI):
     def define_ui_vars(self):
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
@@ -245,9 +259,19 @@ class NasaGammaApp(QMainWindow):
         self.w_cust = WindowCust()
         self.button_customize.setStyleSheet("background-color : lightsteelblue")
         self.button_customize.clicked.connect(self.new_window_custom)
-        self.w_cust.button_load1.clicked.connect(self.load_file1)
-        self.w_cust.button_load2.clicked.connect(self.load_file2)
-        self.w_cust.button_plot.clicked.connect(self.cust_plot)
+        self.w_cust_info = WindowCustInfo()
+        self.w_cust.button_info.clicked.connect(self.customize_info_activate)
+        self.w_cust.button_apply_lab.clicked.connect(self.try_cust_labels)
+        self.w_cust.button_apply_smooth.clicked.connect(self.try_cust_smooth)
+        self.w_cust.button_apply_CR.clicked.connect(self.try_cust_countRate)
+        self.w_cust.button_apply_shift.clicked.connect(self.try_cust_shift)
+
+        # add/subtract spectra
+        self.button_add_subtract.clicked.connect(self.activate_window_add_subtract)
+        self.w_add_sub = WindowAddSubtract()
+        self.w_add_sub.button_load1.clicked.connect(self.load_file1)
+        self.w_add_sub.button_load2.clicked.connect(self.load_file2)
+        self.w_add_sub.button_plot.clicked.connect(self.add_sub_plot)
 
         # navigation toolbars
         self.toolbars = []
@@ -648,30 +672,47 @@ class NasaGammaApp(QMainWindow):
             self.plot_area(bool_area=True)
 
     ## Customize plots
+    ## TODO
+    def customize_info_activate(self):
+        self.w_cust_info.activateWindow()
+        self.w_cust_info.show()
+
     def new_window_custom(self):
         self.w_cust.activateWindow()
         self.w_cust.show()
-        self.w_cust.accepted.connect(self.try_customize_plot)
+        # self.w_cust.accepted.connect(self.try_customize_plot)
 
-    def try_customize_plot(self):
+    def try_cust_labels(self):
         try:
-            self.customize_plot()
+            self.cust_labels()
         except:
-            pass
+            print("Invalid label/constant values")
 
-    def customize_plot(self):
+    def try_cust_smooth(self):
+        try:
+            self.cust_smooth()
+        except:
+            print("Invalid smoothing/rebinning values")
+
+    def try_cust_countRate(self):
+        try:
+            self.cust_countRate()
+        except:
+            print("Invalid count rate values")
+
+    def try_cust_shift(self):
+        try:
+            self.cust_shift()
+        except:
+            print("Invalid gain shift values")
+
+    def cust_labels(self):
         xlabel = self.w_cust.x_label_txt.text()
         ylabel = self.w_cust.y_label_txt.text()
         legend = self.w_cust.legend_txt.text().split(",")
         yconst = self.w_cust.yconst_txt.text()
-        rebin = self.w_cust.rebin_txt.text()
-        moving_avg = self.w_cust.smooth_txt.text()
-        gain_shift = self.w_cust.shiftBy_txt.text()
-        livetime = self.w_cust.livetime_txt.text()
-        if self.w_cust.customize_checkBox_erg.isChecked():
-            bool_erg = True
-        else:
-            bool_erg = False
+        xconst = self.w_cust.xconst_txt.text()
+        xunits = self.w_cust.xunits_txt.text()
         if xlabel != "":
             self.ax_main.set_xlabel(xlabel)
             self.spect.x_units = xlabel
@@ -689,21 +730,22 @@ class NasaGammaApp(QMainWindow):
         if yconst != "":
             self.spect.counts = self.spect.counts * eval(yconst)
             self.create_graph(fit=False, reset=True)
+
+    def cust_smooth(self):
+        print("Smooth button apply activated")
+        rebin = self.w_cust.rebin_txt.text()
+        moving_avg = self.w_cust.smooth_txt.text()
         if rebin != "":
             nbins = eval(rebin)
-            if np.mod(nbins, 2) == 0:  # check if even
-                n = nbins // 2
-                for i in range(n):
-                    self.spect.rebin()
-                self.create_graph(fit=False, reset=True)
+            self.spect.rebin(by=nbins)
+            self.create_graph(fit=False, reset=True)
         if moving_avg != "":
             n = int(eval(moving_avg))
             self.spect.smooth(num=n)
             self.create_graph(fit=False, reset=True)
-        if gain_shift != "":
-            gs = eval(gain_shift)
-            self.spect.gain_shift(by=gs, energy=bool_erg)
-            self.create_graph(fit=False, reset=True)
+
+    def cust_countRate(self):
+        livetime = self.w_cust.livetime_txt.text()
         if self.w_cust.checkBox_CR.isChecked():
             yl = "CPS"
             self.ax_main.set_ylabel(yl)
@@ -713,8 +755,23 @@ class NasaGammaApp(QMainWindow):
         if livetime != "" and self.isevaluable(livetime) and self.spect.cps:
             self.spect.livetime = eval(livetime)
             self.spect.plot_label = None
-            self.fig.canvas.draw_idle()
-        self.w_cust.accepted.disconnect(self.customize_plot)
+            self.create_graph(fit=False, reset=True)
+
+    def cust_shift(self):
+        gain_shift = self.w_cust.shiftBy_txt.text()
+        if self.w_cust.checkBox_erg.isChecked():
+            bool_erg = True
+        else:
+            bool_erg = False
+        if gain_shift != "":
+            gs = eval(gain_shift)
+            self.spect.gain_shift(by=gs, energy=bool_erg)
+            self.create_graph(fit=False, reset=True)
+
+    ## Add/subtract spectra
+    def activate_window_add_subtract(self):
+        self.w_add_sub.activateWindow()
+        self.w_add_sub.show()
 
     def load_file1(self):
         try:
@@ -722,7 +779,7 @@ class NasaGammaApp(QMainWindow):
         except:
             self.file1 = "**ERROR loading file**"
         disp1 = self.file1.split("/")[-1]
-        self.w_cust.filename1.setText(disp1)
+        self.w_add_sub.filename1.setText(disp1)
 
     def load_file2(self):
         try:
@@ -730,13 +787,13 @@ class NasaGammaApp(QMainWindow):
         except:
             self.file2 = "**ERROR loading file**"
         disp2 = self.file2.split("/")[-1]
-        self.w_cust.filename2.setText(disp2)
+        self.w_add_sub.filename2.setText(disp2)
 
-    def cust_plot(self):
+    def add_sub_plot(self):
         try:
-            if self.w_cust.checkBox_add.isChecked():
+            if self.w_add_sub.checkBox_add.isChecked():
                 cts = self.spect1.counts + self.spect2.counts
-            elif self.w_cust.checkBox_sub.isChecked():
+            elif self.w_add_sub.checkBox_sub.isChecked():
                 cts = self.spect1.counts - self.spect2.counts
 
             if self.spect1.energies is not None:
@@ -2362,33 +2419,36 @@ class NasaGammaApp(QMainWindow):
 
     def reset_file(self):
         try:
-            self.clear_main_figure()
-            self.spect = self.spect_orig
-            self.e_units = self.e_units_orig
-            self.create_graph(fit=False, reset=False)
+            self.load_spe_file(reset=True)
         except:
             print("Could not reset file")
 
-    def load_spe_file(self):
+    def load_spe_file(self, reset=False):
         try:
-            self.fileName, self.e_units, self.spect = self.open_file()
-            self.e_units_orig = self.e_units
-            self.spect_orig = self.spect
-            self.create_graph(fit=False, reset=False)
+            self.fileName, self.e_units, self.spect = self.open_file(reset)
+            # self.e_units_orig = deepcopy(self.e_units)
+            # self.spect_orig = deepcopy(self.spect)
+            if reset is False:
+                self.create_graph(fit=False, reset=False)
+            else:
+                self.create_graph(fit=False, reset=True)
             self.setWindowTitle(f"NASA-gamma: {self.fileName}")
         except:
             print("File could not be opened")
 
-    def open_file(self):
-        options = QFileDialog.Options()
-        # options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(
-            self,
-            "Open spectrum file",
-            "",
-            "All Files (*);;",
-            options=options,
-        )
+    def open_file(self, reset=False):
+        if reset is False:
+            options = QFileDialog.Options()
+            # options |= QFileDialog.DontUseNativeDialog
+            fileName, _ = QFileDialog.getOpenFileName(
+                self,
+                "Open spectrum file",
+                "",
+                "All Files (*);;",
+                options=options,
+            )
+        else:
+            fileName = self.fileName
         if fileName == "":
             pass
         else:
