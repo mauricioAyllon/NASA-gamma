@@ -34,11 +34,7 @@ import datetime
 import re
 import sys
 from PyQt5.QtWidgets import *
-
-# from PyQt5.QtGui import QKeySequence, QIcon, QPixmap
 from PyQt5.uic import loadUi
-
-# from PyQt5.QtCore import pyqtSlot
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import Qt
 import matplotlib.pyplot as plt
@@ -71,6 +67,14 @@ class Dialog_from_UI(QDialog):
         self.setWindowTitle(self.window_title)
 
 
+class WindowMainInfo(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        self.ui_name = "win_info_main.ui"
+        self.window_title = "Spectrum info"
+
+
 class WindowCust(Dialog_from_UI):
     def define_ui_vars(self):
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
@@ -87,6 +91,7 @@ class WindowCustInfo(Dialog_from_UI):
 
 class WindowAddSubtract(Dialog_from_UI):
     def define_ui_vars(self):
+        # self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
         self.ui_name = "win_add_subtract.ui"
@@ -103,7 +108,7 @@ class WindowPeakFinder(Dialog_from_UI):
 
 class WindowPeakFinderInfo(Dialog_from_UI):
     def define_ui_vars(self):
-        self.ui_name = "win_peak_find_info.ui"
+        self.ui_name = "win_info_peak_find.ui"
         self.window_title = "Peak finder info"
 
 
@@ -141,7 +146,7 @@ class WindowIsotID(Dialog_from_UI):
 
 class WindowIsotIDInfo(Dialog_from_UI):
     def define_ui_vars(self):
-        self.ui_name = "win_isot_id_info.ui"
+        self.ui_name = "win_info_isot_id.ui"
         self.window_title = "Isotope ID info"
 
 
@@ -237,6 +242,11 @@ class NasaGammaApp(QMainWindow):
         self.btn_grp.addButton(self.pushButton_poly5)
         self.btn_grp.addButton(self.pushButton_exp)
         self.btn_grp.buttonClicked.connect(self.update_poly)
+
+        # info button (main window)
+        ## TODO
+        self.w_info_main = WindowMainInfo()
+        self.button_info_main.clicked.connect(self.main_info_activate)
 
         # reset main figure
         self.button_reset.clicked.connect(self.reset_file)
@@ -515,6 +525,10 @@ class NasaGammaApp(QMainWindow):
         self.w_isotID_info = WindowIsotIDInfo()
         self.w_isot_id.button_info.clicked.connect(self.isotID_info_activate)
 
+    def main_info_activate(self):
+        self.w_info_main.activateWindow()
+        self.w_info_main.show()
+
     def switch_toolbar(self):
         current = self.tabWidget.currentIndex()
         for i, tb in enumerate(self.toolbars):
@@ -730,9 +744,20 @@ class NasaGammaApp(QMainWindow):
         if yconst != "":
             self.spect.counts = self.spect.counts * eval(yconst)
             self.create_graph(fit=False, reset=True)
+        if xconst != "":
+            new_x = self.spect.channels * eval(xconst)
+            self.e_units = f"Channels * {xconst}"
+            self.spect = sp.Spectrum(
+                counts=self.spect.counts, energies=new_x, e_units=self.e_units
+            )
+            self.create_graph(fit=False, reset=True)
+        if xunits != "":
+            self.e_units = xunits
+            self.spect.e_units = xunits
+            self.spect.x_units = f"Energy [{self.e_units}]"
+            self.create_graph(fit=False, reset=True)
 
     def cust_smooth(self):
-        print("Smooth button apply activated")
         rebin = self.w_cust.rebin_txt.text()
         moving_avg = self.w_cust.smooth_txt.text()
         if rebin != "":
