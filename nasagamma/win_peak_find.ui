@@ -28,6 +28,11 @@
      <layout class="QGridLayout" name="gridLayout_9">
       <item row="0" column="0">
        <widget class="QPushButton" name="button_info">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
         <property name="styleSheet">
          <string notr="true">background-color: rgb(255, 255, 127);</string>
         </property>
@@ -94,7 +99,7 @@
           <widget class="QLabel" name="label_units">
            <property name="font">
             <font>
-             <pointsize>11</pointsize>
+             <pointsize>12</pointsize>
              <weight>50</weight>
              <bold>false</bold>
             </font>
@@ -110,7 +115,7 @@
             <widget class="QLabel" name="label">
              <property name="font">
               <font>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
@@ -134,7 +139,7 @@
             <widget class="QLabel" name="label_2">
              <property name="font">
               <font>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
@@ -158,7 +163,7 @@
             <widget class="QLabel" name="label_3">
              <property name="font">
               <font>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
@@ -246,7 +251,7 @@
             <widget class="QLabel" name="label_6">
              <property name="font">
               <font>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
@@ -263,7 +268,7 @@
             <widget class="QLabel" name="label_5">
              <property name="font">
               <font>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
@@ -284,7 +289,7 @@
             <widget class="QRadioButton" name="radioButton_hpge">
              <property name="font">
               <font>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
@@ -304,7 +309,7 @@
             <widget class="QRadioButton" name="radioButton_labr">
              <property name="font">
               <font>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
@@ -324,7 +329,7 @@
             <widget class="QRadioButton" name="radioButton_nai">
              <property name="font">
               <font>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
@@ -344,7 +349,7 @@
             <widget class="QRadioButton" name="radioButton_plastic">
              <property name="font">
               <font>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
@@ -392,7 +397,7 @@
                <widget class="QCheckBox" name="checkBox_scipy">
                 <property name="font">
                  <font>
-                  <pointsize>11</pointsize>
+                  <pointsize>12</pointsize>
                   <weight>50</weight>
                   <bold>false</bold>
                  </font>
@@ -412,7 +417,7 @@
                <widget class="QCheckBox" name="checkBox_km">
                 <property name="font">
                  <font>
-                  <pointsize>11</pointsize>
+                  <pointsize>12</pointsize>
                   <weight>50</weight>
                   <bold>false</bold>
                  </font>
@@ -437,7 +442,7 @@
           <widget class="QCheckBox" name="checkBox_SNR">
            <property name="font">
             <font>
-             <pointsize>11</pointsize>
+             <pointsize>12</pointsize>
              <weight>50</weight>
              <bold>false</bold>
             </font>

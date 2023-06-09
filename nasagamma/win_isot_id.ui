@@ -59,7 +59,7 @@
             <widget class="QLineEdit" name="edit_element_search">
              <property name="font">
               <font>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
               </font>
              </property>
              <property name="styleSheet">
@@ -91,7 +91,7 @@
           <widget class="QTextBrowser" name="text_search">
            <property name="font">
             <font>
-             <pointsize>10</pointsize>
+             <pointsize>12</pointsize>
             </font>
            </property>
            <property name="styleSheet">
@@ -106,9 +106,9 @@
        <widget class="QPushButton" name="button_info">
         <property name="font">
          <font>
-          <pointsize>10</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
+          <pointsize>12</pointsize>
+          <weight>50</weight>
+          <bold>false</bold>
          </font>
         </property>
         <property name="focusPolicy">
@@ -201,7 +201,7 @@
            <widget class="QCheckBox" name="checkBox_sep">
             <property name="font">
              <font>
-              <pointsize>10</pointsize>
+              <pointsize>11</pointsize>
              </font>
             </property>
             <property name="focusPolicy">
@@ -264,7 +264,7 @@ background-color: rgb(255, 255, 127);</string>
            <widget class="QCheckBox" name="checkBox_dep">
             <property name="font">
              <font>
-              <pointsize>10</pointsize>
+              <pointsize>11</pointsize>
              </font>
             </property>
             <property name="focusPolicy">
@@ -327,7 +327,7 @@ background-color: rgb(255, 255, 127);</string>
            <widget class="QCheckBox" name="checkBox_labels">
             <property name="font">
              <font>
-              <pointsize>10</pointsize>
+              <pointsize>11</pointsize>
              </font>
             </property>
             <property name="focusPolicy">
@@ -342,7 +342,7 @@ background-color: rgb(255, 255, 127);</string>
            <widget class="QCheckBox" name="checkBox_CE">
             <property name="font">
              <font>
-              <pointsize>10</pointsize>
+              <pointsize>11</pointsize>
              </font>
             </property>
             <property name="focusPolicy">
@@ -402,8 +402,8 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>595</width>
-             <height>544</height>
+             <width>587</width>
+             <height>539</height>
             </rect>
            </property>
           </widget>
@@ -660,7 +660,7 @@ sources</string>
                 <widget class="QLineEdit" name="edit_isot">
                  <property name="font">
                   <font>
-                   <pointsize>11</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="styleSheet">
@@ -684,7 +684,7 @@ sources</string>
                 <widget class="QLineEdit" name="edit_energy">
                  <property name="font">
                   <font>
-                   <pointsize>11</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="styleSheet">
@@ -708,7 +708,7 @@ sources</string>
                 <widget class="QLineEdit" name="edit_erange">
                  <property name="font">
                   <font>
-                   <pointsize>11</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="styleSheet">
