@@ -98,6 +98,15 @@ class WindowAddSubtract(Dialog_from_UI):
         self.window_title = "Add/Subtract Spectra"
 
 
+class WindowAddSubtractInfo(Dialog_from_UI):
+    def define_ui_vars(self):
+        # self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        self.ui_name = "win_info_add_subt.ui"
+        self.window_title = "Add/Subtract Info"
+
+
 class WindowPeakFinder(Dialog_from_UI):
     def define_ui_vars(self):
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
@@ -282,6 +291,8 @@ class NasaGammaApp(QMainWindow):
         self.w_add_sub.button_load1.clicked.connect(self.load_file1)
         self.w_add_sub.button_load2.clicked.connect(self.load_file2)
         self.w_add_sub.button_plot.clicked.connect(self.add_sub_plot)
+        self.w_add_sub_info = WindowAddSubtractInfo()
+        self.w_add_sub.button_info.clicked.connect(self.add_sub_info_activate)
 
         # navigation toolbars
         self.toolbars = []
@@ -380,19 +391,6 @@ class NasaGammaApp(QMainWindow):
         self.n = 1
 
         self.reset_cal_figure()
-
-        txt = (
-            "Select and add peaks in the 'Spectrum' tab.\n"
-            "Separate peak energy values with commas and use '-'\n"
-            "for peaks that you do not wish to include."
-        )
-        self.ax_cal.text(
-            0.27,
-            0.5,
-            txt,
-            style="italic",
-            bbox={"facecolor": "blue", "alpha": 0.3, "pad": 20},
-        )
 
         # energy textbox
         # self.button_add_cal.clicked.connect(self.add_cal)
@@ -686,7 +684,6 @@ class NasaGammaApp(QMainWindow):
             self.plot_area(bool_area=True)
 
     ## Customize plots
-    ## TODO
     def customize_info_activate(self):
         self.w_cust_info.activateWindow()
         self.w_cust_info.show()
@@ -794,6 +791,10 @@ class NasaGammaApp(QMainWindow):
             self.create_graph(fit=False, reset=True)
 
     ## Add/subtract spectra
+    def add_sub_info_activate(self):
+        self.w_add_sub_info.activateWindow()
+        self.w_add_sub_info.show()
+
     def activate_window_add_subtract(self):
         self.w_add_sub.activateWindow()
         self.w_add_sub.show()
@@ -970,7 +971,7 @@ class NasaGammaApp(QMainWindow):
         # self.selected_rows = []
         self.scroll_fit = self.table_fit_area
         self.table_fit = QtWidgets.QTableView()
-        # self.table_fit.setAlternatingRowColors(True)
+        self.table_fit.setAlternatingRowColors(True)
         self.table_fit.setSortingEnabled(True)
         stylesheet_header = "::section{Background-color:lightgreen}"
         self.table_fit.horizontalHeader().setStyleSheet(stylesheet_header)
