@@ -6,12 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>624</width>
-    <height>599</height>
+    <width>905</width>
+    <height>802</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(190, 209, 206);
+</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
@@ -26,7 +30,7 @@
       <item row="0" column="0">
        <widget class="QTextBrowser" name="text_info">
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(247, 254, 255);</string>
+         <string notr="true">background-color: rgb(221, 221, 227);</string>
         </property>
         <property name="html">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;

@@ -6,18 +6,24 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>435</width>
+    <width>409</width>
     <height>657</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(190, 209, 206);</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QFrame" name="frame">
      <property name="whatsThis">
       <string/>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(212, 217, 208);</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::Box</enum>
@@ -129,9 +135,13 @@
             <widget class="QLineEdit" name="edit_snr">
              <property name="font">
               <font>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 255, 255);</string>
              </property>
             </widget>
            </item>
@@ -153,9 +163,13 @@
             <widget class="QLineEdit" name="edit_ref_ch">
              <property name="font">
               <font>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 255, 255);</string>
              </property>
             </widget>
            </item>
@@ -177,9 +191,13 @@
             <widget class="QLineEdit" name="edit_ref_fwhm">
              <property name="font">
               <font>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 255, 255);</string>
              </property>
             </widget>
            </item>
@@ -202,7 +220,7 @@
           <widget class="QLabel" name="label_8">
            <property name="font">
             <font>
-             <pointsize>11</pointsize>
+             <pointsize>12</pointsize>
              <weight>50</weight>
              <bold>false</bold>
             </font>
@@ -231,9 +249,13 @@
             <widget class="QLineEdit" name="edit_x1">
              <property name="font">
               <font>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 255, 255);</string>
              </property>
             </widget>
            </item>
@@ -241,9 +263,13 @@
             <widget class="QLineEdit" name="edit_x0">
              <property name="font">
               <font>
+               <pointsize>12</pointsize>
                <weight>50</weight>
                <bold>false</bold>
               </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 255, 255);</string>
              </property>
             </widget>
            </item>
@@ -371,7 +397,9 @@
           <widget class="QPushButton" name="button_kernel_apply">
            <property name="font">
             <font>
-             <pointsize>12</pointsize>
+             <pointsize>14</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
             </font>
            </property>
            <property name="styleSheet">
@@ -384,6 +412,9 @@
          </item>
          <item row="6" column="0" colspan="3">
           <widget class="QFrame" name="frame_2">
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(211, 212, 213);</string>
+           </property>
            <property name="frameShape">
             <enum>QFrame::WinPanel</enum>
            </property>
