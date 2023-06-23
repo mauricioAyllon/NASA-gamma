@@ -127,6 +127,12 @@ class WindowCal(Dialog_from_UI):
         self.window_title = "Energy calibration"
 
 
+class WindowCalInfo(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_info_ecal.ui"
+        self.window_title = "Energy calibration information"
+
+
 class WindowCalEqns(Dialog_from_UI):
     def define_ui_vars(self):
         self.ui_name = "win_erg_cal_eqns.ui"
@@ -391,6 +397,9 @@ class NasaGammaApp(QMainWindow):
         self.df_ecal_fit = None
         self.flag_check_e_units = 0
         self.flag_e_legend = 0
+
+        self.w_info_cal = WindowCalInfo()
+        self.button_info_cal.clicked.connect(self.cal_info_activate)
 
         # push butons
         self.button_add_cal.setStyleSheet("background-color : lightblue")
@@ -1000,6 +1009,10 @@ class NasaGammaApp(QMainWindow):
         self.table_fit.setColumnWidth(5, 140)
 
     ## energy calibration
+    def cal_info_activate(self):
+        self.w_info_cal.activateWindow()
+        self.w_info_cal.show()
+
     def reset_cal_figure(self):
         self.fig_cal = self.cal_plot.canvas.figure
         self.fig_cal.clear()
@@ -1373,7 +1386,6 @@ class NasaGammaApp(QMainWindow):
             if len(self.mean_vals) > 1:
                 self.update_cal()
 
-    ##TODO
     def new_window_cal_add_point(self):
         self.w_cal_addpoint = WindowCalAddPoint()
         self.w_cal_addpoint.show()
