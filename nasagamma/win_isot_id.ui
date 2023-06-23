@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1206</width>
+    <width>1129</width>
     <height>739</height>
    </rect>
   </property>
@@ -381,6 +381,12 @@ background-color: rgb(255, 255, 127);</string>
         </item>
         <item row="0" column="0">
          <widget class="QScrollArea" name="scrollArea_gammas">
+          <property name="minimumSize">
+           <size>
+            <width>560</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="font">
            <font>
             <family>MS Shell Dlg 2</family>
@@ -402,7 +408,7 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>587</width>
+             <width>558</width>
              <height>539</height>
             </rect>
            </property>
