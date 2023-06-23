@@ -133,6 +133,12 @@ class WindowCalEqns(Dialog_from_UI):
         self.window_title = "Energy calibration: set equations"
 
 
+class WindowCalAddPoint(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_erg_cal_add_point.ui"
+        self.window_title = "Energy calibration: add point"
+
+
 class WindowEff(Dialog_from_UI):
     def define_ui_vars(self):
         self.ui_name = "win_eff.ui"
@@ -175,11 +181,23 @@ class TableModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
         super(TableModel, self).__init__()
         self._data = data
+        self.highlighted_rows = []
 
     def data(self, index, role):
+        row = index.row()
+        column = index.column()
         if role == Qt.DisplayRole:
-            value = self._data.iloc[index.row(), index.column()]
+            value = self._data.iloc[row, column]
             return str(value)
+        elif role == Qt.BackgroundRole and row in self.highlighted_rows:
+            return QtGui.QColor(Qt.yellow)  # Set the desired background color
+            # return QtGui.QColor(91, 115, 200)
+
+    def set_highlighted_rows(self, rows):
+        self.highlighted_rows = rows
+        self.dataChanged.emit(
+            self.index(0, 0), self.index(self.rowCount(0), self.columnCount(0))
+        )
 
     def rowCount(self, index):
         return self._data.shape[0]
@@ -221,6 +239,7 @@ class NasaGammaApp(QMainWindow):
         self.setWindowTitle("NASA-gamma")
         self.setWindowIcon(QtGui.QIcon("figs/NASA-gamma-logo.png"))
         self.scale = "linear"
+        self.snr_state = "off"
         self.pushButton_scale.clicked.connect(self.update_scale)
         self.pushButton_scale.setStyleSheet("background-color : lightgoldenrodyellow")
         self.button_add_peak.setStyleSheet("background-color : silver")
@@ -253,7 +272,6 @@ class NasaGammaApp(QMainWindow):
         self.btn_grp.buttonClicked.connect(self.update_poly)
 
         # info button (main window)
-        ## TODO
         self.w_info_main = WindowMainInfo()
         self.button_info_main.clicked.connect(self.main_info_activate)
 
@@ -327,6 +345,8 @@ class NasaGammaApp(QMainWindow):
         self.list_xrange = []
         self.commands = commands
         self.search = 0  # initialize dummy search object
+        # peak fitting
+        self.span = None
 
         get_input = param_handle.get_spect_search(self.commands)
         if get_input is not None:
@@ -349,9 +369,6 @@ class NasaGammaApp(QMainWindow):
         self.x0 = None
         self.x1 = None
 
-        # peak fitting
-        self.span = None
-
         # advanced fitting
         # TODO
         self.parea = None
@@ -363,10 +380,18 @@ class NasaGammaApp(QMainWindow):
         ## energy calibration
         self.mean_vals = [0]
         self.e_vals = [0]
+        self.e_sigs = [0]
         self.pred_erg = 0
         self.mean_vals_not_fit = []
         self.e_vals_not_fit = []
+        self.selected_rows_ecal = []
         self.cal_e_units = None
+        self.df_ecal = None
+        self.df_ecal_not_fit = None
+        self.df_ecal_fit = None
+        self.flag_check_e_units = 0
+        self.flag_e_legend = 0
+
         # push butons
         self.button_add_cal.setStyleSheet("background-color : lightblue")
         self.button_origin.setStyleSheet("background-color : lightgoldenrodyellow")
@@ -377,6 +402,7 @@ class NasaGammaApp(QMainWindow):
         self.button_cal3.setStyleSheet("background-color : lightgreen")
         self.button_cal_eqns.setStyleSheet("background-color : silver")
         self.button_origin.clicked.connect(self.set_origin)
+        self.button_remove_selected.clicked.connect(self.ecal_remove_selected)
 
         self.button_cal1.setCheckable(True)
         self.button_cal2.setCheckable(True)
@@ -401,6 +427,8 @@ class NasaGammaApp(QMainWindow):
         self.button_apply_cal.clicked.connect(self.apply_cal)
         # set calibration equation
         self.button_cal_eqns.clicked.connect(self.new_window_cal_eqns)
+        # Add calibration point
+        self.button_cal_add_point.clicked.connect(self.new_window_cal_add_point)
 
         ## Resolution
         # push butons
@@ -533,14 +561,15 @@ class NasaGammaApp(QMainWindow):
             tb.setVisible(i == current)
 
     def create_graph(self, fit=True, reset=True):
-        txt = f"Xrange (optional) [{self.e_units}]:"
-        self.w_peak_find.label_units.setText(txt)
+        # txt = f"Xrange (optional) [{self.e_units}]:"
+        # self.w_peak_find.label_units.setText(txt)
         if reset:
             self.reset_main_figure()
         else:
             self.ax_fit.clear()
             self.ax_fit.set_xticks([])
             self.ax_fit.set_yticks([])
+        self.ax_main.clear()
         if fit:
             self.search.plot_peaks(
                 yscale=self.scale, snrs=self.snr_state, fig=self.fig, ax=self.ax_main
@@ -548,6 +577,7 @@ class NasaGammaApp(QMainWindow):
             self.span_select()
         else:
             self.spect.plot(fig=self.fig, ax=self.ax_main, scale=self.scale)
+        self.ax_main.set_yscale(self.scale)
         self.fig.canvas.draw_idle()
 
     def clear_main_figure(self):
@@ -572,8 +602,8 @@ class NasaGammaApp(QMainWindow):
         self.ax_fit = self.fig_fit.add_subplot(gs[1, 0])
 
         # remove ticks
-        # self.ax_main.set_xticks([])
-        # self.ax_main.set_yticks([])
+        self.ax_main.set_xticks([])
+        self.ax_main.set_yticks([])
         self.ax_res.set_xticks([])
         self.ax_res.set_yticks([])
         self.ax_fit.set_xticks([])
@@ -586,29 +616,11 @@ class NasaGammaApp(QMainWindow):
         self.fig.canvas.draw_idle()
         self.fig_fit.canvas.draw_idle()
 
-    def reset_cal_figure(self):
-        self.fig_cal = self.cal_plot.canvas.figure
-        self.fig_cal.clear()
-        self.fig_cal.set_constrained_layout(True)
-        gs2 = self.fig_cal.add_gridspec(
-            1, 2, width_ratios=[0.5, 0.5], height_ratios=[1]
-        )
-
-        # axes
-        self.ax_cal = self.fig_cal.add_subplot(gs2[:, 0])
-        self.ax_cal_tab = self.fig_cal.add_subplot(gs2[:, 1])
-
-        # remove ticks
-        self.ax_cal.set_xticks([])
-        self.ax_cal.set_yticks([])
-        self.ax_cal_tab.set_xticks([])
-        self.ax_cal_tab.set_yticks([])
-
     def update_scale(self):
         if self.scale == "log":
             self.ax_main.set_yscale("linear")
             self.scale = "linear"
-        else:
+        elif self.scale == "linear":
             self.ax_main.set_yscale("log")
             self.scale = "log"
         self.fig.canvas.draw_idle()
@@ -920,25 +932,25 @@ class NasaGammaApp(QMainWindow):
         print("xmax: ", self.idxmax_fit)
         self.ax_res.clear()
         self.ax_fit.clear()
-        try:
-            self.fit = pf.PeakFit(self.search, xrange, bkg=self.bg, skew=self.sk_gauss)
-            # plot_fit(fit)
-            self.fit.plot(
-                plot_type="simple",
-                fig=self.fig_fit,
-                ax_res=self.ax_res,
-                ax_fit=self.ax_fit,
-            )
-            data = self.get_values_table_fit()
-            self.activate_fit_table(data)
-            self.enable_fitButtons(True)
-        except:
-            print("onselect: Could not perform fit")
+        # try:
+        self.fit = pf.PeakFit(self.search, xrange, bkg=self.bg, skew=self.sk_gauss)
+        # plot_fit(fit)
+        self.fit.plot(
+            plot_type="simple",
+            fig=self.fig_fit,
+            ax_res=self.ax_res,
+            ax_fit=self.ax_fit,
+        )
+        data = self.get_values_table_fit()
+        self.activate_fit_table(data)
+        self.enable_fitButtons(True)
+        # except:
+        #     print("onselect: Could not perform fit")
         self.fig_fit.canvas.draw_idle()
 
     def get_values_table_fit(self):
         cols = [
-            f"Mean ({self.spect.x_units})",
+            f"Mean ({self.e_units})",
             "Peak area",
             "FWHM",
             "FWHM (%)",
@@ -956,15 +968,16 @@ class NasaGammaApp(QMainWindow):
         for i, e in zip(self.fit.peak_info, self.fit.peak_err):
             ls = list(i.values())
             lse = list(e.values())
-            mean.append(round(ls[0], 3))
-            area.append(round(ls[1], 3))
-            fwhm.append(round(ls[2], 3))
-            fwhm_p.append(round(ls[2] / ls[0] * 100, 3))
-            std_A.append(round(lse[1], 3))
-            std_A_p.append(round(lse[1] / ls[1] * 100, 3))
+            mean.append(ls[0])
+            area.append(ls[1])
+            fwhm.append(ls[2])
+            fwhm_p.append(ls[2] / ls[0] * 100)
+            std_A.append(lse[1])
+            std_A_p.append(lse[1] / ls[1] * 100)
 
         rs = np.array([mean, area, fwhm, fwhm_p, std_A, std_A_p]).T
         df = pd.DataFrame(columns=cols, data=rs)
+        df = df.round(decimals=3)
         return df
 
     def activate_fit_table(self, data):
@@ -984,15 +997,32 @@ class NasaGammaApp(QMainWindow):
         stylesheet_ix = "::section{Background-color:lightgoldenrodyellow}"
         self.table_fit.setStyleSheet(stylesheet_ix)
         self.table_fit.setColumnWidth(0, 150)
+        self.table_fit.setColumnWidth(5, 140)
 
     ## energy calibration
+    def reset_cal_figure(self):
+        self.fig_cal = self.cal_plot.canvas.figure
+        self.fig_cal.clear()
+        self.fig_cal.set_constrained_layout(True)
+        gs2 = self.fig_cal.add_gridspec(2, 1, height_ratios=[0.3, 1.5])
+
+        # axes
+        self.ax_cal = self.fig_cal.add_subplot(gs2[1, :])
+        self.ax_cal_res = self.fig_cal.add_subplot(gs2[0, :])
+
+        # remove ticks
+        self.ax_cal.set_xticks([])
+        self.ax_cal.set_yticks([])
+        self.ax_cal_res.set_xticks([])
+        self.ax_cal_res.set_yticks([])
+
     def remove_cal(self):
         try:
             self.e_units = "channels"
             self.spect = sp.Spectrum(counts=self.spect.counts, e_units=self.e_units)
             self.create_graph(fit=False)
         except:
-            pass
+            print("Cannot remove calibration")
 
     @staticmethod
     def get_mean_vals(fit):
@@ -1011,33 +1041,44 @@ class NasaGammaApp(QMainWindow):
             else:
                 num_e = float(e2)
                 if num_e not in list_e_out and ch not in list_m_out:
-                    list_e_out.append(num_e)
-                    list_m_out.append(ch)
+                    list_e_out.append(round(num_e, 3))
+                    list_m_out.append(round(ch, 3))
 
-    def perform_cal(self):
+    def perform_cal(self, df):
+        self.ax_cal_res.clear()
+        self.ax_cal.clear()
         self.pred_erg, self.efit = ecal.ecalibration(
-            mean_vals=self.mean_vals,
-            erg=self.e_vals,
+            mean_vals=df["Centroid"],
+            erg=df[f"Energy ({self.cal_e_units})"],
             channels=self.spect.channels,
             n=self.n,
             e_units=self.e_units,
             plot=True,
-            residual=False,
+            residual=True,
             fig=self.fig_cal,
             ax_fit=self.ax_cal,
+            ax_res=self.ax_cal_res,
         )
 
-    def add_point_dont_fit(self):
-        en = self.w_cal.energy_txt.text().split(",")
-        mean_lst = self.get_mean_vals(self.fit)
-        self.append_to_list_not_repeated(
-            en, mean_lst, self.e_vals_not_fit, self.mean_vals_not_fit
+    def add_point_dont_fit(self, erg_lst=None, ch_lst=None):
+
+        if erg_lst is not None and ch_lst is not None:
+            en, mean_lst = self.retrieve_evals()
+            self.append_to_list_not_repeated(
+                en, mean_lst, self.e_vals_not_fit, self.mean_vals_not_fit
+            )
+        self.df_ecal_not_fit = pd.DataFrame()
+        self.df_ecal_not_fit["Centroid"] = self.mean_vals_not_fit
+        self.df_ecal_not_fit[f"Energy ({self.cal_e_units})"] = self.e_vals_not_fit
+        self.df_ecal_not_fit[f"Sigma ({self.cal_e_units})"] = [0] * len(
+            self.mean_vals_not_fit
         )
-        self.ax_cal.clear()
-        self.check_radioButton()
-        self.perform_cal()
-        self.update_cal_table()
-        self.plot_point_dont_fit()
+        if self.df_ecal_fit is not None:
+            self.df_ecal = pd.concat(
+                [self.df_ecal_fit, self.df_ecal_not_fit], ignore_index=True
+            )
+        else:
+            self.df_ecal = self.df_ecal_not_fit
 
     def plot_point_dont_fit(self):
         if len(self.mean_vals_not_fit) > 0:
@@ -1045,42 +1086,76 @@ class NasaGammaApp(QMainWindow):
                 self.mean_vals_not_fit,
                 self.e_vals_not_fit,
                 "o",
-                color="C0",
+                color="black",
                 ms=8,
+                markerfacecolor="yellow",
                 label="Not used for fit",
             )
-            self.ax_cal.legend()
-            self.mean_vals_not_fit.sort()
-            self.e_vals_not_fit.sort()
+            if self.flag_e_legend == 0:
+                self.ax_cal.legend()
+                self.flag_e_legend = 1
             self.fig_cal.canvas.draw_idle()
 
-    def add_cal(self):
-        try:
-            if self.w_cal.checkBox_cal.isChecked():
-                self.add_point_dont_fit()
-            else:
-                self.ax_cal.clear()
-                # self.reset_cal_figure()
-                # en = self.text_add_cal.text().split(",")
-                en = self.w_cal.energy_txt.text().split(",")
-                mean_lst = self.get_mean_vals(self.fit)
+    def add_point_fit(self, erg_lst=None, ch_lst=None):
+        if len(self.mean_vals) > 0:
+            if erg_lst is not None and ch_lst is not None:
+                en, mean_lst = self.retrieve_evals()
                 self.append_to_list_not_repeated(
                     en, mean_lst, self.e_vals, self.mean_vals
                 )
+            self.df_ecal_fit = pd.DataFrame()
+            self.df_ecal_fit["Centroid"] = self.mean_vals
+            self.df_ecal_fit[f"Energy ({self.cal_e_units})"] = self.e_vals
+            self.df_ecal_fit[f"Sigma ({self.cal_e_units})"] = [0] * len(self.mean_vals)
+            self.perform_cal(self.df_ecal_fit)
+            self.df_ecal_fit[f"Sigma ({self.cal_e_units})"] = list(
+                self.efit.eval_uncertainty()
+            )
+            if self.df_ecal_not_fit is not None:
+                self.df_ecal = pd.concat(
+                    [self.df_ecal_not_fit, self.df_ecal_fit], ignore_index=True
+                )
+            else:
+                self.df_ecal = self.df_ecal_fit
 
-                self.mean_vals.sort()
-                self.e_vals.sort()
-                self.check_radioButton()
-                self.perform_cal()
-                self.update_cal_table()
-                self.fig_cal.canvas.draw_idle()
+    def add_cal(self):
+        try:
+            self.check_radioButton()
+            self.flag_check_e_units = 1
+            cols = [
+                "Centroid",
+                f"Energy ({self.cal_e_units})",
+                f"Sigma ({self.cal_e_units})",
+            ]
+            self.df_ecal = pd.DataFrame(columns=cols)
+            erg, mean_vals = self.retrieve_evals()
+            if self.w_cal.checkBox_cal.isChecked():
+                self.add_point_dont_fit(erg, mean_vals)
+                self.plot_point_dont_fit()
+            else:
+                self.add_point_fit(erg, mean_vals)
+            self.update_ecal_table()
+            self.fig_cal.canvas.draw_idle()
         except:
-            print("Calibration not performed")
+            print("Not valid entry for energy calibration")
+
+    def retrieve_evals(self):
+        erg = self.w_cal.energy_txt.text().split(",")
+        mean_lst = self.get_mean_vals(self.fit)
+        return erg, mean_lst
 
     def new_window_cal(self):
         self.w_cal = WindowCal()
         self.w_cal.show()
         self.w_cal.accepted.connect(self.add_cal)
+        if self.flag_check_e_units == 1:
+            if self.e_units == "eV":
+                self.w_cal.radio_button_ev.setChecked(True)
+            if self.e_units == "keV":
+                self.w_cal.radio_button_kev.setChecked(True)
+            if self.e_units == "MeV":
+                self.w_cal.radio_button_mev.setChecked(True)
+            self.disable_checkRadioButtons()
 
     def check_radioButton(self):
         if self.w_cal.radio_button_ev.isChecked():
@@ -1096,24 +1171,64 @@ class NasaGammaApp(QMainWindow):
             msg = "ERROR: energy units not determined. Will use channels instead"
             print(msg)
 
-    def update_cal_table(self):
-        self.ax_cal_tab.clear()
-        sigs_not_fit = [0] * len(self.mean_vals_not_fit)
-        ergs = self.e_vals + self.e_vals_not_fit
-        # ergs = self.efit.data + self.e_vals_not_fit
-        chs = self.mean_vals + self.mean_vals_not_fit
-        sigs = list(self.efit.eval_uncertainty()) + sigs_not_fit
-        ecal.cal_table(
-            ch_lst=chs,
-            e_lst=ergs,
-            sig_lst=sigs,
-            t_scale=[1, 2],
-            decimals=3,
-            e_units=self.cal_e_units,
-            fig=self.fig_cal,
-            ax=self.ax_cal_tab,
+    def disable_checkRadioButtons(self):
+        self.w_cal.radio_button_ev.setEnabled(False)
+        self.w_cal.radio_button_kev.setEnabled(False)
+        self.w_cal.radio_button_mev.setEnabled(False)
+
+    def update_ecal_table(self):
+        # self.df_ecal = self.get_ecal_values()
+        self.df_ecal.fillna(value=0, inplace=True)
+        self.df_ecal.sort_values(by=["Centroid"], inplace=True, ignore_index=True)
+        self.df_ecal = self.df_ecal.round(3)
+        self.activate_ecal_table(data=self.df_ecal)
+
+    def activate_ecal_table(self, data):
+        self.selected_rows_ecal = []
+        self.table_ecal = QtWidgets.QTableView()
+        self.table_ecal.setAlternatingRowColors(True)
+        self.table_ecal.setSortingEnabled(False)
+        stylesheet_header = "::section{Background-color:lightgreen}"
+        self.table_ecal.horizontalHeader().setStyleSheet(stylesheet_header)
+        self.table_ecal.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        # self.table_ecal.resizeColumnsToContents()
+        self.model_ecal = TableModel(data)
+        ix_not_fit = self.get_index_not_fit_ecal_table()
+        self.color_table_rows(ix_not_fit)
+        self.table_ecal.setModel(self.model_ecal)
+        self.table_ecal_area.setWidget(self.table_ecal)
+        stylesheet_ix = "::section{Background-color:lightgoldenrodyellow}"
+        self.table_ecal.setStyleSheet(stylesheet_ix)
+        self.table_ecal.setColumnWidth(0, 150)
+        self.table_ecal.setColumnWidth(1, 150)
+        self.table_ecal.setColumnWidth(2, 150)
+        self.table_ecal.selectionModel().selectionChanged.connect(
+            self.on_selectionChanged_ecal
         )
-        self.fig_cal.canvas.draw_idle()
+
+    def get_index_not_fit_ecal_table(self):
+        ix = []
+        for row in self.df_ecal.index:
+            erg = self.df_ecal.iloc[row][f"Energy ({self.cal_e_units})"]
+            if erg in self.e_vals_not_fit:
+                ix.append(row)
+        return ix
+
+    def color_table_rows(self, index):
+        self.model_ecal.set_highlighted_rows(index)
+
+    def on_selectionChanged_ecal(self, selected, deselected):
+        for ix in selected.indexes():
+            self.selected_rows_ecal.append(ix.row())
+        for ix in deselected.indexes():
+            try:
+                self.selected_rows_ecal.remove(ix.row())
+            except ValueError:
+                pass
+        self.selected_rows_ecal = list(set(self.selected_rows_ecal))
+        self.selected_indexes_ecal = list(
+            self.model_ecal._data.index[self.selected_rows_ecal]
+        )
 
     def set_origin(self):
         self.ax_cal.clear()
@@ -1125,9 +1240,9 @@ class NasaGammaApp(QMainWindow):
             self.e_vals.insert(0, 0)
 
         if len(self.mean_vals) > 1:
-            self.perform_cal()
+            self.add_point_fit()
             self.plot_point_dont_fit()
-            self.update_cal_table()
+            self.update_ecal_table()
             self.fig_cal.canvas.draw_idle()
 
     def which_button_cal(self):
@@ -1140,14 +1255,17 @@ class NasaGammaApp(QMainWindow):
 
     def update_cal(self):
         try:
+            # df = self.df_ecal.query(f"Centroid in {self.mean_vals}")
+            # df.reset_index(drop=True, inplace=True)
             self.which_button_cal()
             self.ax_cal.clear()
-            self.perform_cal()
+            self.add_point_fit()
+            self.add_point_dont_fit()
             self.plot_point_dont_fit()
-            self.update_cal_table()
+            self.update_ecal_table()
             self.fig_cal.canvas.draw_idle()
         except:
-            pass
+            print("Calibration data not updated")
 
     def new_window_cal_eqns(self):
         self.w_cal_eqns = WindowCalEqns()
@@ -1160,27 +1278,33 @@ class NasaGammaApp(QMainWindow):
             b_txt = self.w_cal_eqns.b.text()
             c_txt = self.w_cal_eqns.c.text()
             d_txt = self.w_cal_eqns.d.text()
-            self.which_button_cal_eqn()
             ch = self.spect.channels
             erg = 0
+            label = "Equation: $a + bx + cx^2 + dx^3$\n"
             if self.isevaluable(a_txt):
                 erg = erg + eval(a_txt)
+                label = label + f"a = {eval(a_txt)}"
             if self.isevaluable(b_txt):
                 erg = erg + eval(b_txt) * ch
+                label = label + f"\nb = {eval(b_txt)}"
             if self.isevaluable(c_txt):
                 erg = erg + eval(c_txt) * ch**2
+                label = label + f"\nc = {eval(c_txt)}"
             if self.isevaluable(d_txt):
                 erg = erg + eval(d_txt) * ch**3
+                label = label + f"\nd = {eval(d_txt)}"
             self.pred_erg = erg
-            self.plot_cal_eqns()
+            self.plot_cal_eqns(label)
         except:
-            pass
+            print("Could not set calibration equations")
 
-    def plot_cal_eqns(self):
+    def plot_cal_eqns(self, label):
+        self.reset_cal()
         self.ax_cal.clear()
-        self.ax_cal.plot(self.spect.channels, self.pred_erg, lw=3)
+        self.ax_cal.plot(self.spect.channels, self.pred_erg, lw=3, label=label)
         self.ax_cal.set_xlabel("Channels")
-        self.ax_cal.set_ylabel(f"Energy ({self.cal_e_units})")
+        self.ax_cal.set_ylabel("Energy (keV)")
+        self.ax_cal.legend(fontsize=16)
         self.fig_cal.canvas.draw_idle()
 
     def which_button_cal_eqn(self):
@@ -1193,18 +1317,21 @@ class NasaGammaApp(QMainWindow):
 
     def reset_cal(self):
         print("Reseting calibration")
-        self.ax_cal_tab.clear()
         self.ax_cal.clear()
-        self.pred_erg = 0
+        self.ax_cal_res.clear()
         self.mean_vals = [0]
         self.e_vals = [0]
         self.mean_vals_not_fit = []
         self.e_vals_not_fit = []
+        self.flag_check_e_units = 0
+        cols = ["Centroid", "Energy", "Sigma"]
+        self.df_ecal = pd.DataFrame(columns=cols)
+        self.update_ecal_table()
         # remove ticks
         self.ax_cal.set_xticks([])
         self.ax_cal.set_yticks([])
-        self.ax_cal_tab.set_xticks([])
-        self.ax_cal_tab.set_yticks([])
+        self.ax_cal_res.set_xticks([])
+        self.ax_cal_res.set_yticks([])
         self.fig_cal.canvas.draw_idle()
 
     def apply_cal(self):
@@ -1221,28 +1348,50 @@ class NasaGammaApp(QMainWindow):
                     energies=self.pred_erg,
                     e_units=self.cal_e_units,
                 )
-
-            # if self.x0 is None:
-            #     self.search = ps.PeakSearch(
-            #         self.spect,
-            #         self.ref_x,
-            #         self.ref_fwhm,
-            #         self.fwhm_at_0,
-            #         min_snr=self.min_snr,
-            #     )
-            # else:
-            #     self.search = ps.PeakSearch(
-            #         self.spect,
-            #         self.ref_x,
-            #         self.ref_fwhm,
-            #         self.fwhm_at_0,
-            #         min_snr=self.min_snr,
-            #         xrange=[self.x0, self.x1],
-            #     )
-
             self.create_graph(fit=False)
         except:
             print("Could not apply calibration")
+
+    def ecal_remove_selected(self):
+        if (
+            len(self.selected_rows_ecal) > 0
+            and self.df_ecal is not None
+            and self.df_ecal.shape[0] > 2
+        ):
+            for row in self.selected_rows_ecal:
+                # row is table index
+                erg = self.df_ecal.iloc[row][f"Energy ({self.cal_e_units})"]
+                val = self.df_ecal.iloc[row]["Centroid"]
+                if erg in self.e_vals:
+                    self.mean_vals.remove(val)
+                    self.e_vals.remove(erg)
+                elif erg in self.e_vals_not_fit:
+                    self.mean_vals_not_fit.remove(val)
+                    self.e_vals_not_fit.remove(erg)
+                    if len(self.e_vals_not_fit) == 0:  # if empty, reset flag
+                        self.flag_e_legend = 0
+            if len(self.mean_vals) > 1:
+                self.update_cal()
+
+    ##TODO
+    def new_window_cal_add_point(self):
+        self.w_cal_addpoint = WindowCalAddPoint()
+        self.w_cal_addpoint.show()
+        self.w_cal_addpoint.accepted.connect(self.ecal_add_point)
+
+    def ecal_add_point(self):
+        try:
+            ch_txt = self.w_cal_addpoint.edit_channel.text().split(",")
+            erg_txt = self.w_cal_addpoint.edit_energy.text().split(",")
+            if len(ch_txt) == len(erg_txt):
+                for ch, erg in zip(ch_txt, erg_txt):
+                    self.mean_vals.append(eval(ch))
+                    self.e_vals.append(eval(erg))
+                self.update_cal()
+            else:
+                print("Channels and energies must be the same length")
+        except:
+            print("Could not add point manually")
 
     ## efficiency calibration
     def reset_eff_figure(self):
@@ -1252,11 +1401,9 @@ class NasaGammaApp(QMainWindow):
         gs2 = self.fig_eff.add_gridspec(
             1, 2, width_ratios=[0.5, 0.5], height_ratios=[1]
         )
-
         # axes
         self.ax_eff = self.fig_eff.add_subplot(gs2[:, 0])
         self.ax_eff_tab = self.fig_eff.add_subplot(gs2[:, 1])
-
         # remove ticks
         self.ax_eff.set_xticks([])
         self.ax_eff.set_yticks([])
@@ -1803,7 +1950,6 @@ class NasaGammaApp(QMainWindow):
             pass
 
     def apply_api_filters(self):
-        # TODO: test this function
         # Add vertical lines in plot indicating filter values
         xmin_txt = self.w_api_filt.xmin_txt.text()
         xmax_txt = self.w_api_filt.xmax_txt.text()
@@ -1955,6 +2101,8 @@ class NasaGammaApp(QMainWindow):
 
     def activate_peak_finder(self):
         self.w_peak_find.activateWindow()
+        txt = f"Xrange (optional) [{self.e_units}]:"
+        self.w_peak_find.label_units.setText(txt)
         self.w_peak_find.show()
 
     def peakFind_kernel_apply(self):
@@ -2055,6 +2203,7 @@ class NasaGammaApp(QMainWindow):
             df_element = self.isotID_filter_by_element(df_files)
             df_energy = self.isotID_filter_by_energy(df_element)
             self.df_isotID = df_energy
+            self.df_isotID = self.df_isotID.round(3)
             self.activate_table_gammas(self.df_isotID)
 
     def isotID_clear(self):
@@ -2304,6 +2453,7 @@ class NasaGammaApp(QMainWindow):
             out_text = parse_NIST.isotopic_abundance_str(element)
             self.w_isot_id.text_search.setText(out_text)
 
+    ## Save files
     def saveReport(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog

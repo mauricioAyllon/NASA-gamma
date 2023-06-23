@@ -15,10 +15,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 file = "data/gui_test_data_cebr.csv"
-# the columns are not in a 'nice' format (blank spaces)
-# so, rename them
-# dict0 = {" Energy (keV)": "Energy", " Counts": "Counts"}
-
 
 df = pd.read_csv(file)
 

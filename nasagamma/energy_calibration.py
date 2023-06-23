@@ -61,31 +61,30 @@ def ecalibration(
     equation = " + ".join(terms)
     if plot:
         plt.rc("font", size=14)
-        plt.style.use("seaborn-darkgrid")
+        plt.style.use("seaborn-v0_8-darkgrid")
         x_offset = 100  # max(channels)*0.01
         if fig is None:
             fig = plt.figure(constrained_layout=False, figsize=(12, 8))
         if residual:
-            gs = fig.add_gridspec(2, 1, height_ratios=[1, 4])
             if ax_res is None:
+                gs = fig.add_gridspec(2, 1, height_ratios=[1, 4])
                 ax_res = fig.add_subplot(gs[0, 0])
-                ax_res.plot(mean_vals, fit.residual, ".", ms=15, alpha=0.5, color="red")
-                ax_res.hlines(
-                    y=0, xmin=min(channels) - x_offset, xmax=max(channels), lw=3
-                )
-                ax_res.set_ylabel("Residual")
-                ax_res.set_xlim([min(channels) - x_offset, max(channels)])
-                ax_res.set_xticks([])
-        else:
-            gs = fig.add_gridspec(1, 1)
+            ax_res.plot(mean_vals, fit.residual, ".", ms=15, alpha=0.5, color="red")
+            ax_res.hlines(y=0, xmin=min(channels) - x_offset, xmax=max(channels), lw=3)
+            ax_res.set_ylabel("Residual")
+            ax_res.set_xlim([min(channels) - x_offset, max(channels)])
+            ax_res.set_xticks([])
+        # else:
+        #     gs = fig.add_gridspec(1, 1)
 
         if ax_fit is None:
             if residual:
                 ax_fit = fig.add_subplot(gs[1, 0])
             else:
+                gs = fig.add_gridspec(1, 1)
                 ax_fit = fig.add_subplot(gs[0, 0])
 
-        ax_fit.set_title("Energy calibration")
+        ax_fit.set_title(f"Reduced $\chi^2$ = {round(fit.redchi,4)}")
         ax_fit.errorbar(
             mean_vals,
             erg,

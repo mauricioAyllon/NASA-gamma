@@ -294,7 +294,7 @@ class PeakSearch:
         plt.gca().set_aspect("equal")
         plt.title("Kernel Matrix")
 
-    def plot_peaks(self, yscale="log", snrs="on", fig=None, ax=None):
+    def plot_peaks(self, yscale="linear", snrs="on", fig=None, ax=None):
         """
         Plot spectrum and their found peak positions.
 
@@ -325,7 +325,7 @@ class PeakSearch:
         # ax.plot(x, self.spectrum.counts, label="Raw spectrum")
         if yscale == "log":
             ax.set_yscale("log")
-        else:
+        elif yscale == "linear":
             ax.set_yscale("linear")
         for xc in self.peaks_idx:
             if self.spectrum.energies is None:
