@@ -538,7 +538,7 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_4">
            <item row="0" column="0">
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="button_info_cal">
              <property name="font">
               <font>
                <pointsize>14</pointsize>
