@@ -4,24 +4,25 @@ NASA-gamma todo:
 	   Implement this on a separate window.
 	
 2) Spectrum:
-	a) Add info and reset buttons.
+	a) Add info and reset buttons. **DONE**
 	b) Isotope ID - add 1) Baghdad Atlas (~2.2 MeV), 2) check sources.
-	c) Isotope ID - add option to plot Compton edge.
+	c) Isotope ID - add option to plot Compton edge. **DONE**
 	d) Redo "Customize" so each window has its own OK button, and remove
-	   multiple file upload. Make it a separate option under File -> Open multiple files.
-	e) When setting as "count rate", refresh spectrum.
+	   multiple file upload. Make it a separate option under File -> Open multiple files. **DONE**
+	e) When setting as "count rate", refresh spectrum. **DONE**
 
 3) Advanced fitting:
 	a) Activate button only when a region is selected.
 	b) Fix left and right boundaries when using energy units.
 	
 3) Energy calibration:
-	a) Add calibration equation with free parameters for repeatability.
-	b) Change to interactive table where individual points can be removed.
-	c) Allow for piecewise energy calibration.
+	a) Add calibration equation with free parameters for repeatability. **DONE**
+	b) Change to interactive table where individual points can be removed. **DONE**
 	
 4) Efficiency:
 	a) Add uncertainty in activity and propagate errors.
+        b) Implement second form of fitting function.
 	
 Suggestions / ideas:
 - API: allow for file size reduction after filtering.
+- Energy calibration: Allow for piecewise energy calibration.
