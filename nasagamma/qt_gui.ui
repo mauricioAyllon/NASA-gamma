@@ -473,7 +473,7 @@
                <property name="font">
                 <font>
                  <family>MS Shell Dlg 2</family>
-                 <pointsize>10</pointsize>
+                 <pointsize>12</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -481,7 +481,7 @@
                </property>
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(223, 223, 223);
-font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                </property>
                <property name="verticalScrollBarPolicy">
                 <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -497,8 +497,8 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>783</width>
-                  <height>228</height>
+                  <width>769</width>
+                  <height>169</height>
                  </rect>
                 </property>
                </widget>
@@ -800,8 +800,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>492</width>
-                <height>717</height>
+                <width>98</width>
+                <height>28</height>
                </rect>
               </property>
              </widget>
@@ -1705,7 +1705,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
      <x>0</x>
      <y>0</y>
      <width>1770</width>
-     <height>26</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
