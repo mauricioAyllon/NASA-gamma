@@ -640,7 +640,6 @@ class NasaGammaApp(QMainWindow):
             self.cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
             if self.span is not None:
                 self.span.set_active(False)
-            # xnew = self.get_xvalue_from_click
         else:
             self.fig.canvas.mpl_disconnect(self.cid)
 
@@ -656,7 +655,6 @@ class NasaGammaApp(QMainWindow):
             self.search = ps.PeakSearch(
                 self.spect, 420, 20, min_snr=1e6, method="scipy"
             )
-            self.span_select()
         x_idx = np.searchsorted(self.search.peaks_idx, xnew)
         self.search.peaks_idx = np.insert(self.search.peaks_idx, x_idx, xnew)
         fwhm_guess_new = self.search.fwhm(xnew)
@@ -671,6 +669,7 @@ class NasaGammaApp(QMainWindow):
             self.ax_main.axvline(
                 x=self.spect.channels[xnew], color="red", linestyle="--", alpha=0.2
             )
+        self.span_select()
         self.fig.canvas.draw_idle()
         self.fig.canvas.mpl_disconnect(self.cid)
         self.button_add_peak.setChecked(False)
@@ -1801,6 +1800,7 @@ class NasaGammaApp(QMainWindow):
         try:
             self.spect = sp.Spectrum(counts=self.tl.spect_cts)
             self.create_graph(fit=False, reset=False)
+            self.span = None
         except:
             pass
 
