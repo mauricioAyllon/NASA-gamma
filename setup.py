@@ -22,7 +22,9 @@ setup(
         "lmfit > 1.0.2",
         "dateparser >= 1.1.1",
         "pandas > 1.4.2",
-        "matplotlib >= 3.7.1",
+        "matplotlib == 3.6.3",
         "mplcursors >= 0.5.2",
+        "pyarrow >= 11.0.0",
+        "fastparquet >= 2023.4.0",
     ],
 )

@@ -28,7 +28,7 @@ def get_data_path(data_path=None):
     return Path(data_path_txt)
 
 
-def read_parquet_file(date, runnr, ch, flat_field=False, data_path_txt=None):
+def read_parquet_file(date, runnr, ch, flood_field=False, data_path_txt=None):
     # only channels 4 (LaBr==True) and 5 (LaBr==False)
     RUNNR = runnr
     DATE = dateparser.parse(date)
@@ -63,7 +63,7 @@ def read_parquet_file(date, runnr, ch, flat_field=False, data_path_txt=None):
             df0 = pd.read_parquet(f)
             df = pd.concat([df, df0])
     df = api.calc_own_pos(df)
-    if flat_field:
+    if flood_field:
         return df
     else:
         df["dt"] *= 1e9  # to ns

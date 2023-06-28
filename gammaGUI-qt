@@ -517,7 +517,7 @@ class NasaGammaApp(QMainWindow):
         self.api_send_to_spect.setStyleSheet("background-color : lightgreen")
         self.api_send_to_spect.clicked.connect(self.send_to_spect_api)
         self.api_load_file.setStyleSheet("background-color : lightblue")
-        self.api_load_file.clicked.connect(self.load_api_file)
+        self.api_load_file.clicked.connect(self.activate_load_api_file)
         self.api_reset.setStyleSheet("background-color : lightcoral")
         self.api_reset.clicked.connect(self.reset_button_api)
         self.api_button_filters.setStyleSheet("background-color : silver")
@@ -1805,34 +1805,39 @@ class NasaGammaApp(QMainWindow):
             pass
 
     ## API
+    def activate_load_api_file(self):
+        try:
+            self.load_api_file()
+        except Exception as e:
+            print("ERROR: Could not load data file")
+            print("An unknown error occurred:", str(e))
+
     def load_api_file(self):
         self.reset_api_figure()
         self.dt_flag = 0
         self.xy_flag = 0
         self.en_flag = 0
-        try:
-            ch = int(self.api_ch_txt.text())
-            date = self.api_date_txt.text()
+        filepath = self.api_path_txt.text()
+        ch_txt = self.api_ch_txt.text()
+        date = self.api_date_txt.text()
+        if ch_txt == "9":
             runnr = int(self.api_run_txt.text())
-            self.df_api = read_parquet_api.read_parquet_file(date, runnr, ch)
-            self.df_current = self.df_api.copy()
-            self.df_previous = self.df_api.copy()
-            self.initialize_plots_api()
-        except:
-            pass
-        try:
-            filepath = self.api_path_txt.text()
-            # self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
             self.df_api = read_parquet_api.read_parquet_file(
-                date, runnr, ch, flat_field=False, data_path_txt=filepath
+                date, runnr, ch=9, flood_field=True
             )
+            self.initialize_plots_api(flood_field=True)
+        else:
+            ch = int(ch_txt)
+            if filepath == "":
+                runnr = int(self.api_run_txt.text())
+                self.df_api = read_parquet_api.read_parquet_file(date, runnr, ch)
+            else:
+                self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
             self.df_current = self.df_api.copy()
             self.df_previous = self.df_api.copy()
             self.initialize_plots_api()
-        except:
-            pass
 
-    def initialize_plots_api(self):
+    def initialize_plots_api(self, flood_field=False):
         self.trange = [-40, 120]  # dt range
         self.ebins = 2**16  # energy bins
         self.hexbins = 80  # x-y bins
@@ -1840,13 +1845,16 @@ class NasaGammaApp(QMainWindow):
         self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
         self.erange_api = [0, 2**16]  # [0,8]
         self.colormap = "plasma"
-        self.plot_energy_hist_api(self.df_api)
-        # self.ax_api_spe.set_yscale(self.api_spect_scale)
-        self.plot_time_hist_api(self.df_api)
-        self.plot_xy_api(self.df_api)
-        self.espan_api()
-        self.xyspan_api()
-        self.tspan_api()
+        if flood_field:
+            self.plot_xy_api(self.df_api)
+        else:
+            self.plot_energy_hist_api(self.df_api)
+            # self.ax_api_spe.set_yscale(self.api_spect_scale)
+            self.plot_time_hist_api(self.df_api)
+            self.plot_xy_api(self.df_api)
+            self.espan_api()
+            self.xyspan_api()
+            self.tspan_api()
         self.fig_api.canvas.draw_idle()
 
     def reset_api_figure(self):
