@@ -344,15 +344,18 @@ class NasaGammaApp(QMainWindow):
         self.saveSpect.triggered.connect(self.save_spect)
         self.saveIDpeaks.triggered.connect(self.save_ID_peaks)
         self.info_file.triggered.connect(self.display_info_file)
-        self.clearSpectrum.triggered.connect(self.clear_main_figure)
+        self.clearSpectrum.triggered.connect(self.clear_spectrum)
 
+        self.initialize_main_figure()
         self.reset_main_figure()
+        self.reset_spect_params()
+        # remove ticks
+        self.remove_ticks_fit()
 
         self.list_xrange = []
         self.commands = commands
         self.search = 0  # initialize dummy search object
         # peak fitting
-        self.span = None
 
         get_input = param_handle.get_spect_search(self.commands)
         if get_input is not None:
@@ -364,7 +367,7 @@ class NasaGammaApp(QMainWindow):
                 self.fwhm_at_0,
                 self.ref_fwhm,
             ) = get_input
-            self.create_graph(fit=True)
+            self.create_graph(fit=True, reset=True)
         try:
             self.min_snr = float(self.commands["--min_snr"])
         except:
@@ -574,11 +577,6 @@ class NasaGammaApp(QMainWindow):
         # self.w_peak_find.label_units.setText(txt)
         if reset:
             self.reset_main_figure()
-        else:
-            self.ax_fit.clear()
-            self.ax_fit.set_xticks([])
-            self.ax_fit.set_yticks([])
-        self.ax_main.clear()
         if fit:
             self.search.plot_peaks(
                 yscale=self.scale, snrs=self.snr_state, fig=self.fig, ax=self.ax_main
@@ -589,13 +587,7 @@ class NasaGammaApp(QMainWindow):
         self.ax_main.set_yscale(self.scale)
         self.fig.canvas.draw_idle()
 
-    def clear_main_figure(self):
-        self.spect = 0
-        self.search = 0
-        self.fit = 0
-        self.reset_main_figure()
-
-    def reset_main_figure(self):
+    def initialize_main_figure(self):
         self.fig = self.main_plot.canvas.figure  # spectrum
         self.fig_fit = self.fit_plot.canvas.figure  # residual
         self.fig.clear()
@@ -604,19 +596,25 @@ class NasaGammaApp(QMainWindow):
         self.fig_fit.set_constrained_layout(True)
         gs = self.fig_fit.add_gridspec(2, 1, height_ratios=[0.3, 1.5])
         self.fig.patch.set_alpha(0.3)
-
         # axes
         self.ax_main = self.fig.add_subplot()
         self.ax_res = self.fig_fit.add_subplot(gs[0, 0])
         self.ax_fit = self.fig_fit.add_subplot(gs[1, 0])
 
-        # remove ticks
-        self.ax_main.set_xticks([])
-        self.ax_main.set_yticks([])
-        self.ax_res.set_xticks([])
-        self.ax_res.set_yticks([])
-        self.ax_fit.set_xticks([])
-        self.ax_fit.set_yticks([])
+        self.fig.canvas.draw_idle()
+        self.fig_fit.canvas.draw_idle()
+
+    def reset_spect_params(self):
+        self.spect = 0
+        self.search = 0
+        self.fit = 0
+        self.span = None
+
+    def reset_main_figure(self):
+        # clear axes
+        self.ax_main.clear()
+        self.ax_res.clear()
+        self.ax_fit.clear()
 
         if self.button_add_peak.isChecked():
             self.fig.canvas.mpl_disconnect(self.cid)
@@ -624,6 +622,17 @@ class NasaGammaApp(QMainWindow):
 
         self.fig.canvas.draw_idle()
         self.fig_fit.canvas.draw_idle()
+
+    def clear_spectrum(self):
+        self.reset_spect_params()
+        self.reset_main_figure()
+        self.remove_ticks_fit()
+
+    def remove_ticks_fit(self):
+        self.ax_fit.set_xticks([])
+        self.ax_fit.set_yticks([])
+        self.ax_res.set_xticks([])
+        self.ax_res.set_yticks([])
 
     def update_scale(self):
         if self.scale == "log":
@@ -655,6 +664,7 @@ class NasaGammaApp(QMainWindow):
             self.search = ps.PeakSearch(
                 self.spect, 420, 20, min_snr=1e6, method="scipy"
             )
+            self.span_select()
         x_idx = np.searchsorted(self.search.peaks_idx, xnew)
         self.search.peaks_idx = np.insert(self.search.peaks_idx, x_idx, xnew)
         fwhm_guess_new = self.search.fwhm(xnew)
@@ -669,7 +679,6 @@ class NasaGammaApp(QMainWindow):
             self.ax_main.axvline(
                 x=self.spect.channels[xnew], color="red", linestyle="--", alpha=0.2
             )
-        self.span_select()
         self.fig.canvas.draw_idle()
         self.fig.canvas.mpl_disconnect(self.cid)
         self.button_add_peak.setChecked(False)
@@ -720,10 +729,10 @@ class NasaGammaApp(QMainWindow):
             print("Invalid label/constant values")
 
     def try_cust_smooth(self):
-        try:
-            self.cust_smooth()
-        except:
-            print("Invalid smoothing/rebinning values")
+        # try:
+        self.cust_smooth()
+        # except:
+        #     print("Invalid smoothing/rebinning values")
 
     def try_cust_countRate(self):
         try:
@@ -848,7 +857,7 @@ class NasaGammaApp(QMainWindow):
                 self.e_units = self.e_units1
             else:
                 self.spect = sp.Spectrum(counts=cts, e_units=self.e_units1)
-            self.create_graph(fit=False, reset=False)
+            self.create_graph(fit=False, reset=True)
         except:
             print("Could not perform operation")
 
@@ -958,12 +967,12 @@ class NasaGammaApp(QMainWindow):
 
     def get_values_table_fit(self):
         cols = [
-            f"Mean ({self.e_units})",
+            f"Mean",
             "Peak area",
             "FWHM",
             "FWHM (%)",
-            "Sigma Area",
-            "Sigma Area (%)",
+            "+/- Area",
+            "+/- Area (%)",
         ]
         mean = []
         area = []
@@ -1005,7 +1014,7 @@ class NasaGammaApp(QMainWindow):
         stylesheet_ix = "::section{Background-color:lightgoldenrodyellow}"
         self.table_fit.setStyleSheet(stylesheet_ix)
         self.table_fit.setColumnWidth(0, 150)
-        self.table_fit.setColumnWidth(5, 140)
+        self.table_fit.setColumnWidth(5, 160)
 
     ## energy calibration
     def cal_info_activate(self):
@@ -1032,7 +1041,7 @@ class NasaGammaApp(QMainWindow):
         try:
             self.e_units = "channels"
             self.spect = sp.Spectrum(counts=self.spect.counts, e_units=self.e_units)
-            self.create_graph(fit=False)
+            self.create_graph(fit=False, reset=True)
         except:
             print("Cannot remove calibration")
 
@@ -1360,7 +1369,7 @@ class NasaGammaApp(QMainWindow):
                     energies=self.pred_erg,
                     e_units=self.cal_e_units,
                 )
-            self.create_graph(fit=False)
+            self.create_graph(fit=False, reset=True)
         except:
             print("Could not apply calibration")
 
@@ -1798,9 +1807,11 @@ class NasaGammaApp(QMainWindow):
 
     def send_to_spect(self):
         try:
+            if self.span is not None:
+                self.span.set_active(False)
             self.spect = sp.Spectrum(counts=self.tl.spect_cts)
-            self.create_graph(fit=False, reset=False)
-            self.span = None
+            self.create_graph(fit=False, reset=True)
+            self.remove_ticks_fit()
         except:
             pass
 
@@ -1833,9 +1844,9 @@ class NasaGammaApp(QMainWindow):
                 self.df_api = read_parquet_api.read_parquet_file(date, runnr, ch)
             else:
                 self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
-            self.df_current = self.df_api.copy()
-            self.df_previous = self.df_api.copy()
             self.initialize_plots_api()
+        self.df_current = self.df_api.copy()
+        self.df_previous = self.df_api.copy()
 
     def initialize_plots_api(self, flood_field=False):
         self.trange = [-40, 120]  # dt range
@@ -1889,9 +1900,10 @@ class NasaGammaApp(QMainWindow):
 
     def send_to_spect_api(self):
         try:
+            self.reset_spect_params()
             self.spect = sp.Spectrum(counts=self.api_gam)
             self.e_units = "channels"
-            self.create_graph(fit=False, reset=False)
+            self.create_graph(fit=False, reset=True)
         except:
             pass
 
@@ -2176,7 +2188,7 @@ class NasaGammaApp(QMainWindow):
                 self.snr_state = "on"
             else:
                 self.snr_state = "off"
-            self.create_graph(fit=True)
+            self.create_graph(fit=True, reset=True)
         except:
             print(
                 (
@@ -2614,37 +2626,33 @@ class NasaGammaApp(QMainWindow):
             # self.w_info_file.label_tc.setText(not_implemented_format)
 
     def reset_file(self):
+        ## TODO: use deepcopy
         try:
             self.load_spe_file(reset=True)
         except:
             print("Could not reset file")
 
-    def load_spe_file(self, reset=False):
+    def load_spe_file(self):
         try:
-            self.fileName, self.e_units, self.spect = self.open_file(reset)
+            self.fileName, self.e_units, self.spect = self.open_file()
             # self.e_units_orig = deepcopy(self.e_units)
             # self.spect_orig = deepcopy(self.spect)
-            if reset is False:
-                self.create_graph(fit=False, reset=False)
-            else:
-                self.create_graph(fit=False, reset=True)
+            self.create_graph(fit=False, reset=False)
             self.setWindowTitle(f"NASA-gamma: {self.fileName}")
         except:
             print("File could not be opened")
 
-    def open_file(self, reset=False):
-        if reset is False:
-            options = QFileDialog.Options()
-            # options |= QFileDialog.DontUseNativeDialog
-            fileName, _ = QFileDialog.getOpenFileName(
-                self,
-                "Open spectrum file",
-                "",
-                "All Files (*);;",
-                options=options,
-            )
-        else:
-            fileName = self.fileName
+    def open_file(self):
+        options = QFileDialog.Options()
+        # options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getOpenFileName(
+            self,
+            "Open spectrum file",
+            "",
+            "All Files (*);;",
+            options=options,
+        )
+
         if fileName == "":
             pass
         else:
