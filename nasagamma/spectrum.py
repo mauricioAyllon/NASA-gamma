@@ -85,12 +85,8 @@ class Spectrum:
         mav.fillna(0, inplace=True)
         counts_mav = np.array(mav)
         counts_mav_scaled = counts_mav / counts_mav.sum() * self.counts.sum()
-        self.__init__(
-            counts=counts_mav_scaled,
-            energies=self.energies,
-            e_units=self.e_units,
-            livetime=self.livetime,
-        )
+        self.counts = counts_mav_scaled
+        self.channels = np.arange(0, len(counts_mav_scaled), 1)
 
     def rebin(self, by=2):
         """
