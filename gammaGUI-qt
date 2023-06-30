@@ -33,6 +33,7 @@ import numpy as np
 import datetime
 import re
 import sys
+from copy import deepcopy
 from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -282,7 +283,7 @@ class NasaGammaApp(QMainWindow):
         self.button_info_main.clicked.connect(self.main_info_activate)
 
         # reset main figure
-        self.button_reset.clicked.connect(self.reset_file)
+        self.button_reset.clicked.connect(self.reset_spectrum)
 
         # Gaussian or skewed Gaussian?
         self.sk_gauss = False
@@ -577,6 +578,7 @@ class NasaGammaApp(QMainWindow):
         # self.w_peak_find.label_units.setText(txt)
         if reset:
             self.reset_main_figure()
+            self.remove_ticks_fit()
         if fit:
             self.search.plot_peaks(
                 yscale=self.scale, snrs=self.snr_state, fig=self.fig, ax=self.ax_main
@@ -1810,6 +1812,9 @@ class NasaGammaApp(QMainWindow):
             if self.span is not None:
                 self.span.set_active(False)
             self.spect = sp.Spectrum(counts=self.tl.spect_cts)
+            self.e_units = "channels"
+            self.e_units_orig = deepcopy(self.e_units)
+            self.spect_orig = deepcopy(self.spect)
             self.create_graph(fit=False, reset=True)
             self.remove_ticks_fit()
         except:
@@ -1903,6 +1908,8 @@ class NasaGammaApp(QMainWindow):
             self.reset_spect_params()
             self.spect = sp.Spectrum(counts=self.api_gam)
             self.e_units = "channels"
+            self.e_units_orig = deepcopy(self.e_units)
+            self.spect_orig = deepcopy(self.spect)
             self.create_graph(fit=False, reset=True)
         except:
             pass
@@ -2625,18 +2632,20 @@ class NasaGammaApp(QMainWindow):
             print(not_implemented_format)
             # self.w_info_file.label_tc.setText(not_implemented_format)
 
-    def reset_file(self):
+    def reset_spectrum(self):
         ## TODO: use deepcopy
         try:
-            self.load_spe_file(reset=True)
+            self.e_units = self.e_units_orig
+            self.spect = self.spect_orig
+            self.create_graph(fit=False, reset=True)
         except:
             print("Could not reset file")
 
     def load_spe_file(self):
         try:
             self.fileName, self.e_units, self.spect = self.open_file()
-            # self.e_units_orig = deepcopy(self.e_units)
-            # self.spect_orig = deepcopy(self.spect)
+            self.e_units_orig = deepcopy(self.e_units)
+            self.spect_orig = deepcopy(self.spect)
             self.create_graph(fit=False, reset=False)
             self.setWindowTitle(f"NASA-gamma: {self.fileName}")
         except:
