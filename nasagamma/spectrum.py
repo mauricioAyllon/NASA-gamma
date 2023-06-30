@@ -48,7 +48,7 @@ class Spectrum:
             if self.e_units is None:
                 self.x_units = "Energy"
             else:
-                self.x_units = f"Energy [{e_units}]"
+                self.x_units = f"Energy ({e_units})"
 
         else:
             self.energies = energies
@@ -193,7 +193,7 @@ class Spectrum:
             self.x, self.counts, drawstyle="steps", alpha=0.7, label=self.plot_label
         )
         ax.set_yscale(scale)
-        ax.set_xlabel(self.x_units)
-        ax.set_ylabel(self.y_label)
+        ax.set_xlabel(self.x_units, fontsize=14)
+        ax.set_ylabel(self.y_label, fontsize=14)
         ax.legend()
         plt.show()
