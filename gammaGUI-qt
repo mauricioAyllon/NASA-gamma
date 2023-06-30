@@ -1371,6 +1371,9 @@ class NasaGammaApp(QMainWindow):
                     energies=self.pred_erg,
                     e_units=self.cal_e_units,
                 )
+            if self.span is not None:
+                self.span.set_active(False)
+
             self.create_graph(fit=False, reset=True)
         except:
             print("Could not apply calibration")
@@ -2635,8 +2638,8 @@ class NasaGammaApp(QMainWindow):
     def reset_spectrum(self):
         ## TODO: use deepcopy
         try:
-            self.e_units = self.e_units_orig
-            self.spect = self.spect_orig
+            self.e_units = deepcopy(self.e_units_orig)
+            self.spect = deepcopy(self.spect_orig)
             self.create_graph(fit=False, reset=True)
         except:
             print("Could not reset file")
