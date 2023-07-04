@@ -636,6 +636,10 @@ class NasaGammaApp(QMainWindow):
         self.ax_res.set_xticks([])
         self.ax_res.set_yticks([])
 
+    def reset_span(self):
+        if self.span is not None:
+            self.span.set_active(False)
+
     def update_scale(self):
         if self.scale == "log":
             self.ax_main.set_yscale("linear")
@@ -792,10 +796,12 @@ class NasaGammaApp(QMainWindow):
             nbins = eval(rebin)
             self.spect.rebin(by=nbins)
             self.create_graph(fit=False, reset=True)
+            self.reset_span()
         if moving_avg != "":
             n = int(eval(moving_avg))
             self.spect.smooth(num=n)
             self.create_graph(fit=False, reset=True)
+            self.reset_span()
 
     def cust_countRate(self):
         livetime = self.w_cust.livetime_txt.text()
@@ -969,7 +975,7 @@ class NasaGammaApp(QMainWindow):
 
     def get_values_table_fit(self):
         cols = [
-            f"Mean",
+            "Mean",
             "Peak area",
             "FWHM",
             "FWHM (%)",
@@ -1047,12 +1053,15 @@ class NasaGammaApp(QMainWindow):
         except:
             print("Cannot remove calibration")
 
-    @staticmethod
-    def get_mean_vals(fit):
+    def get_mean_vals(self):
         mean_lst = []
-        for d in fit.peak_info:
+        for d in self.fit.peak_info:
             keys = list(d)
             mean_ch = d[keys[0]]
+            if self.spect.energies is not None:
+                ix_ch = np.where(self.spect.energies >= mean_ch)[0][0]
+                mean_ch = self.spect.channels[ix_ch]
+            print("DEBUGG mean channel: ", mean_ch)
             mean_lst.append(mean_ch)
         return mean_lst
 
@@ -1164,7 +1173,7 @@ class NasaGammaApp(QMainWindow):
 
     def retrieve_evals(self):
         erg = self.w_cal.energy_txt.text().split(",")
-        mean_lst = self.get_mean_vals(self.fit)
+        mean_lst = self.get_mean_vals()
         return erg, mean_lst
 
     def new_window_cal(self):
@@ -1371,9 +1380,7 @@ class NasaGammaApp(QMainWindow):
                     energies=self.pred_erg,
                     e_units=self.cal_e_units,
                 )
-            if self.span is not None:
-                self.span.set_active(False)
-
+            self.reset_span()
             self.create_graph(fit=False, reset=True)
         except:
             print("Could not apply calibration")
@@ -1633,7 +1640,7 @@ class NasaGammaApp(QMainWindow):
     def add_fwhm(self):
         try:
             self.ax_fwhm.clear()
-            xvals = self.get_mean_vals(self.fit)
+            xvals = self.get_mean_vals()
             fwhms = self.get_fwhm_vals(self.fit)
 
             for x, f in zip(xvals, fwhms):
@@ -1812,8 +1819,7 @@ class NasaGammaApp(QMainWindow):
 
     def send_to_spect(self):
         try:
-            if self.span is not None:
-                self.span.set_active(False)
+            self.reset_span()
             self.spect = sp.Spectrum(counts=self.tl.spect_cts)
             self.e_units = "channels"
             self.e_units_orig = deepcopy(self.e_units)
