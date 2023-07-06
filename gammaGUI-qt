@@ -1953,6 +1953,7 @@ class NasaGammaApp(QMainWindow):
             ax=self.ax_api_xy,
             colorbar=cbar,
             extent=self.xyplane,
+            title=f"Total counts = {df.shape[0]}",
             **kwargs,
         )
         self.fig_api.canvas.draw_idle()
