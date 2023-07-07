@@ -579,6 +579,7 @@ class NasaGammaApp(QMainWindow):
         if reset:
             self.reset_main_figure()
             self.remove_ticks_fit()
+            self.reset_span()
         if fit:
             self.search.plot_peaks(
                 yscale=self.scale, snrs=self.snr_state, fig=self.fig, ax=self.ax_main
@@ -639,6 +640,7 @@ class NasaGammaApp(QMainWindow):
     def reset_span(self):
         if self.span is not None:
             self.span.set_active(False)
+            self.span.set_visible(False)
 
     def update_scale(self):
         if self.scale == "log":
@@ -796,12 +798,10 @@ class NasaGammaApp(QMainWindow):
             nbins = eval(rebin)
             self.spect.rebin(by=nbins)
             self.create_graph(fit=False, reset=True)
-            self.reset_span()
         if moving_avg != "":
             n = int(eval(moving_avg))
             self.spect.smooth(num=n)
             self.create_graph(fit=False, reset=True)
-            self.reset_span()
 
     def cust_countRate(self):
         livetime = self.w_cust.livetime_txt.text()
@@ -1001,6 +1001,7 @@ class NasaGammaApp(QMainWindow):
             std_A_p.append(lse[1] / ls[1] * 100)
 
         rs = np.array([mean, area, fwhm, fwhm_p, std_A, std_A_p]).T
+        print(f"DEBUG: peak area = {mean}")
         df = pd.DataFrame(columns=cols, data=rs)
         df = df.round(decimals=3)
         return df
@@ -1380,7 +1381,6 @@ class NasaGammaApp(QMainWindow):
                     energies=self.pred_erg,
                     e_units=self.cal_e_units,
                 )
-            self.reset_span()
             self.create_graph(fit=False, reset=True)
         except:
             print("Could not apply calibration")
@@ -1819,7 +1819,6 @@ class NasaGammaApp(QMainWindow):
 
     def send_to_spect(self):
         try:
-            self.reset_span()
             self.spect = sp.Spectrum(counts=self.tl.spect_cts)
             self.e_units = "channels"
             self.e_units_orig = deepcopy(self.e_units)
