@@ -1001,7 +1001,6 @@ class NasaGammaApp(QMainWindow):
             std_A_p.append(lse[1] / ls[1] * 100)
 
         rs = np.array([mean, area, fwhm, fwhm_p, std_A, std_A_p]).T
-        print(f"DEBUG: peak area = {mean}")
         df = pd.DataFrame(columns=cols, data=rs)
         df = df.round(decimals=3)
         return df

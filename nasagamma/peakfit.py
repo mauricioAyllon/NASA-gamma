@@ -57,7 +57,6 @@ class PeakFit:
         if search.spectrum.energies is None:
             # print("Working with channel numbers")
             self.x = search.spectrum.channels
-
         else:
             # print("Working with energy values")
             self.x = search.spectrum.energies
@@ -195,7 +194,14 @@ class PeakFit:
             mean0 = fit0.best_values[f"g{i+1}_center"]
             # g0 = components[f"g{i+1}_"]
             # area0 = g0.sum()
-            area0 = fit0.best_values[f"g{i+1}_amplitude"]
+            if self.search.spectrum.energies is None:
+                correct_f = 1
+            else:
+                che = self.chan[maskx]
+                correct_f = np.diff(self.search.spectrum.energies[che]).mean()
+            # Correction factor needed for units to be consistent
+            # A = (counts/ch) * keV, so we need to multiply by ch/keV
+            area0 = fit0.best_values[f"g{i+1}_amplitude"] / correct_f
             fwhm0 = fit0.best_values[f"g{i+1}_sigma"] * 2.355
             dict_peak_info = {
                 f"mean{i+1}": mean0,
