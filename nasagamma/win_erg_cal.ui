@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>363</width>
-    <height>303</height>
+    <width>442</width>
+    <height>299</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,35 +29,34 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_5">
-      <item row="0" column="0">
-       <layout class="QGridLayout" name="gridLayout_3">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Energy:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="energy_txt">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="checkBox_cal">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Display but do not use for fitting</string>
+        </property>
+       </widget>
       </item>
-      <item row="1" column="0">
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_ecal_warning">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;You are starting a new calibration.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="1">
          <widget class="QRadioButton" name="radio_button_kev">
@@ -118,34 +117,9 @@
         </item>
        </layout>
       </item>
-      <item row="2" column="0">
-       <widget class="QCheckBox" name="checkBox_cal">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Display but do not use for fitting</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
+      <item row="5" column="0" colspan="2">
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="0">
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>28</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="0" column="1">
+        <item row="1" column="1">
          <widget class="QDialogButtonBox" name="button_ok_cancel">
           <property name="enabled">
            <bool>true</bool>
@@ -180,8 +154,78 @@ font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
+        <item row="1" column="2">
          <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>28</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="1">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Energy:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="energy_txt">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(255, 255, 255);</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <spacer name="horizontalSpacer_3">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>

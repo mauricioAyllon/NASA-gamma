@@ -615,14 +615,14 @@ class NasaGammaApp(QMainWindow):
 
     def reset_main_figure(self):
         # clear axes
-        self.ax_main.clear()
-        self.ax_res.clear()
-        self.ax_fit.clear()
+        # self.ax_main.clear()
+        # self.ax_res.clear()
+        # self.ax_fit.clear()
 
         if self.button_add_peak.isChecked():
             self.fig.canvas.mpl_disconnect(self.cid)
             self.button_add_peak.setChecked(False)
-
+        self.initialize_main_figure()
         self.fig.canvas.draw_idle()
         self.fig_fit.canvas.draw_idle()
 
@@ -1061,7 +1061,6 @@ class NasaGammaApp(QMainWindow):
             if self.spect.energies is not None:
                 ix_ch = np.where(self.spect.energies >= mean_ch)[0][0]
                 mean_ch = self.spect.channels[ix_ch]
-            print("DEBUGG mean channel: ", mean_ch)
             mean_lst.append(mean_ch)
         return mean_lst
 
@@ -1188,6 +1187,9 @@ class NasaGammaApp(QMainWindow):
             if self.e_units == "MeV":
                 self.w_cal.radio_button_mev.setChecked(True)
             self.disable_checkRadioButtons()
+            txt = "Warning: calibration has been initialized"
+            self.w_cal.label_ecal_warning.setText(txt)
+            self.w_cal.label_ecal_warning.setStyleSheet("color: red ; font: 10")
 
     def check_radioButton(self):
         if self.w_cal.radio_button_ev.isChecked():
@@ -2643,6 +2645,7 @@ class NasaGammaApp(QMainWindow):
     def reset_spectrum(self):
         ## TODO: use deepcopy
         try:
+            self.reset_spect_params()
             self.e_units = deepcopy(self.e_units_orig)
             self.spect = deepcopy(self.spect_orig)
             self.create_graph(fit=False, reset=True)
