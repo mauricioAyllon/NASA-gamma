@@ -514,7 +514,10 @@ class NasaGammaApp(QMainWindow):
         self.folder_path = None
         self.button_load_folder.clicked.connect(self.open_folder)
         self.button_fit_diag.clicked.connect(self.fit_peaks_diagnostics)
-
+        self.button_diag_clear.clicked.connect(self.initialize_plots_diagnostics)
+        self.button_cts_cr.clicked.connect(self.change_cts_cr_diag)
+        self.button_cts_cr_fit.clicked.connect(self.change_cts_cr_fit_diag)
+        self.button_centroid_max.clicked.connect(self.change_centroid_max_diag)
         ## API
         self.api_spect_scale = "linear"
         self.api_xy_scale = "linear"
@@ -1873,11 +1876,24 @@ class NasaGammaApp(QMainWindow):
     def load_diagnostic_data(self):
         self.diag_data = diagnostics.Diagnostics(self.folder_path)
 
+    def change_cts_cr_diag(self):
+        if self.flag_tot_cts:
+            self.ax01.clear()
+            self.diag_data.plot_count_rates(ax=self.ax01)
+            self.fig_diag01.canvas.draw_idle()
+            self.flag_tot_cts = False
+        else:
+            self.ax01.clear()
+            self.diag_data.plot_counts(ax=self.ax01)
+            self.flag_tot_cts = True
+            self.fig_diag01.canvas.draw_idle()
+
     def plot_diagnostic_total(self):
         self.diag_data.plot_spectra(ax=self.ax00)
         self.diag_data.plot_counts(ax=self.ax01)
         self.diag_data.plot_measurement_times(ax=self.ax02)
         self.diag_data.plot_livetime_percent(ax=self.ax03)
+        self.flag_tot_cts = True
 
     def fit_peaks_diagnostics(self):
         xmid_txt = self.xmin_diag.text()
@@ -1889,7 +1905,39 @@ class NasaGammaApp(QMainWindow):
             width = eval(width_txt)
         self.diag_data.fit_peaks(xmid=xmid, width=width)
         self.diag_data.plot_peaks(ax=self.ax10)
+        self.diag_data.plot_fit_counts(ax=self.ax11)
+        self.diag_data.plot_centroid(ax=self.ax12)
+        self.diag_data.plot_fwhm(ax=self.ax13)
         self.fig_diag10.canvas.draw_idle()
+        self.fig_diag11.canvas.draw_idle()
+        self.fig_diag12.canvas.draw_idle()
+        self.fig_diag13.canvas.draw_idle()
+        self.flag_fit_cts = True
+        self.flag_centroid = True
+
+    def change_cts_cr_fit_diag(self):
+        if self.flag_fit_cts:
+            self.ax11.clear()
+            self.diag_data.plot_fit_count_rates(ax=self.ax11)
+            self.fig_diag11.canvas.draw_idle()
+            self.flag_fit_cts = False
+        else:
+            self.ax11.clear()
+            self.diag_data.plot_fit_counts(ax=self.ax11)
+            self.flag_fit_cts = True
+            self.fig_diag11.canvas.draw_idle()
+
+    def change_centroid_max_diag(self):
+        if self.flag_centroid:
+            self.ax12.clear()
+            self.diag_data.plot_max(ax=self.ax12)
+            self.fig_diag12.canvas.draw_idle()
+            self.flag_centroid = False
+        else:
+            self.ax12.clear()
+            self.diag_data.plot_centroid(ax=self.ax12)
+            self.flag_centroid = True
+            self.fig_diag12.canvas.draw_idle()
 
     ## API
     def activate_load_api_file(self):
@@ -2763,6 +2811,13 @@ class NasaGammaApp(QMainWindow):
                     spect = sp.Spectrum(
                         counts=mca.counts, e_units=e_units, livetime=mca.live_time
                     )
+                elif fileName_lc[-3:] == "spe":
+                    spe = file_reader.ReadSPE(fileName)
+                    e_units = "channels"
+                    spect = sp.Spectrum(
+                        counts=spe.counts, e_units=e_units, livetime=spe.live_time
+                    )
+
                 elif fileName_lc[-8:] == ".pha.txt":
                     multiscanPHA = file_reader.ReadMultiscanPHA(fileName)
                     spect = multiscanPHA.spect

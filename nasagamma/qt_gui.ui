@@ -1445,7 +1445,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="button_diag_clear">
              <property name="font">
               <font>
                <pointsize>12</pointsize>
