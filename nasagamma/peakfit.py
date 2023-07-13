@@ -511,7 +511,7 @@ class GaussianComponents:
             for i in range(self.npeaks):
                 x = self.x_data[i]
                 y = self.gauss[i]
-                plt.fill_between(x, 0, y, alpha=0.5)
+                plt.fill_between(x, 0, y, alpha=0.2)
                 x0 = round(self.mean[i], 2)
                 y0 = y.max()
                 a = round(self.area[i], 2)
@@ -592,15 +592,16 @@ class GaussianComponents:
             plt.style.use("default")
         elif plot_type == "fwhm":
             if fig is None:
+                pass  # remove in later releases
+            if ax is None:
                 plt.rc("font", size=14)
                 plt.style.use("seaborn-v0_8-darkgrid")
                 fig = plt.figure(constrained_layout=False, figsize=(18, 8))
-            if ax is None:
                 ax = fig.add_subplot()
             for i in range(self.npeaks):
                 x = self.x_data[i]
                 y = self.gauss[i]
-                ax.fill_between(x, 0, y, alpha=0.5)
+                ax.fill_between(x, 0, y, alpha=0.2)
                 x0 = self.mean[i]
                 y0 = y.max()
                 a = self.area[i]

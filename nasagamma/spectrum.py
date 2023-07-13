@@ -153,7 +153,7 @@ class Spectrum:
         # replace negative values and zeros by 1/10th of the minimum
         self.counts[self.counts < 0.0] = y0_min * 1e-1
 
-    def plot(self, fig=None, ax=None, scale="log"):
+    def plot(self, ax=None, scale="log"):
         """
         Plot spectrum object using channels and energies (if not None)
 
@@ -170,11 +170,10 @@ class Spectrum:
         plt.rc("font", size=14)
         plt.style.use("seaborn-v0_8-darkgrid")
 
-        if fig is None:
-            fig = plt.figure(figsize=(10, 6))
         if ax is None:
+            fig = plt.figure(figsize=(10, 6))
+            fig.patch.set_alpha(0.3)
             ax = fig.add_subplot()
-        fig.patch.set_alpha(0.3)
 
         integral = round(self.counts.sum())
         if self.plot_label is None:

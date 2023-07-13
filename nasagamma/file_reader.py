@@ -182,6 +182,70 @@ class ReadMCA:
         self.counts = np.array(filelst[start_idx + 1 : -1], dtype=int)
 
 
+class ReadSPE:
+    def __init__(self, file):
+        """
+        Read .Spe file.
+
+        Parameters
+        ----------
+        file : string.
+            file path.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.file = file
+        self.description = None
+        self.detector = None
+        self.detector_description = None
+        self.version = None
+        self.time_str = None
+        self.time_s = None
+        self.date = None
+        self.start_time = None
+        self.live_time = None
+        self.real_time = None
+        self.channels = None
+        self.ROI = None
+        self.counts = None
+
+        if file[-3:].lower() != "spe":
+            print("ERROR: Must be a Spe file")
+        self.parse_file()
+
+    def parse_file(self):
+        with open(self.file, "r") as myfile:
+            filelst = myfile.readlines()
+        for i, line in enumerate(filelst):
+            l = line.lower().split()
+            if l[0] == "$spec_id:":
+                self.description = filelst[i + 1]
+            if "det#" in l:
+                self.detector = l[1]
+            if "detdesc#" in l:
+                self.detector_description = l[1:]
+            if "ap#" in l:
+                self.version = l[1:]
+            if "$date_mea:" in l:
+                self.date = filelst[i + 1].split()[0]
+                self.time_str = filelst[i + 1].split()[1]
+                tme = datetime.datetime.strptime(self.time_str, "%H:%M:%S")
+                self.time_s = tme.hour * 60 * 60 + tme.minute * 60 + tme.second
+            if "$meas_tim:" in l:
+                self.real_time = float(filelst[i + 1].split()[1])
+                self.live_time = float(filelst[i + 1].split()[0])
+            if "$data:" in l:
+                self.channels = int(filelst[i + 1].split()[1])
+                start_idx = i
+            if "$roi:" in l:
+                self.ROI = filelst[i + 1].split()[0]
+                end_idx = i
+        self.counts = np.array(filelst[start_idx + 2 : end_idx - 1], dtype=int)
+
+
 def read_lynx_csv(file_name):
     with open(file_name, "r") as myfile:
         filelst = myfile.readlines()

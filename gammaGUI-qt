@@ -54,6 +54,7 @@ from nasagamma import resolution
 from nasagamma import file_reader
 from nasagamma import read_parquet_api
 from nasagamma import parse_NIST
+from nasagamma import diagnostics
 import pkg_resources
 
 
@@ -509,6 +510,11 @@ class NasaGammaApp(QMainWindow):
         self.button_filter_lynx_e.setStyleSheet("background-color : ivory")
         self.button_filter_lynx_e.clicked.connect(self.filter_erg)
 
+        ## Diagnostics
+        self.folder_path = None
+        self.button_load_folder.clicked.connect(self.open_folder)
+        self.button_fit_diag.clicked.connect(self.fit_peaks_diagnostics)
+
         ## API
         self.api_spect_scale = "linear"
         self.api_xy_scale = "linear"
@@ -582,11 +588,11 @@ class NasaGammaApp(QMainWindow):
             self.reset_span()
         if fit:
             self.search.plot_peaks(
-                yscale=self.scale, snrs=self.snr_state, fig=self.fig, ax=self.ax_main
+                yscale=self.scale, snrs=self.snr_state, ax=self.ax_main
             )
             self.span_select()
         else:
-            self.spect.plot(fig=self.fig, ax=self.ax_main, scale=self.scale)
+            self.spect.plot(ax=self.ax_main, scale=self.scale)
         self.ax_main.set_yscale(self.scale)
         self.fig.canvas.draw_idle()
 
@@ -1829,6 +1835,62 @@ class NasaGammaApp(QMainWindow):
         except:
             pass
 
+    ## Diagnostics
+    def initialize_plots_diagnostics(self):
+        self.fig_diag00 = self.diag_plot00.canvas.figure
+        self.fig_diag01 = self.diag_plot01.canvas.figure
+        self.fig_diag02 = self.diag_plot02.canvas.figure
+        self.fig_diag03 = self.diag_plot03.canvas.figure
+        self.fig_diag10 = self.diag_plot10.canvas.figure
+        self.fig_diag11 = self.diag_plot11.canvas.figure
+        self.fig_diag12 = self.diag_plot12.canvas.figure
+        self.fig_diag13 = self.diag_plot13.canvas.figure
+        self.figs_diag = [
+            self.fig_diag00,  # spectrum
+            self.fig_diag01,  # counts/cr
+            self.fig_diag02,  # measurement times
+            self.fig_diag03,  # live time
+            self.fig_diag10,  # peak xrange
+            self.fig_diag11,  # counts/cr (peak)
+            self.fig_diag12,  # centroid/max
+            self.fig_diag13,
+        ]  # fwhm (%)
+        for fig in self.figs_diag:
+            fig.clear()
+            fig.set_constrained_layout(True)
+            fig.patch.set_alpha(0.3)
+        self.ax00 = self.fig_diag00.add_subplot()
+        self.ax01 = self.fig_diag01.add_subplot()
+        self.ax02 = self.fig_diag02.add_subplot()
+        self.ax03 = self.fig_diag03.add_subplot()
+        self.ax10 = self.fig_diag10.add_subplot()
+        self.ax11 = self.fig_diag11.add_subplot()
+        self.ax12 = self.fig_diag12.add_subplot()
+        self.ax13 = self.fig_diag13.add_subplot()
+        for fig in self.figs_diag:
+            fig.canvas.draw_idle()
+
+    def load_diagnostic_data(self):
+        self.diag_data = diagnostics.Diagnostics(self.folder_path)
+
+    def plot_diagnostic_total(self):
+        self.diag_data.plot_spectra(ax=self.ax00)
+        self.diag_data.plot_counts(ax=self.ax01)
+        self.diag_data.plot_measurement_times(ax=self.ax02)
+        self.diag_data.plot_livetime_percent(ax=self.ax03)
+
+    def fit_peaks_diagnostics(self):
+        xmid_txt = self.xmin_diag.text()
+        width_txt = self.xmax_diag.text()
+        if xmid_txt == "" or width_txt == "":
+            print("Must specify X-range bounds")
+        elif self.isevaluable(xmid_txt) and self.isevaluable(width_txt):
+            xmid = eval(xmid_txt)
+            width = eval(width_txt)
+        self.diag_data.fit_peaks(xmid=xmid, width=width)
+        self.diag_data.plot_peaks(ax=self.ax10)
+        self.fig_diag10.canvas.draw_idle()
+
     ## API
     def activate_load_api_file(self):
         try:
@@ -2157,63 +2219,63 @@ class NasaGammaApp(QMainWindow):
     def peakFind_kernel_apply(self):
         # self.ax_main.clear()
         self.fwhm_at_0 = 1
-        try:
-            if self.w_peak_find.checkBox_km.isChecked():
-                method = "km"
-            else:
-                method = "scipy"
-            self.min_snr = float(self.w_peak_find.edit_snr.text())
-            self.ref_x = float(self.w_peak_find.edit_ref_ch.text())
-            self.ref_fwhm = float(self.w_peak_find.edit_ref_fwhm.text())
+        # try:
+        if self.w_peak_find.checkBox_km.isChecked():
+            method = "km"
+        else:
+            method = "scipy"
+        self.min_snr = float(self.w_peak_find.edit_snr.text())
+        self.ref_x = float(self.w_peak_find.edit_ref_ch.text())
+        self.ref_fwhm = float(self.w_peak_find.edit_ref_fwhm.text())
 
-            x0 = self.w_peak_find.edit_x0.text()
-            x1 = self.w_peak_find.edit_x1.text()
-            if x0 and x1:
-                self.x0 = float(x0)
-                self.x1 = float(x1)
+        x0 = self.w_peak_find.edit_x0.text()
+        x1 = self.w_peak_find.edit_x1.text()
+        if x0 and x1:
+            self.x0 = float(x0)
+            self.x1 = float(x1)
+            self.search = ps.PeakSearch(
+                self.spect,
+                self.ref_x,
+                self.ref_fwhm,
+                self.fwhm_at_0,
+                min_snr=self.min_snr,
+                xrange=[self.x0, self.x1],
+                method=method,
+            )
+        else:
+            if method == "km" and len(self.spect.channels) < 9000:
                 self.search = ps.PeakSearch(
                     self.spect,
                     self.ref_x,
                     self.ref_fwhm,
                     self.fwhm_at_0,
                     min_snr=self.min_snr,
-                    xrange=[self.x0, self.x1],
+                    method=method,
+                )
+            elif method == "scipy":
+                self.search = ps.PeakSearch(
+                    self.spect,
+                    self.ref_x,
+                    self.ref_fwhm,
+                    self.fwhm_at_0,
+                    min_snr=self.min_snr,
                     method=method,
                 )
             else:
-                if method == "km" and len(self.spect.channels) < 9000:
-                    self.search = ps.PeakSearch(
-                        self.spect,
-                        self.ref_x,
-                        self.ref_fwhm,
-                        self.fwhm_at_0,
-                        min_snr=self.min_snr,
-                        method=method,
-                    )
-                elif method == "scipy":
-                    self.search = ps.PeakSearch(
-                        self.spect,
-                        self.ref_x,
-                        self.ref_fwhm,
-                        self.fwhm_at_0,
-                        min_snr=self.min_snr,
-                        method=method,
-                    )
-                else:
-                    pass
-            if self.w_peak_find.checkBox_SNR.isChecked():
-                self.snr_state = "on"
-            else:
-                self.snr_state = "off"
-            self.create_graph(fit=True, reset=True)
-        except:
-            print(
-                (
-                    "ERROR: non-numeric entry or if more than 9000 channels,"
-                    "constrain the range using x0 and x1."
-                )
-            )
-            # self.create_graph(fit=False)
+                pass
+        if self.w_peak_find.checkBox_SNR.isChecked():
+            self.snr_state = "on"
+        else:
+            self.snr_state = "off"
+        self.create_graph(fit=True, reset=True)
+        # except:
+        #     print(
+        #         (
+        #             "ERROR: non-numeric entry or if more than 9000 channels,"
+        #             "constrain the range using x0 and x1."
+        #         )
+        #     )
+        #     # self.create_graph(fit=False)
 
     def peakFind_check_hpge(self):
         self.w_peak_find.edit_snr.setText("5")
@@ -2531,7 +2593,6 @@ class NasaGammaApp(QMainWindow):
 
     def save_spect(self):
         options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
         fileName, _ = QFileDialog.getSaveFileName(
             self, "Save", "", "All Files (*);;Text Files (*.txt)", options=options
         )
@@ -2555,7 +2616,6 @@ class NasaGammaApp(QMainWindow):
 
     def save_ID_peaks(self):
         options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
         fileName, _ = QFileDialog.getSaveFileName(
             self, "Save", "", "All Files (*);;Text Files (*.txt)", options=options
         )
@@ -2661,6 +2721,14 @@ class NasaGammaApp(QMainWindow):
             self.setWindowTitle(f"NASA-gamma: {self.fileName}")
         except:
             print("File could not be opened")
+
+    def open_folder(self):
+        self.folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+        if self.folder_path:
+            print(f"Selected folder path: {self.folder_path}")
+        self.initialize_plots_diagnostics()
+        self.load_diagnostic_data()
+        self.plot_diagnostic_total()
 
     def open_file(self):
         options = QFileDialog.Options()

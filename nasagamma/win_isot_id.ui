@@ -582,7 +582,7 @@ sources</string>
              <item row="3" column="1" rowspan="2">
               <widget class="QCheckBox" name="neutron_inl_baghdad">
                <property name="enabled">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
                <property name="font">
                 <font>

@@ -98,6 +98,7 @@ class PeakSearch:
 
         """
         if not isinstance(spectrum, sp.Spectrum):
+            print(f"File type: {type(spectrum)}")
             raise Exception("spectrum must be a Spectrum object")
         if xrange is None:
             self.channel_idx = spectrum.channels
@@ -294,7 +295,7 @@ class PeakSearch:
         plt.gca().set_aspect("equal")
         plt.title("Kernel Matrix")
 
-    def plot_peaks(self, yscale="linear", snrs="on", fig=None, ax=None):
+    def plot_peaks(self, yscale="linear", snrs="on", ax=None):
         """
         Plot spectrum and their found peak positions.
 
@@ -315,9 +316,8 @@ class PeakSearch:
             x = self.spectrum.channels[self.channel_idx]
         else:
             x = self.spectrum.energies[self.channel_idx]
-        if fig is None:
-            fig = plt.figure(figsize=(10, 6))
         if ax is None:
+            fig = plt.figure(figsize=(10, 6))
             ax = fig.add_subplot()
 
         if snrs == "on" and self.method == "km":
@@ -333,7 +333,7 @@ class PeakSearch:
             else:
                 x0 = self.spectrum.energies[xc]
             ax.axvline(x=x0, color="red", linestyle="--", alpha=0.2)
-        self.spectrum.plot(fig=fig, ax=ax)
+        self.spectrum.plot(ax=ax)
         ax.legend(loc=1)
         ax.set_title(f"SNR > {self.min_snr}")
         # ax.set_ylim(1e-1)
