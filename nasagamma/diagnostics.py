@@ -82,6 +82,21 @@ class Diagnostics:
         self.fwhms = np.array(fwhms)
         self.maxims = np.array(maxims)
 
+    def combine_spects(self):
+        counts = 0
+        livetime = 0
+        for s in self.spects:
+            counts += s.counts
+            livetime += s.livetime
+        spe = sp.Spectrum(
+            counts=counts,
+            energies=s.energies,
+            e_units=s.e_units,
+            livetime=livetime,
+            cps=s.cps,
+        )
+        return spe
+
     def plot_counts(self, ax=None):
         if ax is None:
             fig = plt.figure(figsize=(10, 6))

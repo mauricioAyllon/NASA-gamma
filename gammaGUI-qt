@@ -512,12 +512,17 @@ class NasaGammaApp(QMainWindow):
 
         ## Diagnostics
         self.folder_path = None
+        self.button_cts_cr.setEnabled(False)
+        self.button_cts_cr_fit.setEnabled(False)
+        self.button_centroid_max.setEnabled(False)
+        self.button_combine_send.setEnabled(False)
         self.button_load_folder.clicked.connect(self.open_folder)
         self.button_fit_diag.clicked.connect(self.fit_peaks_diagnostics)
         self.button_diag_clear.clicked.connect(self.initialize_plots_diagnostics)
         self.button_cts_cr.clicked.connect(self.change_cts_cr_diag)
         self.button_cts_cr_fit.clicked.connect(self.change_cts_cr_fit_diag)
         self.button_centroid_max.clicked.connect(self.change_centroid_max_diag)
+        self.button_combine_send.clicked.connect(self.combine_and_send_to_spect)
         ## API
         self.api_spect_scale = "linear"
         self.api_xy_scale = "linear"
@@ -952,7 +957,7 @@ class NasaGammaApp(QMainWindow):
         )
 
     def enable_fitButtons(self, boolV):
-        # self.button_adv_fit.setEnabled(boolV)
+        self.button_adv_fit.setEnabled(boolV)
         self.button_add_cal.setEnabled(boolV)
         self.button_add_fwhm.setEnabled(boolV)
         self.button_add_eff.setEnabled(boolV)
@@ -1875,6 +1880,8 @@ class NasaGammaApp(QMainWindow):
 
     def load_diagnostic_data(self):
         self.diag_data = diagnostics.Diagnostics(self.folder_path)
+        self.button_cts_cr.setEnabled(True)
+        self.button_combine_send.setEnabled(True)
 
     def change_cts_cr_diag(self):
         if self.flag_tot_cts:
@@ -1887,6 +1894,14 @@ class NasaGammaApp(QMainWindow):
             self.diag_data.plot_counts(ax=self.ax01)
             self.flag_tot_cts = True
             self.fig_diag01.canvas.draw_idle()
+
+    def combine_and_send_to_spect(self):
+        self.spect = self.diag_data.combine_spects()
+        self.e_units = self.spect.e_units
+        self.e_units_orig = deepcopy(self.e_units)
+        self.spect_orig = deepcopy(self.spect)
+        self.create_graph(fit=False, reset=True)
+        self.setWindowTitle("NASA-gamma: combined spectrum from Diagnostics tab")
 
     def plot_diagnostic_total(self):
         self.diag_data.plot_spectra(ax=self.ax00)
@@ -1914,6 +1929,8 @@ class NasaGammaApp(QMainWindow):
         self.fig_diag13.canvas.draw_idle()
         self.flag_fit_cts = True
         self.flag_centroid = True
+        self.button_cts_cr_fit.setEnabled(True)
+        self.button_centroid_max.setEnabled(True)
 
     def change_cts_cr_fit_diag(self):
         if self.flag_fit_cts:
