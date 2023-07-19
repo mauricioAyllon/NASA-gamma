@@ -40,35 +40,111 @@ class Diagnostics:
                 realtimes.append(spe.real_time)
             else:
                 continue
+        if self.spects[0].energies is None:
+            self.e_flag = False
+        else:
+            self.e_flag = True
         self.runs = np.arange(0, len(count_rates), 1)
         self.count_rates = np.array(count_rates)
         self.tot_counts = np.array(tot_counts)
         self.livetimes = np.array(livetimes)
         self.realtimes = np.array(realtimes)
 
+    def calculate_integral(self, xmid, width):
+        areas, maxims = [], []
+        for i, spect in enumerate(self.spects):
+            if spect.energies is not None:
+                ixe = (spect.energies >= xmid - width) & (
+                    spect.energies <= xmid + width
+                )
+                erange = spect.channels[ixe]
+                xrange = [erange[0], erange[-1]]
+            else:
+                xrange = [int(xmid - width), int(xmid + width)]
+            # maximum channel (index)
+            mx = xrange[0] + np.argmax(spect.counts[xrange[0] : xrange[1]])
+            mx_e = spect.energies[mx]
+            maxims.append(mx_e)
+            area = spect.counts[xrange[0] : xrange[1]].sum()
+            areas.append(area)
+        self.xmid = xmid
+        self.width = width
+        self.areas = np.array(areas)
+        self.maxims = np.array(maxims)
+        self.means = np.zeros(len(areas))
+        self.fwhms = np.zeros(len(areas))
+
+    @staticmethod
+    def single_search(spect, xrange):
+        search = None
+        for rf in range(1, 20, 1):
+            # print(f"Reference FWHM = {rf}")
+            search = ps.PeakSearch(
+                spectrum=spect,
+                ref_x=420,
+                ref_fwhm=rf,
+                min_snr=2,
+                xrange=[xrange[0], xrange[1]],
+                method="km",
+            )
+            check_single = search.peaks_idx.shape[0]
+            if check_single == 1:
+                break
+            else:
+                search = None
+        if search == None:
+            for msnr in np.arange(0.1, 2, 0.2):
+                # print(f"Minimum SNR = {msnr}")
+                search = ps.PeakSearch(
+                    spectrum=spect,
+                    ref_x=420,
+                    ref_fwhm=4,
+                    min_snr=msnr,
+                    xrange=[xrange[0], xrange[1]],
+                    method="km",
+                )
+                check_single = search.peaks_idx.shape[0]
+                if check_single == 1:
+                    break
+                else:
+                    search = None
+        return search
+
     def fit_peaks(self, xmid, width):
         means, areas, fwhms, maxims = [], [], [], []
         for i, spect in enumerate(self.spects):
             if spect.energies is not None:
-                self.e_flag = True
                 xnew = np.where(spect.energies >= xmid)[0][0]
             else:
-                self.e_flag = False
                 xnew = np.where(spect.channels >= xmid)[0][0]
-            search = ps.PeakSearch(spect, 420, 20, min_snr=1e6, method="scipy")
-            search.peaks_idx = np.append(search.peaks_idx, xnew)
-            fwhm_guess_new = search.fwhm(xnew)
-            search.fwhm_guess = np.append(search.fwhm_guess, fwhm_guess_new)
-            fit = pf.PeakFit(search=search, xrange=[xmid - width, xmid + width])
-            if fit.fit_result.message == "Fit succeeded." and len(fit.peak_info) > 0:
-                info = fit.peak_info[0]
-                mean = info["mean1"]
-                area = info["area1"]
-                fwhm = info["fwhm1"]
-            else:
-                print(f"No fit available for run number {i}")
+
+            try:
+                search = self.single_search(spect, xrange=[xmid - width, xmid + width])
+            except:
+                search = None
+            if search is None:
+                print(f"SEARCH: No fit available for run number {i}")
                 mean, area, fwhm = 0, 0, 0
-            mx = np.argmax(spect.counts[xnew - width : xnew + width])
+            else:
+                try:
+                    fit = pf.PeakFit(search=search, xrange=[xmid - width, xmid + width])
+                    if (
+                        fit.fit_result.message == "Fit succeeded."
+                        and len(fit.peak_info) > 0
+                        and fit.peak_info[0]["area1"] > 0
+                    ):
+                        info = fit.peak_info[0]
+                        mean = info["mean1"]
+                        area = info["area1"]
+                        fwhm = info["fwhm1"]
+                except:
+                    print(f"FIT: No fit available for run number {i}")
+                    mean, area, fwhm = 0, 0, 0
+
+            # max val
+            mx = int(xnew - width) + np.argmax(
+                spect.counts[xnew - width : xnew + width]
+            )
             if spect.energies is not None:
                 mx = np.where(spect.energies >= mx)[0][0]
             maxims.append(mx)
@@ -120,7 +196,7 @@ class Diagnostics:
         )
         ax.set_xlabel("Run number", fontsize=14)
         ax.set_ylabel("Counts", fontsize=14)
-        ax.legend()
+        # ax.legend()
         plt.show()
 
     def plot_count_rates(self, ax=None):
@@ -146,7 +222,7 @@ class Diagnostics:
         )
         ax.set_xlabel("Run number", fontsize=14)
         ax.set_ylabel("Count rate (cts/s)", fontsize=14)
-        ax.legend()
+        # ax.legend()
         plt.show()
 
     def plot_spectra(self, ax=None):
@@ -180,7 +256,7 @@ class Diagnostics:
         )
         ax.set_xlabel("Run number")
         ax.set_ylabel("% livetime")
-        ax.legend()
+        # ax.legend()
 
     def plot_peaks(self, ax=None):
         if ax is None:
@@ -223,7 +299,7 @@ class Diagnostics:
         )
         ax.set_xlabel("Run number", fontsize=14)
         ax.set_ylabel("Counts", fontsize=14)
-        ax.legend()
+        # ax.legend()
         plt.show()
 
     def plot_fit_count_rates(self, ax=None):
@@ -249,7 +325,7 @@ class Diagnostics:
         )
         ax.set_xlabel("Run number", fontsize=14)
         ax.set_ylabel("Count rate (cts/s)", fontsize=14)
-        ax.legend()
+        # ax.legend()
         plt.show()
 
     def plot_centroid(self, ax=None):
@@ -259,7 +335,7 @@ class Diagnostics:
         ax.plot(self.runs, self.means, "o--", color="C1", label="Centroid")
         ax.set_xlabel("Run number")
         ax.set_ylabel("Centroid")
-        ax.legend()
+        # ax.legend()
 
     def plot_max(self, ax=None):
         if ax is None:
@@ -268,18 +344,25 @@ class Diagnostics:
         ax.plot(self.runs, self.maxims, "o--", color="C2", label="Maximum channel")
         ax.set_xlabel("Run number")
         ax.set_ylabel("Max channel")
-        ax.legend()
+        # ax.legend()
 
     def plot_fwhm(self, ax=None):
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
             ax = fig.add_subplot()
-        ax.plot(
-            self.runs, self.fwhms / self.means * 100, "o--", color="C0", label="FWHM"
-        )
+        if np.any(self.means == 0):
+            ax.plot(self.runs, self.fwhms, "o--", color="C0", label="FWHM")
+        else:
+            ax.plot(
+                self.runs,
+                self.fwhms / self.means * 100,
+                "o--",
+                color="C0",
+                label="FWHM",
+            )
         ax.set_xlabel("Run number")
         ax.set_ylabel("% FWHM")
-        ax.legend()
+        # ax.legend()
 
 
 # d = Diagnostics(r"C:\Users\mayllonu\Documents\NASA-GSFC\Technical\experiments\2022-09-DraGNS-Goddard\2022-09-23\HPGe-activation")
@@ -289,5 +372,44 @@ class Diagnostics:
 # d.plot_measurement_times()
 # d.plot_livetime_percent()
 # d.fit_peaks(xmid=2755, width=10)
+# xmid = 847.2
+# width = 10
+# d.fit_peaks(xmid=xmid, width=width)
 # d.plot_peaks()
 # d.plot_max()
+# d.plot_fit_counts()
+# d.plot_centroid()
+
+
+# def single_search(spect, xrange):
+#     search = None
+#     for rf in range(1,20,1):
+#         #print(f"Reference FWHM = {rf}")
+#         search = ps.PeakSearch(spectrum=spect, ref_x=420, ref_fwhm=rf,
+#                                 min_snr=2, xrange=[xrange[0], xrange[1]],
+#                                 method="km")
+#         check_single = search.peaks_idx.shape[0]
+#         if check_single == 1:
+#             break
+#         else:
+#             search = None
+#     if search == None:
+#         for msnr in np.arange(0.1,2,0.2):
+#             #print(f"Minimum SNR = {msnr}")
+#             search = ps.PeakSearch(spectrum=spect, ref_x=420, ref_fwhm=4,
+#                                     min_snr=msnr, xrange=[xrange[0], xrange[1]],
+#                                     method="km")
+#             check_single = search.peaks_idx.shape[0]
+#             if check_single == 1:
+#                 break
+#             else:
+#                 search = None
+#     return search
+
+# s1 = single_search(d.spects[0], xrange=[xmid-width, xmid+width])
+
+# xrange = [xmid-width, xmid + width]
+# search = ps.PeakSearch(spectrum=d.spects[0], ref_x=420, ref_fwhm=3,
+#                         min_snr=5, xrange=[xrange[0], xrange[1]],
+#                         method="km")
+# search.plot_peaks()

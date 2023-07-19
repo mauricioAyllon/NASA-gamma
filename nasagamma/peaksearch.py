@@ -227,7 +227,8 @@ class PeakSearch:
         if self.xrange == None:
             pass
         else:
-            peaks_idx = peaks_idx[1:-1]
+            pass
+            # peaks_idx = peaks_idx[1:-1]
 
         self.fwhm_guess = self.fwhm(peaks_idx)
         self.peak_plus_bkg = peak_plus_bkg

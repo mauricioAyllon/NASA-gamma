@@ -517,7 +517,12 @@ class NasaGammaApp(QMainWindow):
         self.button_centroid_max.setEnabled(False)
         self.button_combine_send.setEnabled(False)
         self.button_load_folder.clicked.connect(self.open_folder)
-        self.button_fit_diag.clicked.connect(self.fit_peaks_diagnostics)
+        self.button_fit_diag.clicked.connect(
+            lambda: self.fit_peaks_diagnostics(integral=False)
+        )
+        self.button_integral_diag.clicked.connect(
+            lambda: self.fit_peaks_diagnostics(integral=True)
+        )
         self.button_diag_clear.clicked.connect(self.initialize_plots_diagnostics)
         self.button_cts_cr.clicked.connect(self.change_cts_cr_diag)
         self.button_cts_cr_fit.clicked.connect(self.change_cts_cr_fit_diag)
@@ -1910,7 +1915,11 @@ class NasaGammaApp(QMainWindow):
         self.diag_data.plot_livetime_percent(ax=self.ax03)
         self.flag_tot_cts = True
 
-    def fit_peaks_diagnostics(self):
+    def fit_peaks_diagnostics(self, integral=False):
+        self.ax10.clear()
+        self.ax11.clear()
+        self.ax12.clear()
+        self.ax13.clear()
         xmid_txt = self.xmin_diag.text()
         width_txt = self.xmax_diag.text()
         if xmid_txt == "" or width_txt == "":
@@ -1918,7 +1927,10 @@ class NasaGammaApp(QMainWindow):
         elif self.isevaluable(xmid_txt) and self.isevaluable(width_txt):
             xmid = eval(xmid_txt)
             width = eval(width_txt)
-        self.diag_data.fit_peaks(xmid=xmid, width=width)
+        if integral:
+            self.diag_data.calculate_integral(xmid=xmid, width=width)
+        else:
+            self.diag_data.fit_peaks(xmid=xmid, width=width)
         self.diag_data.plot_peaks(ax=self.ax10)
         self.diag_data.plot_fit_counts(ax=self.ax11)
         self.diag_data.plot_centroid(ax=self.ax12)

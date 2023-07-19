@@ -497,8 +497,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>769</width>
-                  <height>169</height>
+                  <width>783</width>
+                  <height>228</height>
                  </rect>
                 </property>
                </widget>
@@ -800,8 +800,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>436</width>
-                <height>667</height>
+                <width>492</width>
+                <height>717</height>
                </rect>
               </property>
              </widget>
@@ -1820,6 +1820,21 @@ Spectrum</string>
            </item>
            <item>
             <layout class="QGridLayout" name="gridLayout_39">
+             <item row="2" column="0">
+              <widget class="QPushButton" name="button_fit_diag">
+               <property name="font">
+                <font>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(170, 255, 255);</string>
+               </property>
+               <property name="text">
+                <string>Fit</string>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="0">
               <widget class="QLabel" name="label_6">
                <property name="font">
@@ -1886,18 +1901,18 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                </item>
               </layout>
              </item>
-             <item row="2" column="0">
-              <widget class="QPushButton" name="button_fit_diag">
+             <item row="3" column="0">
+              <widget class="QPushButton" name="button_integral_diag">
                <property name="font">
                 <font>
                  <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="styleSheet">
-                <string notr="true">background-color: rgb(170, 255, 255);</string>
+                <string notr="true">background-color: rgb(0, 170, 255);</string>
                </property>
                <property name="text">
-                <string>Fit</string>
+                <string>Integral</string>
                </property>
               </widget>
              </item>
@@ -2218,7 +2233,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
      <x>0</x>
      <y>0</y>
      <width>1770</width>
-     <height>31</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
