@@ -2803,9 +2803,12 @@ class NasaGammaApp(QMainWindow):
         self.folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
         if self.folder_path:
             print(f"Selected folder path: {self.folder_path}")
-        self.initialize_plots_diagnostics()
-        self.load_diagnostic_data()
-        self.plot_diagnostic_total()
+        try:
+            self.initialize_plots_diagnostics()
+            self.load_diagnostic_data()
+            self.plot_diagnostic_total()
+        except:
+            print("Could not open folder")
 
     def open_file(self):
         options = QFileDialog.Options()

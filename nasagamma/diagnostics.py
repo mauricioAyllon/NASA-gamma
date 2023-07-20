@@ -113,6 +113,7 @@ class Diagnostics:
     def fit_peaks(self, xmid, width):
         means, areas, fwhms, maxims = [], [], [], []
         for i, spect in enumerate(self.spects):
+            mean, area, fwhm = 0, 0, 0
             if spect.energies is not None:
                 xnew = np.where(spect.energies >= xmid)[0][0]
             else:
@@ -124,7 +125,6 @@ class Diagnostics:
                 search = None
             if search is None:
                 print(f"SEARCH: No fit available for run number {i}")
-                mean, area, fwhm = 0, 0, 0
             else:
                 try:
                     fit = pf.PeakFit(search=search, xrange=[xmid - width, xmid + width])
@@ -139,7 +139,6 @@ class Diagnostics:
                         fwhm = info["fwhm1"]
                 except:
                     print(f"FIT: No fit available for run number {i}")
-                    mean, area, fwhm = 0, 0, 0
 
             # max val
             mx = int(xnew - width) + np.argmax(
