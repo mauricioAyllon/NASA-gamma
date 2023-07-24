@@ -688,9 +688,7 @@ class NasaGammaApp(QMainWindow):
         print(xnew)
         # if no search object initialized, initialize a dummy one
         if self.search == 0:
-            self.search = ps.PeakSearch(
-                self.spect, 420, 20, min_snr=1e6, method="scipy"
-            )
+            self.search = ps.PeakSearch(self.spect, 420, 3, min_snr=1e6, method="scipy")
             self.span_select()
         x_idx = np.searchsorted(self.search.peaks_idx, xnew)
         self.search.peaks_idx = np.insert(self.search.peaks_idx, x_idx, xnew)
@@ -797,6 +795,7 @@ class NasaGammaApp(QMainWindow):
         if yconst != "":
             self.spect.counts = self.spect.counts * eval(yconst)
             self.create_graph(fit=False, reset=True)
+            self.search = 0
         if xconst != "":
             new_x = self.spect.channels * eval(xconst)
             self.e_units = f"Channels * {xconst}"
@@ -804,11 +803,13 @@ class NasaGammaApp(QMainWindow):
                 counts=self.spect.counts, energies=new_x, e_units=self.e_units
             )
             self.create_graph(fit=False, reset=True)
+            self.search = 0
         if xunits != "":
             self.e_units = xunits
             self.spect.e_units = xunits
             self.spect.x_units = f"Energy [{self.e_units}]"
             self.create_graph(fit=False, reset=True)
+            self.search = 0
 
     def cust_smooth(self):
         rebin = self.w_cust.rebin_txt.text()
@@ -817,10 +818,12 @@ class NasaGammaApp(QMainWindow):
             nbins = eval(rebin)
             self.spect.rebin(by=nbins)
             self.create_graph(fit=False, reset=True)
+            self.search = 0
         if moving_avg != "":
             n = int(eval(moving_avg))
             self.spect.smooth(num=n)
             self.create_graph(fit=False, reset=True)
+            self.search = 0
 
     def cust_countRate(self):
         livetime = self.w_cust.livetime_txt.text()
@@ -834,6 +837,7 @@ class NasaGammaApp(QMainWindow):
             self.spect.livetime = eval(livetime)
             self.spect.plot_label = None
             self.create_graph(fit=False, reset=True)
+            self.search = 0
 
     def cust_shift(self):
         gain_shift = self.w_cust.shiftBy_txt.text()
@@ -845,6 +849,7 @@ class NasaGammaApp(QMainWindow):
             gs = eval(gain_shift)
             self.spect.gain_shift(by=gs, energy=bool_erg)
             self.create_graph(fit=False, reset=True)
+            self.search = 0
 
     ## Add/subtract spectra
     def add_sub_info_activate(self):
@@ -885,6 +890,7 @@ class NasaGammaApp(QMainWindow):
             else:
                 self.spect = sp.Spectrum(counts=cts, e_units=self.e_units1)
             self.create_graph(fit=False, reset=True)
+            self.search = 0
         except:
             print("Could not perform operation")
 
@@ -1069,6 +1075,7 @@ class NasaGammaApp(QMainWindow):
             self.e_units = "channels"
             self.spect = sp.Spectrum(counts=self.spect.counts, e_units=self.e_units)
             self.create_graph(fit=False, reset=True)
+            self.search = 0
         except:
             print("Cannot remove calibration")
 
@@ -1402,6 +1409,7 @@ class NasaGammaApp(QMainWindow):
                     e_units=self.cal_e_units,
                 )
             self.create_graph(fit=False, reset=True)
+            self.search = 0
         except:
             print("Could not apply calibration")
 
@@ -1906,6 +1914,7 @@ class NasaGammaApp(QMainWindow):
         self.e_units_orig = deepcopy(self.e_units)
         self.spect_orig = deepcopy(self.spect)
         self.create_graph(fit=False, reset=True)
+        self.search = 0
         self.setWindowTitle("NASA-gamma: combined spectrum from Diagnostics tab")
 
     def plot_diagnostic_total(self):
@@ -2059,6 +2068,7 @@ class NasaGammaApp(QMainWindow):
             self.e_units_orig = deepcopy(self.e_units)
             self.spect_orig = deepcopy(self.spect)
             self.create_graph(fit=False, reset=True)
+            self.search = 0
         except:
             pass
 
@@ -2296,63 +2306,63 @@ class NasaGammaApp(QMainWindow):
     def peakFind_kernel_apply(self):
         # self.ax_main.clear()
         self.fwhm_at_0 = 1
-        # try:
-        if self.w_peak_find.checkBox_km.isChecked():
-            method = "km"
-        else:
-            method = "scipy"
-        self.min_snr = float(self.w_peak_find.edit_snr.text())
-        self.ref_x = float(self.w_peak_find.edit_ref_ch.text())
-        self.ref_fwhm = float(self.w_peak_find.edit_ref_fwhm.text())
+        try:
+            if self.w_peak_find.checkBox_km.isChecked():
+                method = "km"
+            else:
+                method = "scipy"
+            self.min_snr = float(self.w_peak_find.edit_snr.text())
+            self.ref_x = float(self.w_peak_find.edit_ref_ch.text())
+            self.ref_fwhm = float(self.w_peak_find.edit_ref_fwhm.text())
 
-        x0 = self.w_peak_find.edit_x0.text()
-        x1 = self.w_peak_find.edit_x1.text()
-        if x0 and x1:
-            self.x0 = float(x0)
-            self.x1 = float(x1)
-            self.search = ps.PeakSearch(
-                self.spect,
-                self.ref_x,
-                self.ref_fwhm,
-                self.fwhm_at_0,
-                min_snr=self.min_snr,
-                xrange=[self.x0, self.x1],
-                method=method,
-            )
-        else:
-            if method == "km" and len(self.spect.channels) < 9000:
+            x0 = self.w_peak_find.edit_x0.text()
+            x1 = self.w_peak_find.edit_x1.text()
+            if x0 and x1:
+                self.x0 = float(x0)
+                self.x1 = float(x1)
                 self.search = ps.PeakSearch(
                     self.spect,
                     self.ref_x,
                     self.ref_fwhm,
                     self.fwhm_at_0,
                     min_snr=self.min_snr,
-                    method=method,
-                )
-            elif method == "scipy":
-                self.search = ps.PeakSearch(
-                    self.spect,
-                    self.ref_x,
-                    self.ref_fwhm,
-                    self.fwhm_at_0,
-                    min_snr=self.min_snr,
+                    xrange=[self.x0, self.x1],
                     method=method,
                 )
             else:
-                pass
-        if self.w_peak_find.checkBox_SNR.isChecked():
-            self.snr_state = "on"
-        else:
-            self.snr_state = "off"
-        self.create_graph(fit=True, reset=True)
-        # except:
-        #     print(
-        #         (
-        #             "ERROR: non-numeric entry or if more than 9000 channels,"
-        #             "constrain the range using x0 and x1."
-        #         )
-        #     )
-        #     # self.create_graph(fit=False)
+                if method == "km" and len(self.spect.channels) < 9000:
+                    self.search = ps.PeakSearch(
+                        self.spect,
+                        self.ref_x,
+                        self.ref_fwhm,
+                        self.fwhm_at_0,
+                        min_snr=self.min_snr,
+                        method=method,
+                    )
+                elif method == "scipy":
+                    self.search = ps.PeakSearch(
+                        self.spect,
+                        self.ref_x,
+                        self.ref_fwhm,
+                        self.fwhm_at_0,
+                        min_snr=self.min_snr,
+                        method=method,
+                    )
+                else:
+                    pass
+            if self.w_peak_find.checkBox_SNR.isChecked():
+                self.snr_state = "on"
+            else:
+                self.snr_state = "off"
+            self.create_graph(fit=True, reset=True)
+        except:
+            print(
+                (
+                    "ERROR: non-numeric entry or if more than 9000 channels,"
+                    "constrain the range using x0 and x1."
+                )
+            )
+            # self.create_graph(fit=False)
 
     def peakFind_check_hpge(self):
         self.w_peak_find.edit_snr.setText("5")
