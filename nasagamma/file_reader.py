@@ -29,25 +29,29 @@ def read_csv_file(file_name):
 
     """
     df = pd.read_csv(file_name)
-    df.columns = df.columns.str.replace(" ", "")  # remove white spaces
+    # remove white spaces and convert to lower case
+    df.columns = df.columns.str.replace(" ", "").str.lower()
     ###
     name_lst = ["count", "counts", "cts", "data", "countrate(cps)"]
     e_lst = ["energy", "energies", "erg"]
-    u_lst = ["eV", "keV", "MeV", "GeV"]
+    unit_dict = {"ev": "eV", "kev": "keV", "mev": "MeV", "gev": "GeV"}
     col_lst = list(df.columns)
     # cts_col = [s for s in col_lst if "counts" in s.lower()][0]
     cts_col = 0
     erg = 0
+    unit = "keV_default"  # if no units given, default to keV
     for s in col_lst:
         s2 = re.split("[^a-zA-Z]", s)  # split by non alphabetic character
-        if s.lower() in name_lst:
+        s2 = [x for x in s2 if x]  # remove empty string
+        if s in name_lst:
             cts_col = s
             next
         for st in s2:
-            if st.lower() in e_lst:
+            if st in e_lst:
                 erg = s
-            if st in u_lst:
-                unit = st
+            if st in list(unit_dict.keys()):
+                unit = unit_dict[st]
+
     if cts_col == 0:
         print("ERROR: no column named with counts keyword e.g counts, data, cts")
     elif erg == 0:
