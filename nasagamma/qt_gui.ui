@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1770</width>
-    <height>987</height>
+    <width>1613</width>
+    <height>908</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -497,8 +497,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>783</width>
-                  <height>228</height>
+                  <width>626</width>
+                  <height>149</height>
                  </rect>
                 </property>
                </widget>
@@ -800,8 +800,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>492</width>
-                <height>717</height>
+                <width>98</width>
+                <height>28</height>
                </rect>
               </property>
              </widget>
@@ -2232,7 +2232,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1770</width>
+     <width>1613</width>
      <height>26</height>
     </rect>
    </property>
