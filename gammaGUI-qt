@@ -2681,7 +2681,7 @@ class NasaGammaApp(QMainWindow):
     def save_spect(self):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getSaveFileName(
-            self, "Save", "", "All Files (*);;Text Files (*.txt)", options=options
+            self, "Save", "", "All Files (*);", options=options
         )
         try:
             print("Saved file: ", fileName)
