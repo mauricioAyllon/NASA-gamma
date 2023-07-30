@@ -800,8 +800,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>98</width>
-                <height>28</height>
+                <width>450</width>
+                <height>638</height>
                </rect>
               </property>
              </widget>
@@ -1742,6 +1742,21 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              </property>
              <property name="text">
               <string>Clear Plots</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="button_diag_save">
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(200, 188, 58);</string>
+             </property>
+             <property name="text">
+              <string>Save Data</string>
              </property>
             </widget>
            </item>

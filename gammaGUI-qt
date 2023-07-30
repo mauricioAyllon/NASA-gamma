@@ -329,6 +329,7 @@ class NasaGammaApp(QMainWindow):
             self.resolution_plot,
             self.lynx_plot,
             self.api_plot,
+            self.diag_plot00,
         ]:
             tmp = NavigationToolbar(tb.canvas, self)
             tmp.setVisible(False)
@@ -516,18 +517,20 @@ class NasaGammaApp(QMainWindow):
         self.button_cts_cr_fit.setEnabled(False)
         self.button_centroid_max.setEnabled(False)
         self.button_combine_send.setEnabled(False)
+        self.button_diag_save.setEnabled(False)
         self.button_load_folder.clicked.connect(self.open_folder)
         self.button_fit_diag.clicked.connect(
-            lambda: self.fit_peaks_diagnostics(integral=False)
+            lambda: self.try_fit_peaks_diagnostics(integral=False)
         )
         self.button_integral_diag.clicked.connect(
-            lambda: self.fit_peaks_diagnostics(integral=True)
+            lambda: self.try_fit_peaks_diagnostics(integral=True)
         )
         self.button_diag_clear.clicked.connect(self.initialize_plots_diagnostics)
         self.button_cts_cr.clicked.connect(self.change_cts_cr_diag)
         self.button_cts_cr_fit.clicked.connect(self.change_cts_cr_fit_diag)
         self.button_centroid_max.clicked.connect(self.change_centroid_max_diag)
         self.button_combine_send.clicked.connect(self.combine_and_send_to_spect)
+        self.button_diag_save.clicked.connect(self.save_multiple_spectra)
         ## API
         self.api_spect_scale = "linear"
         self.api_xy_scale = "linear"
@@ -1899,12 +1902,12 @@ class NasaGammaApp(QMainWindow):
     def change_cts_cr_diag(self):
         if self.flag_tot_cts:
             self.ax01.clear()
-            self.diag_data.plot_count_rates(ax=self.ax01)
+            self.diag_data.plot_count_rates(time=False, ax=self.ax01)
             self.fig_diag01.canvas.draw_idle()
             self.flag_tot_cts = False
         else:
             self.ax01.clear()
-            self.diag_data.plot_counts(ax=self.ax01)
+            self.diag_data.plot_counts(time=False, ax=self.ax01)
             self.flag_tot_cts = True
             self.fig_diag01.canvas.draw_idle()
 
@@ -1919,10 +1922,18 @@ class NasaGammaApp(QMainWindow):
 
     def plot_diagnostic_total(self):
         self.diag_data.plot_spectra(ax=self.ax00)
-        self.diag_data.plot_counts(ax=self.ax01)
-        self.diag_data.plot_measurement_times(ax=self.ax02)
-        self.diag_data.plot_livetime_percent(ax=self.ax03)
+        self.diag_data.plot_counts(time=False, ax=self.ax01)
+        self.diag_data.plot_measurement_times(time=False, ax=self.ax02)
+        self.diag_data.plot_livetime_percent(time=False, ax=self.ax03)
         self.flag_tot_cts = True
+
+    def try_fit_peaks_diagnostics(self, integral=False):
+        try:
+            self.fit_peaks_diagnostics(integral)
+            self.button_diag_save.setEnabled(True)
+        except Exception as e:
+            print("ERROR: Could not perform fit or integral")
+            print("An unknown error occurred:", str(e))
 
     def fit_peaks_diagnostics(self, integral=False):
         self.ax10.clear()
@@ -1941,9 +1952,9 @@ class NasaGammaApp(QMainWindow):
         else:
             self.diag_data.fit_peaks(xmid=xmid, width=width)
         self.diag_data.plot_peaks(ax=self.ax10)
-        self.diag_data.plot_fit_counts(ax=self.ax11)
-        self.diag_data.plot_centroid(ax=self.ax12)
-        self.diag_data.plot_fwhm(ax=self.ax13)
+        self.diag_data.plot_fit_counts(time=False, ax=self.ax11)
+        self.diag_data.plot_centroid(time=False, ax=self.ax12)
+        self.diag_data.plot_fwhm(time=False, ax=self.ax13)
         self.fig_diag10.canvas.draw_idle()
         self.fig_diag11.canvas.draw_idle()
         self.fig_diag12.canvas.draw_idle()
@@ -1956,24 +1967,24 @@ class NasaGammaApp(QMainWindow):
     def change_cts_cr_fit_diag(self):
         if self.flag_fit_cts:
             self.ax11.clear()
-            self.diag_data.plot_fit_count_rates(ax=self.ax11)
+            self.diag_data.plot_fit_count_rates(time=False, ax=self.ax11)
             self.fig_diag11.canvas.draw_idle()
             self.flag_fit_cts = False
         else:
             self.ax11.clear()
-            self.diag_data.plot_fit_counts(ax=self.ax11)
+            self.diag_data.plot_fit_counts(time=False, ax=self.ax11)
             self.flag_fit_cts = True
             self.fig_diag11.canvas.draw_idle()
 
     def change_centroid_max_diag(self):
         if self.flag_centroid:
             self.ax12.clear()
-            self.diag_data.plot_max(ax=self.ax12)
+            self.diag_data.plot_max(time=False, ax=self.ax12)
             self.fig_diag12.canvas.draw_idle()
             self.flag_centroid = False
         else:
             self.ax12.clear()
-            self.diag_data.plot_centroid(ax=self.ax12)
+            self.diag_data.plot_centroid(time=False, ax=self.ax12)
             self.flag_centroid = True
             self.fig_diag12.canvas.draw_idle()
 
@@ -2716,6 +2727,22 @@ class NasaGammaApp(QMainWindow):
         except:
             print("Cannot save file with peak info")
 
+    def save_multiple_spectra(self):
+        options = QFileDialog.Options()
+        fileName, _ = QFileDialog.getSaveFileName(
+            self, "Save", "", "All Files (*);", options=options
+        )
+        try:
+            print("Saved file: ", fileName)
+            df = self.diag_data.create_data_frame()
+            if ".csv" in fileName:
+                df.to_csv(f"{fileName}", index=False)
+            else:
+                df.to_csv(f"{fileName}.csv", index=False)
+        except Exception as e:
+            print("ERROR: Cannot save file")
+            print("An unknown error occurred:", str(e))
+
     def display_info_file(self):
         self.w_info_file = WindowInfoFile()
         self.w_info_file.show()
@@ -2877,7 +2904,7 @@ if __name__ == "__main__":
     print(commands)
 
     # initialize figure
-    plt.rc("font", size=14)
+    plt.rc("font", size=16)
     plt.style.use("seaborn-v0_8-darkgrid")
 
     # initialize app

@@ -9,6 +9,7 @@ from nasagamma import peaksearch as ps
 from nasagamma import peakfit as pf
 from nasagamma import file_reader
 import glob
+import natsort
 
 
 class Diagnostics:
@@ -17,9 +18,15 @@ class Diagnostics:
         plt.style.use("seaborn-v0_8-darkgrid")
         self.folder_path = folder_path
         self.load_data()
+        self.means = []
+        self.areas = []
+        self.maxims = []
+        self.fwhms = []
+        self.area_errors = []
 
     def load_data(self):
         files = glob.glob(f"{self.folder_path}/*")
+        files = natsort.natsorted(files)
         self.spects, count_rates, tot_counts, livetimes, realtimes = [], [], [], [], []
         for file in files:
             if file.lower()[-8:] == ".pha.txt":
@@ -49,6 +56,8 @@ class Diagnostics:
         self.tot_counts = np.array(tot_counts)
         self.livetimes = np.array(livetimes)
         self.realtimes = np.array(realtimes)
+        t_abs = self.livetimes.cumsum()
+        self.absolute_time = t_abs - t_abs[0]
 
     def calculate_integral(self, xmid, width):
         areas, maxims = [], []
@@ -63,8 +72,11 @@ class Diagnostics:
                 xrange = [int(xmid - width), int(xmid + width)]
             # maximum channel (index)
             mx = xrange[0] + np.argmax(spect.counts[xrange[0] : xrange[1]])
-            mx_e = spect.energies[mx]
-            maxims.append(mx_e)
+            if self.e_flag:
+                mx_e = spect.energies[mx]
+                maxims.append(mx_e)
+            else:
+                maxims.append(mx)
             area = spect.counts[xrange[0] : xrange[1]].sum()
             areas.append(area)
         self.xmid = xmid
@@ -111,9 +123,9 @@ class Diagnostics:
         return search
 
     def fit_peaks(self, xmid, width):
-        means, areas, fwhms, maxims = [], [], [], []
+        means, areas, area_errors, fwhms, maxims = [], [], [], [], []
         for i, spect in enumerate(self.spects):
-            mean, area, fwhm = 0, 0, 0
+            mean, area, area_err, fwhm = 0, 0, 0, 0
             if spect.energies is not None:
                 xnew = np.where(spect.energies >= xmid)[0][0]
             else:
@@ -136,6 +148,7 @@ class Diagnostics:
                         info = fit.peak_info[0]
                         mean = info["mean1"]
                         area = info["area1"]
+                        area_err = fit.peak_err[0]["area_err1"]
                         fwhm = info["fwhm1"]
                 except:
                     print(f"FIT: No fit available for run number {i}")
@@ -149,10 +162,12 @@ class Diagnostics:
             maxims.append(mx)
             means.append(mean)
             areas.append(area)
+            area_errors.append(area_err)
             fwhms.append(fwhm)
         self.xmid = xmid
         self.width = width
         self.means = np.array(means)
+        self.area_errors = np.array(area_errors)
         self.areas = np.array(areas)
         self.fwhms = np.array(fwhms)
         self.maxims = np.array(maxims)
@@ -172,13 +187,54 @@ class Diagnostics:
         )
         return spe
 
-    def plot_counts(self, ax=None):
+    def create_data_frame(self):
+        if (
+            len(self.means) != 0
+            and len(self.areas) != 0
+            and len(self.maxims) != 0
+            and len(self.fwhms) != 0
+        ):
+            units = self.spects[0].e_units
+            CR = self.areas / self.livetimes
+            CR_err = self.area_errors / self.livetimes
+            data_np = np.array(
+                [
+                    self.absolute_time,
+                    self.means,
+                    self.areas,
+                    CR,
+                    CR_err,
+                    self.maxims,
+                    self.fwhms,
+                ]
+            ).T
+            df = pd.DataFrame(
+                columns=[
+                    "Time (s)",
+                    f"Mean ({units})",
+                    "Counts",
+                    "Count Rate (cps)",
+                    "Count Rate Error",
+                    "Max",
+                    "FWHM",
+                ],
+                data=data_np,
+            )
+            return df
+
+    def plot_counts(self, time=False, ax=None):
+        if time:
+            x = self.absolute_time
+            x_label = "Time (s)"
+        else:
+            x = self.runs
+            x_label = "Run number"
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
             ax = fig.add_subplot()
-        ax.plot(self.runs, self.tot_counts, "o--", color="grey")
+        ax.plot(x, self.tot_counts, "o--", color="grey")
         ax.errorbar(
-            self.runs,
+            x,
             self.tot_counts,
             yerr=np.sqrt(self.tot_counts),
             ecolor="black",
@@ -193,18 +249,24 @@ class Diagnostics:
             lw=2,
             label="Total counts",
         )
-        ax.set_xlabel("Run number", fontsize=14)
+        ax.set_xlabel(x_label, fontsize=14)
         ax.set_ylabel("Counts", fontsize=14)
         # ax.legend()
         plt.show()
 
-    def plot_count_rates(self, ax=None):
+    def plot_count_rates(self, time=False, ax=None):
+        if time:
+            x = self.absolute_time
+            x_label = "Time (s)"
+        else:
+            x = self.runs
+            x_label = "Run number"
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
             ax = fig.add_subplot()
-        ax.plot(self.runs, self.count_rates, "o--", color="grey")
+        ax.plot(x, self.count_rates, "o--", color="grey")
         ax.errorbar(
-            self.runs,
+            x,
             self.count_rates,
             yerr=np.sqrt(self.count_rates * self.livetimes) / self.livetimes,
             ecolor="black",
@@ -219,7 +281,7 @@ class Diagnostics:
             lw=2,
             label="Count rates",
         )
-        ax.set_xlabel("Run number", fontsize=14)
+        ax.set_xlabel(x_label, fontsize=14)
         ax.set_ylabel("Count rate (cts/s)", fontsize=14)
         # ax.legend()
         plt.show()
@@ -232,28 +294,40 @@ class Diagnostics:
             s.plot(ax=ax)
         ax.legend().set_visible(False)
 
-    def plot_measurement_times(self, ax=None):
+    def plot_measurement_times(self, time=False, ax=None):
+        if time:
+            x = self.absolute_time
+            x_label = "Time (s)"
+        else:
+            x = self.runs
+            x_label = "Run number"
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
             ax = fig.add_subplot()
-        ax.plot(self.runs, self.realtimes, "o-", label="Real time")
-        ax.plot(self.runs, self.livetimes, "o-", label="Live time")
-        ax.set_xlabel("Run number")
+        ax.plot(x, self.realtimes, "o-", label="Real time")
+        ax.plot(x, self.livetimes, "o-", label="Live time")
+        ax.set_xlabel(x_label)
         ax.set_ylabel("Time (s)")
         ax.legend()
 
-    def plot_livetime_percent(self, ax=None):
+    def plot_livetime_percent(self, time=False, ax=None):
+        if time:
+            x = self.absolute_time
+            x_label = "Time (s)"
+        else:
+            x = self.runs
+            x_label = "Run number"
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
             ax = fig.add_subplot()
         ax.plot(
-            self.runs,
+            x,
             self.livetimes / self.realtimes * 100,
             "o-",
             color="C2",
             label="% Live time",
         )
-        ax.set_xlabel("Run number")
+        ax.set_xlabel(x_label)
         ax.set_ylabel("% livetime")
         # ax.legend()
 
@@ -275,15 +349,21 @@ class Diagnostics:
             ax.set_xlabel(s.x_units)
             ax.set_ylabel("Counts")
 
-    def plot_fit_counts(self, ax=None):
+    def plot_fit_counts(self, time=False, ax=None):
+        if time:
+            x = self.absolute_time
+            x_label = "Time (s)"
+        else:
+            x = self.runs
+            x_label = "Run number"
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
             ax = fig.add_subplot()
-        ax.plot(self.runs, self.areas, "o--", color="grey")
+        ax.plot(x, self.areas, "o--", color="grey")
         ax.errorbar(
-            self.runs,
+            x,
             self.areas,
-            yerr=np.sqrt(self.areas),
+            yerr=self.area_errors,
             ecolor="black",
             elinewidth=3,
             capsize=12,
@@ -296,20 +376,26 @@ class Diagnostics:
             lw=2,
             label="Counts",
         )
-        ax.set_xlabel("Run number", fontsize=14)
+        ax.set_xlabel(x_label, fontsize=14)
         ax.set_ylabel("Counts", fontsize=14)
         # ax.legend()
         plt.show()
 
-    def plot_fit_count_rates(self, ax=None):
+    def plot_fit_count_rates(self, time=False, ax=None):
+        if time:
+            x = self.absolute_time
+            x_label = "Time (s)"
+        else:
+            x = self.runs
+            x_label = "Run number"
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
             ax = fig.add_subplot()
-        ax.plot(self.runs, self.areas / self.livetimes, "o--", color="grey")
+        ax.plot(x, self.areas / self.livetimes, "o--", color="grey")
         ax.errorbar(
-            self.runs,
+            x,
             self.areas / self.livetimes,
-            yerr=np.sqrt(self.areas) / self.livetimes,
+            yerr=self.area_errors / self.livetimes,
             ecolor="black",
             elinewidth=3,
             capsize=12,
@@ -322,44 +408,62 @@ class Diagnostics:
             lw=2,
             label="Count rates",
         )
-        ax.set_xlabel("Run number", fontsize=14)
+        ax.set_xlabel(x_label, fontsize=14)
         ax.set_ylabel("Count rate (cts/s)", fontsize=14)
         # ax.legend()
         plt.show()
 
-    def plot_centroid(self, ax=None):
+    def plot_centroid(self, time=False, ax=None):
+        if time:
+            x = self.absolute_time
+            x_label = "Time (s)"
+        else:
+            x = self.runs
+            x_label = "Run number"
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
             ax = fig.add_subplot()
-        ax.plot(self.runs, self.means, "o--", color="C1", label="Centroid")
-        ax.set_xlabel("Run number")
+        ax.plot(x, self.means, "o--", color="C1", label="Centroid")
+        ax.set_xlabel(x_label)
         ax.set_ylabel("Centroid")
         # ax.legend()
 
-    def plot_max(self, ax=None):
+    def plot_max(self, time=False, ax=None):
+        if time:
+            x = self.absolute_time
+            x_label = "Time (s)"
+        else:
+            x = self.runs
+            x_label = "Run number"
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
             ax = fig.add_subplot()
-        ax.plot(self.runs, self.maxims, "o--", color="C2", label="Maximum channel")
-        ax.set_xlabel("Run number")
+        ax.plot(x, self.maxims, "o--", color="C2", label="Maximum channel")
+        ax.set_xlabel(x_label)
         ax.set_ylabel("Max channel")
         # ax.legend()
 
-    def plot_fwhm(self, ax=None):
+    def plot_fwhm(self, time=False, ax=None):
+        if time:
+            x = self.absolute_time
+            x_label = "Time (s)"
+        else:
+            x = self.runs
+            x_label = "Run number"
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
             ax = fig.add_subplot()
         if np.any(self.means == 0):
-            ax.plot(self.runs, self.fwhms, "o--", color="C0", label="FWHM")
+            ax.plot(x, self.fwhms, "o--", color="C0", label="FWHM")
         else:
             ax.plot(
-                self.runs,
+                x,
                 self.fwhms / self.means * 100,
                 "o--",
                 color="C0",
                 label="FWHM",
             )
-        ax.set_xlabel("Run number")
+        ax.set_xlabel(x_label)
         ax.set_ylabel("% FWHM")
         # ax.legend()
 
