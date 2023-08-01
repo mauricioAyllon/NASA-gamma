@@ -26,5 +26,6 @@ setup(
         "mplcursors >= 0.5.2",
         "pyarrow >= 11.0.0",
         "fastparquet >= 2023.4.0",
+        "natsort >= 7.1.1",
     ],
 )
