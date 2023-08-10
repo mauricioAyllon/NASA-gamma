@@ -256,6 +256,7 @@ class NasaGammaApp(QMainWindow):
         # push buttons
         self.enable_fitButtons(False)
         self.bg = "poly1"
+        self.e_units = None
         self.pushButton_poly1.setStyleSheet("background-color : lightgreen")
         self.pushButton_poly1.setCheckable(True)
         self.pushButton_poly1.setChecked(True)
