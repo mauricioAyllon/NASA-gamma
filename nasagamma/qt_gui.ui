@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1449</width>
-    <height>778</height>
+    <width>1857</width>
+    <height>946</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1800</width>
-    <height>900</height>
+    <width>16777215</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -333,7 +333,7 @@
          <widget class="QFrame" name="frame_2">
           <property name="minimumSize">
            <size>
-            <width>650</width>
+            <width>1000</width>
             <height>0</height>
            </size>
           </property>
@@ -367,13 +367,13 @@
          <widget class="QFrame" name="frame_3">
           <property name="minimumSize">
            <size>
-            <width>630</width>
+            <width>670</width>
             <height>0</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>800</width>
+            <width>16777215</width>
             <height>16777215</height>
            </size>
           </property>
@@ -399,7 +399,7 @@
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>350</height>
+                 <height>450</height>
                 </size>
                </property>
                <property name="maximumSize">
@@ -479,7 +479,7 @@
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
-                 <height>500</height>
+                 <height>300</height>
                 </size>
                </property>
                <property name="font">
@@ -509,8 +509,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>712</width>
-                  <height>99</height>
+                  <width>756</width>
+                  <height>108</height>
                  </rect>
                 </property>
                </widget>
@@ -812,8 +812,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>368</width>
-                <height>508</height>
+                <width>436</width>
+                <height>564</height>
                </rect>
               </property>
              </widget>
@@ -2259,8 +2259,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1449</width>
-     <height>26</height>
+     <width>1857</width>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
