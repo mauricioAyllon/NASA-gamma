@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1449</width>
-    <height>828</height>
+    <width>1386</width>
+    <height>724</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -79,7 +79,7 @@
                 <widget class="QPushButton" name="button_find_peaks">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -91,7 +91,7 @@
                 <widget class="QPushButton" name="button_identify_peaks">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -103,14 +103,14 @@
                 <widget class="QPushButton" name="button_add_subtract">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="styleSheet">
                   <string notr="true">background-color: rgb(170, 255, 255);</string>
                  </property>
                  <property name="text">
-                  <string>Add/Subtract Spectra</string>
+                  <string>Add Spectra</string>
                  </property>
                 </widget>
                </item>
@@ -135,7 +135,7 @@
                 <widget class="QPushButton" name="pushButton_gauss2">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -147,7 +147,7 @@
                 <widget class="QPushButton" name="pushButton_poly3">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -159,7 +159,7 @@
                 <widget class="QPushButton" name="pushButton_exp">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -171,7 +171,7 @@
                 <widget class="QPushButton" name="pushButton_poly1">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -183,7 +183,7 @@
                 <widget class="QPushButton" name="pushButton_poly5">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -195,7 +195,7 @@
                 <widget class="QPushButton" name="pushButton_poly2">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -219,7 +219,7 @@
                 <widget class="QPushButton" name="pushButton_gauss">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -248,7 +248,7 @@
                 <widget class="QPushButton" name="pushButton_scale">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -260,7 +260,7 @@
                 <widget class="QPushButton" name="button_add_peak">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -272,7 +272,7 @@
                 <widget class="QPushButton" name="button_customize">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -284,7 +284,7 @@
                 <widget class="QPushButton" name="button_info_main">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="styleSheet">
@@ -299,7 +299,7 @@
                 <widget class="QPushButton" name="button_reset">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="styleSheet">
@@ -314,7 +314,7 @@
                 <widget class="QPushButton" name="button_remove_cal">
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>12</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -333,7 +333,7 @@
          <widget class="QFrame" name="frame_2">
           <property name="minimumSize">
            <size>
-            <width>670</width>
+            <width>500</width>
             <height>0</height>
            </size>
           </property>
@@ -367,7 +367,7 @@
          <widget class="QFrame" name="frame_3">
           <property name="minimumSize">
            <size>
-            <width>670</width>
+            <width>550</width>
             <height>0</height>
            </size>
           </property>
@@ -399,7 +399,7 @@
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>400</height>
+                 <height>300</height>
                 </size>
                </property>
                <property name="maximumSize">
@@ -462,7 +462,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Advanced fitting</string>
+                  <string>Adv. fitting</string>
                  </property>
                 </widget>
                </item>
@@ -509,7 +509,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>692</width>
+                  <width>799</width>
                   <height>99</height>
                  </rect>
                 </property>
@@ -812,8 +812,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>407</width>
-                <height>558</height>
+                <width>347</width>
+                <height>458</height>
                </rect>
               </property>
              </widget>
@@ -2259,7 +2259,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1449</width>
+     <width>1386</width>
      <height>26</height>
     </rect>
    </property>
