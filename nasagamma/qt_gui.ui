@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1857</width>
-    <height>946</height>
+    <width>1449</width>
+    <height>828</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -333,7 +333,7 @@
          <widget class="QFrame" name="frame_2">
           <property name="minimumSize">
            <size>
-            <width>1000</width>
+            <width>670</width>
             <height>0</height>
            </size>
           </property>
@@ -399,7 +399,7 @@
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>450</height>
+                 <height>400</height>
                 </size>
                </property>
                <property name="maximumSize">
@@ -479,7 +479,7 @@
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
-                 <height>300</height>
+                 <height>250</height>
                 </size>
                </property>
                <property name="font">
@@ -509,8 +509,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>756</width>
-                  <height>108</height>
+                  <width>692</width>
+                  <height>99</height>
                  </rect>
                 </property>
                </widget>
@@ -812,8 +812,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>436</width>
-                <height>564</height>
+                <width>407</width>
+                <height>558</height>
                </rect>
               </property>
              </widget>
@@ -2259,8 +2259,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1857</width>
-     <height>31</height>
+     <width>1449</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
