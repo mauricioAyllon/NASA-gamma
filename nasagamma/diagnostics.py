@@ -60,7 +60,7 @@ class Diagnostics:
         self.absolute_time = t_abs - t_abs[0]
 
     def calculate_integral(self, xmid, width):
-        areas, maxims = [], []
+        areas, area_errors, maxims = [], [], []
         for i, spect in enumerate(self.spects):
             if spect.energies is not None:
                 ixe = (spect.energies >= xmid - width) & (
@@ -79,9 +79,11 @@ class Diagnostics:
                 maxims.append(mx)
             area = spect.counts[xrange[0] : xrange[1]].sum()
             areas.append(area)
+            area_errors.append(np.sqrt(area))
         self.xmid = xmid
         self.width = width
         self.areas = np.array(areas)
+        self.area_errors = np.array(area_errors)
         self.maxims = np.array(maxims)
         self.means = np.zeros(len(areas))
         self.fwhms = np.zeros(len(areas))
