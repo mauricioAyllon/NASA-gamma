@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1449</width>
-    <height>828</height>
+    <width>1600</width>
+    <height>850</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -331,6 +331,12 @@
         </item>
         <item row="1" column="0">
          <widget class="QFrame" name="frame_2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>670</width>
@@ -342,6 +348,11 @@
             <width>16777215</width>
             <height>16777215</height>
            </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
           </property>
           <property name="styleSheet">
            <string notr="true">background-color: rgb(212, 217, 208);</string>
@@ -365,9 +376,15 @@
         </item>
         <item row="1" column="1">
          <widget class="QFrame" name="frame_3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
-            <width>670</width>
+            <width>600</width>
             <height>0</height>
            </size>
           </property>
@@ -407,6 +424,11 @@
                  <width>2000</width>
                  <height>2000</height>
                 </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>12</pointsize>
+                </font>
                </property>
                <property name="autoFillBackground">
                 <bool>false</bool>
@@ -470,10 +492,16 @@
              </item>
              <item row="2" column="0">
               <widget class="QScrollArea" name="table_fit_area">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>100</height>
+                 <height>150</height>
                 </size>
                </property>
                <property name="maximumSize">
@@ -509,8 +537,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>692</width>
-                  <height>99</height>
+                  <width>741</width>
+                  <height>148</height>
                  </rect>
                 </property>
                </widget>
@@ -812,8 +840,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>407</width>
-                <height>558</height>
+                <width>444</width>
+                <height>580</height>
                </rect>
               </property>
              </widget>
@@ -2259,7 +2287,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1449</width>
+     <width>1600</width>
      <height>26</height>
     </rect>
    </property>
@@ -2268,13 +2296,16 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
      <string>File</string>
     </property>
     <addaction name="openFile"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
      <string>Options</string>
     </property>
     <addaction name="clearSpectrum"/>
+    <addaction name="separator"/>
     <addaction name="info_file"/>
+    <addaction name="actionTheme"/>
    </widget>
    <widget class="QMenu" name="menuSave">
     <property name="title">
@@ -2301,7 +2332,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
    </property>
    <property name="font">
     <font>
-     <pointsize>10</pointsize>
+     <pointsize>12</pointsize>
     </font>
    </property>
    <property name="shortcut">
@@ -2314,7 +2345,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
    </property>
    <property name="font">
     <font>
-     <pointsize>10</pointsize>
+     <pointsize>12</pointsize>
     </font>
    </property>
    <property name="shortcut">
@@ -2327,7 +2358,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
    </property>
    <property name="font">
     <font>
-     <pointsize>10</pointsize>
+     <pointsize>12</pointsize>
     </font>
    </property>
    <property name="shortcut">
@@ -2340,7 +2371,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
    </property>
    <property name="font">
     <font>
-     <pointsize>10</pointsize>
+     <pointsize>12</pointsize>
     </font>
    </property>
   </action>
@@ -2350,7 +2381,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
    </property>
    <property name="font">
     <font>
-     <pointsize>10</pointsize>
+     <pointsize>12</pointsize>
     </font>
    </property>
    <property name="shortcut">
@@ -2378,7 +2409,17 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
    </property>
    <property name="font">
     <font>
-     <pointsize>10</pointsize>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="actionTheme">
+   <property name="text">
+    <string>Theme</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
     </font>
    </property>
   </action>

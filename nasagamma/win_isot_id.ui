@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1117</width>
-    <height>739</height>
+    <width>1118</width>
+    <height>711</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,12 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QFrame" name="frame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="styleSheet">
       <string notr="true">background-color: rgb(180, 200, 200);</string>
      </property>
@@ -30,8 +36,8 @@
        <widget class="QFrame" name="frame_3">
         <property name="maximumSize">
          <size>
-          <width>16777215</width>
-          <height>191</height>
+          <width>590</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="frameShape">
@@ -154,10 +160,13 @@
       <item row="1" column="3" rowspan="2">
        <layout class="QGridLayout" name="gridLayout_6">
         <property name="sizeConstraint">
-         <enum>QLayout::SetFixedSize</enum>
+         <enum>QLayout::SetNoConstraint</enum>
         </property>
         <item row="1" column="0">
          <layout class="QGridLayout" name="gridLayout_5">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetNoConstraint</enum>
+          </property>
           <item row="3" column="3">
            <widget class="QPushButton" name="button_red">
             <property name="font">
@@ -381,9 +390,15 @@ background-color: rgb(255, 255, 127);</string>
         </item>
         <item row="0" column="0">
          <widget class="QScrollArea" name="scrollArea_gammas">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
-            <width>450</width>
+            <width>300</width>
             <height>0</height>
            </size>
           </property>
@@ -408,8 +423,8 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>546</width>
-             <height>539</height>
+             <width>556</width>
+             <height>511</height>
             </rect>
            </property>
           </widget>
@@ -419,6 +434,12 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
       </item>
       <item row="1" column="0" colspan="3">
        <widget class="QFrame" name="frame_2">
+        <property name="maximumSize">
+         <size>
+          <width>590</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="styleSheet">
          <string notr="true">background-color: rgb(207, 236, 171);</string>
         </property>

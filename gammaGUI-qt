@@ -244,7 +244,7 @@ class NasaGammaApp(QMainWindow):
         # self.setMinimumSize(1800, 900)
         # pixmap = QPixmap("figs/nasa-logo.jpg")
         # self.label_nasa.setPixmap(pixmap)
-        self.resize(600, 600)
+        # self.resize(600, 600)
         self.setWindowTitle("NASA-gamma")
         self.setWindowIcon(QtGui.QIcon("figs/NASA-gamma-logo.png"))
         self.scale = "linear"
