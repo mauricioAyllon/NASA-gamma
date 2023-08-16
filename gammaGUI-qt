@@ -41,6 +41,7 @@ from PyQt5.QtCore import Qt
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.widgets import SpanSelector, RectangleSelector
+import mplcyberpunk
 from nasagamma import param_handle
 from nasagamma import peakfit as pf
 from nasagamma import peaksearch as ps
@@ -76,6 +77,12 @@ class WindowMainInfo(Dialog_from_UI):
         self.ui_name = "win_info_main.ui"
         self.window_title = "Spectrum info"
 
+class WindowChangeTheme(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        self.ui_name = "win_change_theme.ui"
+        self.window_title = "Change Theme"
 
 class WindowCust(Dialog_from_UI):
     def define_ui_vars(self):
@@ -352,6 +359,11 @@ class NasaGammaApp(QMainWindow):
         self.clearSpectrum.triggered.connect(self.clear_spectrum)
         self.actionTheme.triggered.connect(self.change_theme)
 
+        # change theme
+        self.w_change_theme = WindowChangeTheme()
+        self.w_change_theme.button_seaborn_dark.clicked.connect(self.activate_seaborn_darkgrid)
+        self.w_change_theme.button_cyberpunk.clicked.connect(self.activate_cyberpunk)
+
         self.initialize_main_figure()
         self.reset_main_figure()
         self.reset_spect_params()
@@ -597,9 +609,21 @@ class NasaGammaApp(QMainWindow):
         current = self.tabWidget.currentIndex()
         for i, tb in enumerate(self.toolbars):
             tb.setVisible(i == current)
-    
+    # TODO
     def change_theme(self):
-        pass
+        self.w_change_theme.activateWindow()
+        self.w_change_theme.show()
+    
+    def activate_seaborn_darkgrid(self):
+        plt.style.use("seaborn-v0_8-darkgrid")
+        self.fig.canvas.draw_idle()
+        self.fig_fit.canvas.draw_idle()
+
+    def activate_cyberpunk(self):
+        plt.style.use("cyberpunk")
+        mplcyberpunk.make_lines_glow()
+        self.fig.canvas.draw_idle()
+        self.fig_fit.canvas.draw_idle()
 
     def create_graph(self, fit=True, reset=True):
         # txt = f"Xrange (optional) [{self.e_units}]:"
