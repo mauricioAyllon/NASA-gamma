@@ -618,6 +618,7 @@ class NasaGammaApp(QMainWindow):
         plt.style.use("seaborn-v0_8-darkgrid")
         self.fig.canvas.draw_idle()
         self.fig_fit.canvas.draw_idle()
+        pass
 
     def activate_cyberpunk(self):
         plt.style.use("cyberpunk")
