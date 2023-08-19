@@ -350,7 +350,6 @@ class NasaGammaApp(QMainWindow):
         self.saveIDpeaks.triggered.connect(self.save_ID_peaks)
         self.info_file.triggered.connect(self.display_info_file)
         self.clearSpectrum.triggered.connect(self.clear_spectrum)
-        self.actionTheme.triggered.connect(self.change_theme)
 
         self.initialize_main_figure()
         self.reset_main_figure()
@@ -597,9 +596,6 @@ class NasaGammaApp(QMainWindow):
         current = self.tabWidget.currentIndex()
         for i, tb in enumerate(self.toolbars):
             tb.setVisible(i == current)
-    
-    def change_theme(self):
-        pass
 
     def create_graph(self, fit=True, reset=True):
         # txt = f"Xrange (optional) [{self.e_units}]:"
