@@ -777,12 +777,15 @@ class NasaGammaApp(QMainWindow):
             print("Invalid gain shift values")
 
     def cust_labels(self):
+        description = self.w_cust.descript_txt.text()
         xlabel = self.w_cust.x_label_txt.text()
         ylabel = self.w_cust.y_label_txt.text()
         legend = self.w_cust.legend_txt.text().split(",")
         yconst = self.w_cust.yconst_txt.text()
         xconst = self.w_cust.xconst_txt.text()
         xunits = self.w_cust.xunits_txt.text()
+        if description != "":
+            self.spect.description = description
         if xlabel != "":
             self.ax_main.set_xlabel(xlabel)
             self.spect.x_units = xlabel
@@ -2697,20 +2700,11 @@ class NasaGammaApp(QMainWindow):
             self, "Save", "", "All Files (*);", options=options
         )
         try:
+            if fileName[-4:] == ".txt":
+                self.spect.to_txt(fileName)
+            else:
+                self.spect.to_csv(fileName)
             print("Saved file: ", fileName)
-            cts = self.spect.counts
-            if self.spect.energies is not None:
-                cols = ["counts", f"{self.spect.x_units}"]
-                data = np.array((cts, self.spect.x)).T
-            else:
-                cols = ["counts"]
-                data = cts
-
-            df = pd.DataFrame(data=data, columns=cols)
-            if ".csv" in fileName:
-                df.to_csv(f"{fileName}", index=False)
-            else:
-                df.to_csv(f"{fileName}.csv", index=False)
         except:
             print("Cannot save file")
 
@@ -2749,77 +2743,40 @@ class NasaGammaApp(QMainWindow):
         self.w_info_file = WindowInfoFile()
         self.w_info_file.show()
 
-        try:
-            lt = float(self.lynxcsv.live_time[0:-4])
-            rt = float(self.lynxcsv.real_time[0:-4])
-            livetime = lt
-            realtime = rt
-            deadtime = round((1 - lt / rt) * 100, 2)
-            total_cts = self.lynxcsv.counts
-            count_rate = round(self.lynxcsv.count_rate, 3)
-            nch = self.lynxcsv.nch
-            energy_cal = self.lynxcsv.energy_calibration
-            start_time = self.lynxcsv.start_time
-            self.w_info_file.label_lt.setText(str(livetime))
-            self.w_info_file.label_rt.setText(str(realtime))
-            self.w_info_file.label_dt.setText(str(deadtime))
-            self.w_info_file.label_tc.setText(str(total_cts))
+        tot_cts = self.spect.counts.sum()
+        nch = self.spect.counts.shape[0]
+        self.w_info_file.label_tc.setText(str(tot_cts))
+        self.w_info_file.label_nch.setText(str(nch))
+        if self.spect.description is None:
+            self.w_info_file.label_descript.setText("N/A")
+        else:
+            self.w_info_file.label_descript.setText(str(self.spect.description))
+        if self.spect.livetime is None:
+            self.w_info_file.label_lt.setText("N/A")
+        else:
+            count_rate = tot_cts / self.spect.livetime
+            self.w_info_file.label_lt.setText(str(self.spect.livetime))
             self.w_info_file.label_cr.setText(str(count_rate))
-            self.w_info_file.label_nch.setText(str(nch))
-            self.w_info_file.label_time.setText(start_time)
-            self.w_info_file.label_energy_cal.setText(str(energy_cal))
-        except:
-            not_implemented_format = "File format not implemented"
-            print(not_implemented_format)
-            # self.w_info_file.label_tc.setText(not_implemented_format)
-
-        try:
-            self.cnf_dict = read_cnf.read_cnf_file(self.fileName, False)
-            livetime = self.cnf_dict["Live time"]
-            realtime = self.cnf_dict["Real time"]
-            deadtime = (1 - livetime / realtime) * 100
-            total_cts = self.cnf_dict["Total counts"]
-            count_rate = total_cts / livetime
-            ch_num = self.cnf_dict["Number of channels"]
-            start_time = self.cnf_dict["Start time"]
-            self.w_info_file.label_lt.setText(str(livetime))
-            self.w_info_file.label_rt.setText(str(realtime))
+        if self.spect.realtime is None:
+            self.w_info_file.label_rt.setText("N/A")
+        else:
+            self.w_info_file.label_rt.setText(str(self.spect.realtime))
+        if self.spect.livetime is None or self.spect.realtime is None:
+            self.w_info_file.label_dt.setText("N/A")
+            self.w_info_file.label_cr.setText("N/A")
+        else:
+            deadtime = round((1 - self.spect.livetime / self.spect.realtime) * 100, 3)
             self.w_info_file.label_dt.setText(str(deadtime))
-            self.w_info_file.label_tc.setText(str(total_cts))
-            self.w_info_file.label_cr.setText(str(count_rate))
-            self.w_info_file.label_nch.setText(str(ch_num))
-            self.w_info_file.label_time.setText(start_time)
-        except:
-            not_implemented_format = "File format not implemented"
-            print(not_implemented_format)
-            # self.w_info_file.label_tc.setText(not_implemented_format)
-
-        try:
-            lt = self.multiscanPHA.live_time
-            rt = self.multiscanPHA.real_time
-            livetime = lt
-            realtime = rt
-            deadtime = round((1 - lt / rt) * 100, 2)
-            total_cts = self.multiscanPHA.counts
-            count_rate = round(self.multiscanPHA.count_rate, 3)
-            nch = self.multiscanPHA.nch
-            energy_cal = self.multiscanPHA.energy_calibration
-            start_time = self.multiscanPHA.start_time
-            self.w_info_file.label_lt.setText(str(livetime))
-            self.w_info_file.label_rt.setText(str(realtime))
-            self.w_info_file.label_dt.setText(str(deadtime))
-            self.w_info_file.label_tc.setText(str(total_cts))
-            self.w_info_file.label_cr.setText(str(count_rate))
-            self.w_info_file.label_nch.setText(str(nch))
-            self.w_info_file.label_time.setText(start_time)
-            self.w_info_file.label_energy_cal.setText(str(energy_cal))
-        except:
-            not_implemented_format = "File format not implemented"
-            print(not_implemented_format)
-            # self.w_info_file.label_tc.setText(not_implemented_format)
+        if self.spect.acq_date is None:
+            self.w_info_file.label_date.setText("N/A")
+        else:
+            self.w_info_file.label_date.setText(str(self.spect.acq_date))
+        if self.spect.energy_cal is None:
+            self.w_info_file.label_energy_cal.setText("N/A") 
+        else:
+            self.w_info_file.label_energy_cal.setText(str(self.spect.energy_cal)) 
 
     def reset_spectrum(self):
-        ## TODO: use deepcopy
         try:
             self.reset_spect_params()
             self.e_units = deepcopy(self.e_units_orig)
@@ -2893,11 +2850,16 @@ class NasaGammaApp(QMainWindow):
                     multiscanPHA = file_reader.ReadMultiscanPHA(fileName)
                     spect = multiscanPHA.spect
                     e_units = spect.e_units
+
+                elif fileName_lc[-4:] == ".txt" and fileName_lc[-8:] != ".pha.txt":
+                    spect = file_reader.read_txt(fileName)
+                    e_units = spect.e_units
                 else:
                     print("Could not open file")
                     fileName = fileName + " ***INVALID FILE TYPE***"
-            except:
+            except Exception as e:
                 print("Could not open file")
+                print("An unknown error occurred:", str(e))
         return fileName, e_units, spect
 
 

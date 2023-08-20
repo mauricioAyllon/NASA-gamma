@@ -8,27 +8,26 @@ from nasagamma import spectrum as sp
 from nasagamma import read_cnf
 import datetime
 
-
-def read_csv_file(file_name):
+def process_df(df):
     """
-    Read .csv file.
+    Process dataframe.
     Must have at least one header with one of the key words listed
     in name_lst.
 
     Parameters
     ----------
-    file_name : string.
-        file path.
+    df : pandas dataframe.
+        dataframe containing counts or counts and energy.
 
     Returns
     -------
-    e_units : string
+    unit : string.
         X-axis units e.g. channels, keV, MeV.
-    spect : Spectrum instance.
-        Spectrum object from nasagamma.
-
+    cts_col : string.
+        name of column header for counts.
+    erg : string.
+        name of column header for energies.
     """
-    df = pd.read_csv(file_name)
     # remove white spaces and convert to lower case
     df.columns = df.columns.str.replace(" ", "").str.lower()
     ###
@@ -51,6 +50,30 @@ def read_csv_file(file_name):
                 erg = s
             if st in list(unit_dict.keys()):
                 unit = unit_dict[st]
+    return unit, cts_col, erg
+
+def read_csv_file(file_name):
+    """
+    Read .csv file.
+    Must have at least one header with one of the key words listed
+    in name_lst.
+
+    Parameters
+    ----------
+    file_name : string.
+        file path.
+
+    Returns
+    -------
+    e_units : string
+        X-axis units e.g. channels, keV, MeV.
+    spect : Spectrum instance.
+        Spectrum object from nasagamma.
+
+    """
+    df = pd.read_csv(file_name)
+    
+    unit, cts_col, erg = process_df(df)
 
     if cts_col == 0:
         print("ERROR: no column named with counts keyword e.g counts, data, cts")
@@ -67,6 +90,60 @@ def read_csv_file(file_name):
 
     return e_units, spect
 
+def read_txt(filename):
+    with open(filename, "r") as myfile:
+        filelst = myfile.readlines()
+        for i, line in enumerate(filelst):
+            l = line.lower().split()
+            if l[0] == "description:":
+                description = " ".join(l[1:])
+            elif l[0] == "date" and l[1] == "created:":
+                date_created = l[2]
+            elif l[0] == "real" and l[1] == "time":
+                realtime = l[3]
+            elif l[0] == "live" and l[1] == "time":
+                livetime = l[3]
+            elif l[0] == "energy" and l[1] == "calibration:":
+                erg_cal = l[2]
+            else:
+                start_idx = i
+                break
+
+    df = pd.read_csv(filename, skiprows=start_idx)
+    unit, cts_col, erg = process_df(df)
+
+    if realtime == "none":
+        realtime = None
+    else:
+        realtime = float(realtime)
+    if livetime == "none":
+        livetime = None
+    else:
+        livetime = float(livetime)
+    if description == "none":
+        description = None
+    if date_created == "none":
+        date_created = None
+    if erg_cal == "none":
+        erg_cal = None
+
+    if cts_col == 0:
+        print("ERROR: no column named with counts keyword e.g counts, data, cts")
+    elif erg == 0:
+        # print("working with channel numbers")
+        e_units = "channels"
+        spect = sp.Spectrum(counts=df[cts_col], e_units=e_units, livetime=livetime,
+                            realtime=realtime, description=description, acq_date=date_created,
+                            energy_cal=erg_cal)
+        spect.x = spect.channels
+    elif erg != 0:
+        # print("working with energy values")
+        e_units = unit
+        spect = sp.Spectrum(counts=df[cts_col], energies=df[erg], e_units=e_units,
+                            livetime=livetime, realtime=realtime, description=description,
+                            acq_date=date_created, energy_cal=erg_cal)
+        spect.x = spect.energies
+    return spect
 
 def read_cnf_to_spect(filename):
     """
@@ -383,6 +460,7 @@ class ReadMultiscanPHA:
             energies=df["energy"],
             e_units=self.eunits,
             livetime=self.live_time,
+            realtime=self.real_time
         )
         self.spect.x = self.spect.energies
         self.counts = self.spect.counts.sum()
