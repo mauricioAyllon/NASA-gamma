@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>556</width>
-    <height>380</height>
+    <width>576</width>
+    <height>475</height>
    </rect>
   </property>
   <property name="palette">
@@ -49,6 +49,15 @@
        </color>
       </brush>
      </colorrole>
+     <colorrole role="PlaceholderText">
+      <brush brushstyle="NoBrush">
+       <color alpha="128">
+        <red>0</red>
+        <green>0</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
     </active>
     <inactive>
      <colorrole role="Button">
@@ -84,6 +93,15 @@
         <red>188</red>
         <green>198</green>
         <blue>200</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="PlaceholderText">
+      <brush brushstyle="NoBrush">
+       <color alpha="128">
+        <red>0</red>
+        <green>0</green>
+        <blue>255</blue>
        </color>
       </brush>
      </colorrole>
@@ -125,6 +143,15 @@
        </color>
       </brush>
      </colorrole>
+     <colorrole role="PlaceholderText">
+      <brush brushstyle="NoBrush">
+       <color alpha="128">
+        <red>0</red>
+        <green>0</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
     </disabled>
    </palette>
   </property>
@@ -144,20 +171,8 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Live time (s): </string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="label_lt">
+      <item row="7" column="1">
+       <widget class="QLabel" name="label_date">
         <property name="font">
          <font>
           <pointsize>12</pointsize>
@@ -174,49 +189,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Real time (s): </string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="label_rt">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(255, 255, 255);</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Box</enum>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_15">
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Dead time (%):</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="QLabel" name="label_dt">
         <property name="font">
          <font>
@@ -234,20 +207,20 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_3">
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_13">
         <property name="font">
          <font>
           <pointsize>14</pointsize>
          </font>
         </property>
         <property name="text">
-         <string>Total counts: </string>
+         <string>Acquisition date:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QLabel" name="label_tc">
+      <item row="1" column="1">
+       <widget class="QLabel" name="label_lt">
         <property name="font">
          <font>
           <pointsize>12</pointsize>
@@ -265,19 +238,43 @@
        </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="label_3">
         <property name="font">
          <font>
           <pointsize>14</pointsize>
          </font>
         </property>
         <property name="text">
-         <string>Count rate [cts/s]: </string>
+         <string>Total counts: </string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="QLabel" name="label_cr">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Live time (s): </string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="font">
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Number of channels: </string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="label_rt">
         <property name="font">
          <font>
           <pointsize>12</pointsize>
@@ -294,19 +291,19 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_5">
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_15">
         <property name="font">
          <font>
           <pointsize>14</pointsize>
          </font>
         </property>
         <property name="text">
-         <string>Number of channels: </string>
+         <string>Dead time (%):</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
+      <item row="6" column="1">
        <widget class="QLabel" name="label_nch">
         <property name="font">
          <font>
@@ -324,20 +321,8 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_13">
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Start time:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QLabel" name="label_time">
+      <item row="8" column="1">
+       <widget class="QLabel" name="label_energy_cal">
         <property name="font">
          <font>
           <pointsize>12</pointsize>
@@ -354,7 +339,37 @@
         </property>
        </widget>
       </item>
-      <item row="7" column="0">
+      <item row="4" column="1">
+       <widget class="QLabel" name="label_tc">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(255, 255, 255);</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="font">
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Count rate (cts/s): </string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
        <widget class="QLabel" name="label_14">
         <property name="font">
          <font>
@@ -366,8 +381,56 @@
         </property>
        </widget>
       </item>
-      <item row="7" column="1">
-       <widget class="QLabel" name="label_energy_cal">
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="font">
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Real time (s): </string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLabel" name="label_cr">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(255, 255, 255);</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="font">
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Description:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="label_descript">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font">
          <font>
           <pointsize>12</pointsize>

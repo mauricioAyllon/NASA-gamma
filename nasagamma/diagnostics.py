@@ -36,9 +36,10 @@ class Diagnostics:
                 tot_counts.append(f.counts)
                 livetimes.append(f.live_time)
                 realtimes.append(f.real_time)
-            elif file.lower()[-3:] == "spe":
+            elif file.lower()[-4:] == ".spe":
                 spe = file_reader.ReadSPE(file)
-                spect = sp.Spectrum(counts=spe.counts, livetime=spe.live_time)
+                spect = sp.Spectrum(counts=spe.counts, livetime=spe.live_time,
+                                    realtime=spe.real_time)
                 self.spects.append(spect)
                 cr = spe.counts.sum() / spe.live_time
                 count_rates.append(cr)
@@ -177,16 +178,22 @@ class Diagnostics:
     def combine_spects(self):
         counts = 0
         livetime = 0
+        realtime = 0
         for i, s in enumerate(self.spects):
             counts += s.counts
             if s.livetime is not None:
                 livetime += s.livetime
             else:
-                print(f"No livetime available for file number {i}")
+                print(f"No live time available for file number {i}")
+            if s.realtime is not None:
+                realtime += s.realtime
+            else:
+                print(f"No real time available for file number {i}")
         spe = sp.Spectrum(
             counts=counts,
             energies=s.energies,
             e_units=s.e_units,
+            realtime=realtime,
             livetime=livetime,
             cps=s.cps,
         )

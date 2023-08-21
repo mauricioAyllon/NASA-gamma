@@ -4,17 +4,21 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import datetime
 
 
 class Spectrum:
     def __init__(
         self,
         counts=None,
-        channels=None,
         energies=None,
         e_units=None,
+        realtime=None,
         livetime=None,
         cps=False,
+        acq_date=None,
+        energy_cal=None,
+        description=None
     ):
         """
         Initialize the spectrum.
@@ -38,10 +42,9 @@ class Spectrum:
 
         """
         self.e_units = e_units
+        channels = np.arange(0, len(counts), 1)
         if counts is None:
             print("ERROR: Must specify counts")
-        if channels is None:
-            channels = np.arange(0, len(counts), 1)
         if energies is not None:
             self.energies = np.asarray(energies, dtype=float)
             self.x = self.energies
@@ -57,8 +60,12 @@ class Spectrum:
 
         self.counts = np.asarray(counts, dtype=float)
         self.channels = np.asarray(channels, dtype=int)
+        self.realtime = realtime
         self.livetime = livetime
         self.cps = cps
+        self.acq_date = acq_date
+        self.energy_cal = energy_cal
+        self.description = description
         if cps:
             self.y_label = "CPS"
         else:
@@ -152,6 +159,44 @@ class Spectrum:
         y0_min = np.amin(self.counts[self.counts > 0.0])
         # replace negative values and zeros by 1/10th of the minimum
         self.counts[self.counts < 0.0] = y0_min * 1e-1
+
+    def to_csv(self, fileName):
+        if self.energies is not None:
+            cols = ["counts", f"{self.x_units}"]
+            data = np.array((self.counts, self.x)).T
+        else:
+            cols = ["counts"]
+            data = self.counts
+
+        df = pd.DataFrame(data=data, columns=cols)
+        if fileName[-4:] == ".csv":
+            df.to_csv(f"{fileName}", index=False)
+        else:
+            df.to_csv(f"{fileName}.csv", index=False)
+
+    def to_txt(self, fileName):
+        current_date = datetime.date.today()
+        if fileName[-4:] == ".txt":
+            file_txt = fileName
+        else:
+            file_txt = fileName + ".txt" 
+        with open(file_txt, 'w') as f:
+            # write metadata
+            f.write(f"Description: {self.description}\n")
+            f.write(f"Date created: {current_date}\n")
+            f.write(f"Real time (s): {self.realtime}\n")
+            f.write(f"Live time (s): {self.livetime}\n")
+            f.write(f"Energy calibration: {self.energy_cal}\n")
+            if self.energies is None:
+                # Write header
+                f.write("counts\n")
+                # Write data rows
+                for cts in self.counts:
+                    f.write(f"{cts}\n")
+            else:
+                f.write(f"counts,{self.x_units}\n")
+                for cts,erg in zip(self.counts, self.energies):
+                    f.write(f"{cts},{erg}\n")
 
     def plot(self, ax=None, scale="log"):
         """
