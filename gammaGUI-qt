@@ -797,8 +797,7 @@ class NasaGammaApp(QMainWindow):
         if legend != [""]:
             legend = [x.strip() for x in legend]
             self.ax_main.legend(self.ax_main.get_legend_handles_labels()[0], legend)
-            # self.ax_main.legend(labels=legend)
-            # self.spect.plot_label = legend
+            self.spect.label = legend[-1]
             self.fig.canvas.draw_idle()
         if yconst != "":
             self.spect.counts = self.spect.counts * eval(yconst)
@@ -843,7 +842,6 @@ class NasaGammaApp(QMainWindow):
             self.fig.canvas.draw_idle()
         if livetime != "" and self.isevaluable(livetime) and self.spect.cps:
             self.spect.livetime = eval(livetime)
-            self.spect.plot_label = None
             self.create_graph(fit=False, reset=True)
             self.search = 0
 
@@ -2751,6 +2749,10 @@ class NasaGammaApp(QMainWindow):
             self.w_info_file.label_descript.setText("N/A")
         else:
             self.w_info_file.label_descript.setText(str(self.spect.description))
+        if self.spect.label is None:
+            self.w_info_file.label_plot.setText("N/A")
+        else:
+            self.w_info_file.label_plot.setText(str(self.spect.label))
         if self.spect.livetime is None:
             self.w_info_file.label_lt.setText("N/A")
         else:
@@ -2772,9 +2774,9 @@ class NasaGammaApp(QMainWindow):
         else:
             self.w_info_file.label_date.setText(str(self.spect.acq_date))
         if self.spect.energy_cal is None:
-            self.w_info_file.label_energy_cal.setText("N/A") 
+            self.w_info_file.label_energy_cal.setText("N/A")
         else:
-            self.w_info_file.label_energy_cal.setText(str(self.spect.energy_cal)) 
+            self.w_info_file.label_energy_cal.setText(str(self.spect.energy_cal))
 
     def reset_spectrum(self):
         try:

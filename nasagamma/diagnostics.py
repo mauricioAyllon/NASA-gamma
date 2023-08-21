@@ -36,10 +36,19 @@ class Diagnostics:
                 tot_counts.append(f.counts)
                 livetimes.append(f.live_time)
                 realtimes.append(f.real_time)
+            elif file.lower()[-4:] == ".txt" and file.lower()[-8:] != ".pha.txt":
+                spect = file_reader.read_txt(file)
+                self.spects.append(spect)
+                cr = spect.counts.sum() / spect.livetime
+                count_rates.append(cr)
+                tot_counts.append(spect.counts.sum())
+                livetimes.append(spect.livetime)
+                realtimes.append(spect.realtime)
             elif file.lower()[-4:] == ".spe":
                 spe = file_reader.ReadSPE(file)
-                spect = sp.Spectrum(counts=spe.counts, livetime=spe.live_time,
-                                    realtime=spe.real_time)
+                spect = sp.Spectrum(
+                    counts=spe.counts, livetime=spe.live_time, realtime=spe.real_time
+                )
                 self.spects.append(spect)
                 cr = spe.counts.sum() / spe.live_time
                 count_rates.append(cr)

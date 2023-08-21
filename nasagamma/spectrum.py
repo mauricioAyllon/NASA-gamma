@@ -18,7 +18,8 @@ class Spectrum:
         cps=False,
         acq_date=None,
         energy_cal=None,
-        description=None
+        description=None,
+        label=None,
     ):
         """
         Initialize the spectrum.
@@ -70,7 +71,7 @@ class Spectrum:
             self.y_label = "CPS"
         else:
             self.y_label = "Cts"
-        self.plot_label = None
+        self.label = label
 
     def smooth(self, num=4):
         """
@@ -161,6 +162,19 @@ class Spectrum:
         self.counts[self.counts < 0.0] = y0_min * 1e-1
 
     def to_csv(self, fileName):
+        """
+        Save spectrum to a .csv file. This file format does not include metadata
+
+        Parameters
+        ----------
+        fileName : string
+            file name or path of where to save the file.
+
+        Returns
+        -------
+        None.
+
+        """
         if self.energies is not None:
             cols = ["counts", f"{self.x_units}"]
             data = np.array((self.counts, self.x)).T
@@ -175,14 +189,29 @@ class Spectrum:
             df.to_csv(f"{fileName}.csv", index=False)
 
     def to_txt(self, fileName):
+        """
+        Save spectrum to a .txt file. This file format includes metadata
+        as headers.
+
+        Parameters
+        ----------
+        fileName : string
+            file name or path of where to save the file.
+
+        Returns
+        -------
+        None.
+
+        """
         current_date = datetime.date.today()
         if fileName[-4:] == ".txt":
             file_txt = fileName
         else:
-            file_txt = fileName + ".txt" 
-        with open(file_txt, 'w') as f:
+            file_txt = fileName + ".txt"
+        with open(file_txt, "w") as f:
             # write metadata
             f.write(f"Description: {self.description}\n")
+            f.write(f"Label: {self.label}\n")
             f.write(f"Date created: {current_date}\n")
             f.write(f"Real time (s): {self.realtime}\n")
             f.write(f"Live time (s): {self.livetime}\n")
@@ -195,7 +224,7 @@ class Spectrum:
                     f.write(f"{cts}\n")
             else:
                 f.write(f"counts,{self.x_units}\n")
-                for cts,erg in zip(self.counts, self.energies):
+                for cts, erg in zip(self.counts, self.energies):
                     f.write(f"{cts},{erg}\n")
 
     def plot(self, ax=None, scale="log"):
@@ -221,17 +250,15 @@ class Spectrum:
             ax = fig.add_subplot()
 
         integral = round(self.counts.sum())
-        if self.plot_label is None:
+        if self.label is None:
             if self.livetime is None:
                 lt = "Livetime = N/A"
             else:
                 lt = f"Livetime = {self.livetime:.3E} s"
-            self.plot_label = f"Total counts = {integral:.3E}\n{lt}"
+            self.label = f"Total counts = {integral:.3E}\n{lt}"
 
         ax.fill_between(self.x, 0, self.counts, alpha=0.2, color="C1", step="pre")
-        ax.plot(
-            self.x, self.counts, drawstyle="steps", alpha=0.7, label=self.plot_label
-        )
+        ax.plot(self.x, self.counts, drawstyle="steps", alpha=0.7, label=self.label)
         ax.set_yscale(scale)
         ax.set_xlabel(self.x_units, fontsize=14)
         ax.set_ylabel(self.y_label, fontsize=14)

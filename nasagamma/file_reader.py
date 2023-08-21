@@ -8,6 +8,7 @@ from nasagamma import spectrum as sp
 from nasagamma import read_cnf
 import datetime
 
+
 def process_df(df):
     """
     Process dataframe.
@@ -52,6 +53,7 @@ def process_df(df):
                 unit = unit_dict[st]
     return unit, cts_col, erg
 
+
 def read_csv_file(file_name):
     """
     Read .csv file.
@@ -72,7 +74,7 @@ def read_csv_file(file_name):
 
     """
     df = pd.read_csv(file_name)
-    
+
     unit, cts_col, erg = process_df(df)
 
     if cts_col == 0:
@@ -90,21 +92,24 @@ def read_csv_file(file_name):
 
     return e_units, spect
 
+
 def read_txt(filename):
     with open(filename, "r") as myfile:
         filelst = myfile.readlines()
         for i, line in enumerate(filelst):
-            l = line.lower().split()
-            if l[0] == "description:":
+            l = line.split()
+            if l[0].lower() == "description:":
                 description = " ".join(l[1:])
-            elif l[0] == "date" and l[1] == "created:":
-                date_created = l[2]
-            elif l[0] == "real" and l[1] == "time":
+            elif l[0].lower() == "label:":
+                plot_label = " ".join(l[1:])
+            elif l[0].lower() == "date" and l[1].lower() == "created:":
+                date_created = " ".join(l[2])
+            elif l[0].lower() == "real" and l[1].lower() == "time":
                 realtime = l[3]
-            elif l[0] == "live" and l[1] == "time":
+            elif l[0].lower() == "live" and l[1].lower() == "time":
                 livetime = l[3]
-            elif l[0] == "energy" and l[1] == "calibration:":
-                erg_cal = l[2]
+            elif l[0].lower() == "energy" and l[1].lower() == "calibration:":
+                erg_cal = " ".join(l[2])
             else:
                 start_idx = i
                 break
@@ -112,19 +117,21 @@ def read_txt(filename):
     df = pd.read_csv(filename, skiprows=start_idx)
     unit, cts_col, erg = process_df(df)
 
-    if realtime == "none":
+    if realtime.lower() == "none":
         realtime = None
     else:
         realtime = float(realtime)
-    if livetime == "none":
+    if livetime.lower() == "none":
         livetime = None
     else:
         livetime = float(livetime)
-    if description == "none":
+    if description.lower() == "none":
         description = None
-    if date_created == "none":
+    if plot_label.lower() == "none":
+        plot_label = None
+    if date_created.lower() == "none":
         date_created = None
-    if erg_cal == "none":
+    if erg_cal.lower() == "none":
         erg_cal = None
 
     if cts_col == 0:
@@ -132,18 +139,34 @@ def read_txt(filename):
     elif erg == 0:
         # print("working with channel numbers")
         e_units = "channels"
-        spect = sp.Spectrum(counts=df[cts_col], e_units=e_units, livetime=livetime,
-                            realtime=realtime, description=description, acq_date=date_created,
-                            energy_cal=erg_cal)
+        spect = sp.Spectrum(
+            counts=df[cts_col],
+            e_units=e_units,
+            livetime=livetime,
+            realtime=realtime,
+            description=description,
+            acq_date=date_created,
+            energy_cal=erg_cal,
+            label=plot_label,
+        )
         spect.x = spect.channels
     elif erg != 0:
         # print("working with energy values")
         e_units = unit
-        spect = sp.Spectrum(counts=df[cts_col], energies=df[erg], e_units=e_units,
-                            livetime=livetime, realtime=realtime, description=description,
-                            acq_date=date_created, energy_cal=erg_cal)
+        spect = sp.Spectrum(
+            counts=df[cts_col],
+            energies=df[erg],
+            e_units=e_units,
+            livetime=livetime,
+            realtime=realtime,
+            description=description,
+            acq_date=date_created,
+            energy_cal=erg_cal,
+            label=plot_label,
+        )
         spect.x = spect.energies
     return spect
+
 
 def read_cnf_to_spect(filename):
     """
@@ -418,6 +441,7 @@ class ReadLynxCsv:
 class ReadMultiscanPHA:
     def __init__(self, file):
         self.file = file
+        self.description = None
         self.start_time = None
         self.energy_calibration = None
         self.live_time = None
@@ -436,6 +460,8 @@ class ReadMultiscanPHA:
             filelst = myfile.readlines()
         for i, line in enumerate(filelst):
             l = line.lower().strip().split(",")
+            if "name" in l and len(l) > 1:
+                self.description = l[1]
             if "time started" in l:
                 self.start_time = ",".join(l[1:]).strip('"')
             if "live time when finished" in l:
@@ -458,9 +484,12 @@ class ReadMultiscanPHA:
         self.spect = sp.Spectrum(
             counts=df["counts"],
             energies=df["energy"],
+            description=self.description,
             e_units=self.eunits,
             livetime=self.live_time,
-            realtime=self.real_time
+            realtime=self.real_time,
+            energy_cal=self.energy_calibration,
+            acq_date=self.start_time,
         )
         self.spect.x = self.spect.energies
         self.counts = self.spect.counts.sum()
