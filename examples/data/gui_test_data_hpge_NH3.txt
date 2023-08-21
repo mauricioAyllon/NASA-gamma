@@ -1,5 +1,6 @@
 Description: Total combined NH3 spectra
-Date created: 2023-08-20
+Label: NH3
+Date created: 2023-08-21
 Real time (s): 36228
 Live time (s): 28800
 Energy calibration: None
