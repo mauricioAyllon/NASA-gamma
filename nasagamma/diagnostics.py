@@ -198,6 +198,10 @@ class Diagnostics:
                 realtime += s.realtime
             else:
                 print(f"No real time available for file number {i}")
+            if s.energy_cal is not None:
+                ecal = s.energy_cal
+            else:
+                ecal = None
         spe = sp.Spectrum(
             counts=counts,
             energies=s.energies,
@@ -205,6 +209,7 @@ class Diagnostics:
             realtime=realtime,
             livetime=livetime,
             cps=s.cps,
+            energy_cal=ecal,
         )
         return spe
 
