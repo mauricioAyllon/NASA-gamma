@@ -7,6 +7,7 @@ from nasagamma import peakfit as pf
 from nasagamma import file_reader
 import traceback
 import pandas as pd
+import pytest
 
 # import sys, os
 
@@ -19,9 +20,9 @@ import pandas as pd
 #     sys.stdout = sys.__stdout__
 
 
-file_csv = "examples/data/gui_test_data_labr_uncalibrated.csv"
-file_cnf = "examples/data/2021-03-23-MGS.cnf"
-file_cal = "examples/data/gui_test_data_labr.csv"
+file_csv = "examples/data/gui_test_data_cebr.csv"
+file_cnf = "examples/data/gui_test_data_lab_sources.cnf"
+file_cal = "examples/data/gui_test_data_cebr_cal.csv"
 file_hpge = "examples/data/gui_test_data_hpge.csv"
 
 
@@ -46,7 +47,7 @@ def log_exit(*m):
     exit(1)
 
 
-def check_nasagamma():
+def test_nasagamma():
     try:
         import nasagamma
 
@@ -55,7 +56,7 @@ def check_nasagamma():
         log(red("FAIL"), "nasagamma not installed")
 
 
-def check_csv_reader():
+def test_csv_reader():
     try:
         e_units1, _ = file_reader.read_csv_file(file_csv)
         e_units2, _ = file_reader.read_csv_file(file_cal)
@@ -67,7 +68,7 @@ def check_csv_reader():
         log(red("FAIL"), "csv file reader unable to run")
 
 
-def check_cnf_reader():
+def test_cnf_reader():
     try:
         e_units, spect = file_reader.read_cnf_to_spect(file_cnf)
         if e_units == "keV" and spect.counts.shape[0] > 0:
@@ -76,7 +77,7 @@ def check_cnf_reader():
         log(red("FAIL"), "cnf file reader unable to run")
 
 
-def check_spectrum():
+def test_spectrum():
     try:
         df = pd.read_csv(file_csv)
         cts_np = df["counts"].to_numpy()
@@ -89,7 +90,7 @@ def check_spectrum():
         log(red("FAIL"), "Cannot instantiate a spectrum object")
 
 
-def check_peaksearch():
+def test_peaksearch():
     try:
         df = pd.read_csv(file_csv)
         cts_np = df["counts"].to_numpy()
@@ -118,8 +119,8 @@ def check_peaksearch():
     return search1, search2, search3, search4
 
 
-def check_peakfit():
-    search1, search2, search3, search4 = check_peaksearch()
+def test_peakfit():
+    search1, search2, search3, search4 = test_peaksearch()
     try:
         # blockPrint()
         fit1 = pf.PeakFit(search1, xrange=[600, 800], bkg="poly1")
@@ -134,11 +135,11 @@ def check_peakfit():
 
 def main():
     try:
-        check_nasagamma()
-        check_csv_reader()
-        check_cnf_reader()
-        check_spectrum()
-        check_peakfit()
+        test_nasagamma()
+        test_csv_reader()
+        test_cnf_reader()
+        test_spectrum()
+        test_peakfit()
     except Exception:
         log_exit(traceback.format_exc())
 
@@ -173,7 +174,7 @@ if __name__ == "__main__":
 #     exit(1)
 
 
-# def check_real(ex_name, f, exp_res, *args):
+# def test_real(ex_name, f, exp_res, *args):
 #     try:
 #         res = f(*args)
 #     except NotImplementedError:
@@ -192,7 +193,7 @@ if __name__ == "__main__":
 #         return (x == y).all()
 #     return x == y
 
-# def check_tuple(ex_name, f, exp_res, *args, **kwargs):
+# def test_tuple(ex_name, f, exp_res, *args, **kwargs):
 #     try:
 #         res = f(*args, **kwargs)
 #     except NotImplementedError:
@@ -208,7 +209,7 @@ if __name__ == "__main__":
 #         log(red("FAIL"), ex_name, ": incorrect answer. Expected", exp_res, ", got: ", res)
 #         return True
 
-# def check_array(ex_name, f, exp_res, *args):
+# def test_array(ex_name, f, exp_res, *args):
 #     try:
 #         res = f(*args)
 #     except NotImplementedError:
@@ -224,7 +225,7 @@ if __name__ == "__main__":
 #         log(red("FAIL"), ex_name, ": incorrect answer. Expected", exp_res, ", got: ", res)
 #         return True
 
-# def check_list(ex_name, f, exp_res, *args):
+# def test_list(ex_name, f, exp_res, *args):
 #     try:
 #         res = f(*args)
 #     except NotImplementedError:
@@ -241,14 +242,14 @@ if __name__ == "__main__":
 #         return True
 
 
-# def check_get_order():
+# def test_get_order():
 #     ex_name = "Get order"
-#     if check_list(
+#     if test_list(
 #             ex_name, p1.get_order,
 #             [0], 1):
 #         log("You should revert `get_order` to its original implementation for this test to pass")
 #         return
-#     if check_list(
+#     if test_list(
 #             ex_name, p1.get_order,
 #             [1, 0], 2):
 #         log("You should revert `get_order` to its original implementation for this test to pass")
@@ -256,26 +257,26 @@ if __name__ == "__main__":
 #     log(green("PASS"), ex_name, "")
 
 
-# def check_hinge_loss_single():
+# def test_hinge_loss_single():
 #     ex_name = "Hinge loss single"
 
 #     feature_vector = np.array([1, 2])
 #     label, theta, theta_0 = 1, np.array([-1, 1]), -0.2
 #     exp_res = 1 - 0.8
-#     if check_real(
+#     if test_real(
 #             ex_name, p1.hinge_loss_single,
 #             exp_res, feature_vector, label, theta, theta_0):
 #         return
 #     log(green("PASS"), ex_name, "")
 
 
-# def check_hinge_loss_full():
+# def test_hinge_loss_full():
 #     ex_name = "Hinge loss full"
 
 #     feature_vector = np.array([[1, 2], [1, 2]])
 #     label, theta, theta_0 = np.array([1, 1]), np.array([-1, 1]), -0.2
 #     exp_res = 1 - 0.8
-#     if check_real(
+#     if test_real(
 #             ex_name, p1.hinge_loss_full,
 #             exp_res, feature_vector, label, theta, theta_0):
 #         return
@@ -283,13 +284,13 @@ if __name__ == "__main__":
 #     log(green("PASS"), ex_name, "")
 
 
-# def check_perceptron_single_update():
+# def test_perceptron_single_update():
 #     ex_name = "Perceptron single update"
 
 #     feature_vector = np.array([1, 2])
 #     label, theta, theta_0 = 1, np.array([-1, 1]), -1.5
 #     exp_res = (np.array([0, 3]), -0.5)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.perceptron_single_step_update,
 #             exp_res, feature_vector, label, theta, theta_0):
 #         return
@@ -297,7 +298,7 @@ if __name__ == "__main__":
 #     feature_vector = np.array([1, 2])
 #     label, theta, theta_0 = 1, np.array([-1, 1]), -1
 #     exp_res = (np.array([0, 3]), 0)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name + " (boundary case)", p1.perceptron_single_step_update,
 #             exp_res, feature_vector, label, theta, theta_0):
 #         return
@@ -305,14 +306,14 @@ if __name__ == "__main__":
 #     log(green("PASS"), ex_name, "")
 
 
-# def check_perceptron():
+# def test_perceptron():
 #     ex_name = "Perceptron"
 
 #     feature_matrix = np.array([[1, 2]])
 #     labels = np.array([1])
 #     T = 1
 #     exp_res = (np.array([1, 2]), 1)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.perceptron,
 #             exp_res, feature_matrix, labels, T):
 #         return
@@ -321,7 +322,7 @@ if __name__ == "__main__":
 #     labels = np.array([1, 1])
 #     T = 1
 #     exp_res = (np.array([0, 2]), 2)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.perceptron,
 #             exp_res, feature_matrix, labels, T):
 #         return
@@ -330,7 +331,7 @@ if __name__ == "__main__":
 #     labels = np.array([1])
 #     T = 2
 #     exp_res = (np.array([1, 2]), 1)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.perceptron,
 #             exp_res, feature_matrix, labels, T):
 #         return
@@ -339,7 +340,7 @@ if __name__ == "__main__":
 #     labels = np.array([1, 1])
 #     T = 2
 #     exp_res = (np.array([0, 2]), 2)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.perceptron,
 #             exp_res, feature_matrix, labels, T):
 #         return
@@ -347,14 +348,14 @@ if __name__ == "__main__":
 #     log(green("PASS"), ex_name, "")
 
 
-# def check_average_perceptron():
+# def test_average_perceptron():
 #     ex_name = "Average perceptron"
 
 #     feature_matrix = np.array([[1, 2]])
 #     labels = np.array([1])
 #     T = 1
 #     exp_res = (np.array([1, 2]), 1)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.average_perceptron,
 #             exp_res, feature_matrix, labels, T):
 #         return
@@ -363,7 +364,7 @@ if __name__ == "__main__":
 #     labels = np.array([1, 1])
 #     T = 1
 #     exp_res = (np.array([-0.5, 1]), 1.5)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.average_perceptron,
 #             exp_res, feature_matrix, labels, T):
 #         return
@@ -372,7 +373,7 @@ if __name__ == "__main__":
 #     labels = np.array([1])
 #     T = 2
 #     exp_res = (np.array([1, 2]), 1)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.average_perceptron,
 #             exp_res, feature_matrix, labels, T):
 #         return
@@ -381,7 +382,7 @@ if __name__ == "__main__":
 #     labels = np.array([1, 1])
 #     T = 2
 #     exp_res = (np.array([-0.25, 1.5]), 1.75)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.average_perceptron,
 #             exp_res, feature_matrix, labels, T):
 #         return
@@ -389,7 +390,7 @@ if __name__ == "__main__":
 #     log(green("PASS"), ex_name, "")
 
 
-# def check_pegasos_single_update():
+# def test_pegasos_single_update():
 #     ex_name = "Pegasos single update"
 
 #     feature_vector = np.array([1, 2])
@@ -397,7 +398,7 @@ if __name__ == "__main__":
 #     L = 0.2
 #     eta = 0.1
 #     exp_res = (np.array([-0.88, 1.18]), -1.4)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.pegasos_single_step_update,
 #             exp_res,
 #             feature_vector, label, L, eta, theta, theta_0):
@@ -408,7 +409,7 @@ if __name__ == "__main__":
 #     L = 0.2
 #     eta = 0.1
 #     exp_res = (np.array([-0.88, 1.08]), 1.1)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name +  " (boundary case)", p1.pegasos_single_step_update,
 #             exp_res,
 #             feature_vector, label, L, eta, theta, theta_0):
@@ -419,7 +420,7 @@ if __name__ == "__main__":
 #     L = 0.2
 #     eta = 0.1
 #     exp_res = (np.array([-0.88, 1.18]), -1.9)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.pegasos_single_step_update,
 #             exp_res,
 #             feature_vector, label, L, eta, theta, theta_0):
@@ -428,7 +429,7 @@ if __name__ == "__main__":
 #     log(green("PASS"), ex_name, "")
 
 
-# def check_pegasos():
+# def test_pegasos():
 #     ex_name = "Pegasos"
 
 #     feature_matrix = np.array([[1, 2]])
@@ -436,7 +437,7 @@ if __name__ == "__main__":
 #     T = 1
 #     L = 0.2
 #     exp_res = (np.array([1, 2]), 1)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.pegasos,
 #             exp_res, feature_matrix, labels, T, L):
 #         return
@@ -446,7 +447,7 @@ if __name__ == "__main__":
 #     T = 1
 #     L = 1
 #     exp_res = (np.array([1-1/np.sqrt(2), 1-1/np.sqrt(2)]), 1)
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.pegasos,
 #             exp_res, feature_matrix, labels, T, L):
 #         return
@@ -454,14 +455,14 @@ if __name__ == "__main__":
 #     log(green("PASS"), ex_name, "")
 
 
-# def check_classify():
+# def test_classify():
 #     ex_name = "Classify"
 
 #     feature_matrix = np.array([[1, 1], [1, 1], [1, 1]])
 #     theta = np.array([1, 1])
 #     theta_0 = 0
 #     exp_res = np.array([1, 1, 1])
-#     if check_array(
+#     if test_array(
 #             ex_name, p1.classify,
 #             exp_res, feature_matrix, theta, theta_0):
 #         return
@@ -470,14 +471,14 @@ if __name__ == "__main__":
 #     theta = np.array([1, 1])
 #     theta_0 = 0
 #     exp_res = np.array([-1])
-#     if check_array(
+#     if test_array(
 #             ex_name + " (boundary case)", p1.classify,
 #             exp_res, feature_matrix, theta, theta_0):
 #         return
 
 #     log(green("PASS"), ex_name, "")
 
-# def check_classifier_accuracy():
+# def test_classifier_accuracy():
 #     ex_name = "Classifier accuracy"
 
 #     train_feature_matrix = np.array([[1, 0], [1, -1], [2, 3]])
@@ -486,7 +487,7 @@ if __name__ == "__main__":
 #     val_labels = np.array([-1, 1])
 #     exp_res = 1, 0
 #     T=1
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.classifier_accuracy,
 #             exp_res,
 #             p1.perceptron,
@@ -502,7 +503,7 @@ if __name__ == "__main__":
 #     exp_res = 1, 0
 #     T=1
 #     L=0.2
-#     if check_tuple(
+#     if test_tuple(
 #             ex_name, p1.classifier_accuracy,
 #             exp_res,
 #             p1.pegasos,
@@ -513,7 +514,7 @@ if __name__ == "__main__":
 
 #     log(green("PASS"), ex_name, "")
 
-# def check_bag_of_words():
+# def test_bag_of_words():
 #     ex_name = "Bag of words"
 
 #     texts = [
@@ -549,7 +550,7 @@ if __name__ == "__main__":
 #         log(red("FAIL"), ex_name, ": keys are missing:", [k for k in stop_keys if k not in keys], " or are not unexpected:", [k for k in keys if k not in stop_keys])
 
 
-# def check_extract_bow_feature_vectors():
+# def test_extract_bow_feature_vectors():
 #     ex_name = "Extract bow feature vectors"
 #     texts = [
 #         "He loves her ",
@@ -590,18 +591,18 @@ if __name__ == "__main__":
 # def main():
 #     log(green("PASS"), "Import project1")
 #     try:
-#         check_get_order()
-#         check_hinge_loss_single()
-#         check_hinge_loss_full()
-#         check_perceptron_single_update()
-#         check_perceptron()
-#         check_average_perceptron()
-#         check_pegasos_single_update()
-#         check_pegasos()
-#         check_classify()
-#         check_classifier_accuracy()
-#         check_bag_of_words()
-#         check_extract_bow_feature_vectors()
+#         test_get_order()
+#         test_hinge_loss_single()
+#         test_hinge_loss_full()
+#         test_perceptron_single_update()
+#         test_perceptron()
+#         test_average_perceptron()
+#         test_pegasos_single_update()
+#         test_pegasos()
+#         test_classify()
+#         test_classifier_accuracy()
+#         test_bag_of_words()
+#         test_extract_bow_feature_vectors()
 #     except Exception:
 #         log_exit(traceback.format_exc())
 
