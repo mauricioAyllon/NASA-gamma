@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1118</width>
-    <height>711</height>
+    <width>1122</width>
+    <height>698</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,7 +36,7 @@
        <widget class="QFrame" name="frame_3">
         <property name="maximumSize">
          <size>
-          <width>590</width>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
@@ -423,8 +423,8 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>556</width>
-             <height>511</height>
+             <width>546</width>
+             <height>498</height>
             </rect>
            </property>
           </widget>
@@ -436,7 +436,7 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QFrame" name="frame_2">
         <property name="maximumSize">
          <size>
-          <width>590</width>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
