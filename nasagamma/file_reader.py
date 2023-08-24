@@ -94,50 +94,54 @@ def read_csv_file(file_name):
 
 
 def read_txt(filename):
+    description = None
+    plot_label = None
+    date_created = None
+    realtime = None
+    livetime = None
+    erg_cal = None
     with open(filename, "r") as myfile:
         filelst = myfile.readlines()
         for i, line in enumerate(filelst):
             l = line.split()
-            if l[0].lower() == "description:":
+            if l[0].lower() == "description:" and len(l) > 1:
                 description = " ".join(l[1:])
-            elif l[0].lower() == "label:":
+            if l[0].lower() == "label:" and len(l) > 1:
                 plot_label = " ".join(l[1:])
-            elif l[0].lower() == "date" and l[1].lower() == "created:":
+            if l[0].lower() == "date" and l[1].lower() == "created:" and len(l) > 2:
                 date_created = " ".join(l[2])
-            elif l[0].lower() == "real" and l[1].lower() == "time":
+            if l[0].lower() == "real" and l[1].lower() == "time" and len(l) > 2:
                 realtime = l[3]
-            elif l[0].lower() == "live" and l[1].lower() == "time":
+            if l[0].lower() == "live" and l[1].lower() == "time" and len(l) > 2:
                 livetime = l[3]
-            elif l[0].lower() == "energy" and l[1].lower() == "calibration:":
-                erg_cal = " ".join(l[2])
-            else:
-                start_idx = i
+            if l[0].lower() == "energy" and l[1].lower() == "calibration:":
+                if len(l) > 2:
+                    erg_cal = " ".join(l[2])
+                start_idx = i+1
                 break
-
     df = pd.read_csv(filename, skiprows=start_idx)
     unit, cts_col, erg = process_df(df)
 
-    if realtime.lower() == "none":
+    if realtime == "None":
         realtime = None
     else:
         realtime = float(realtime)
-    if livetime.lower() == "none":
+    if livetime == "None":
         livetime = None
     else:
         livetime = float(livetime)
-    if description.lower() == "none":
+    if description == "None":
         description = None
-    if plot_label.lower() == "none":
+    if plot_label == "None":
         plot_label = None
-    if date_created.lower() == "none":
+    if date_created == "None":
         date_created = None
-    if erg_cal.lower() == "none":
+    if erg_cal == "None":
         erg_cal = None
 
     if cts_col == 0:
         print("ERROR: no column named with counts keyword e.g counts, data, cts")
     elif erg == 0:
-        # print("working with channel numbers")
         e_units = "channels"
         spect = sp.Spectrum(
             counts=df[cts_col],
