@@ -29,13 +29,25 @@ class Spectrum:
         counts : numpy array, pandas series, or list.
             counts per bin or count rate. This is the only
             required input parameter.
-        channels : numpy array, pandas series, or list. Optional
-            array of bin edges. If None, assume based on counts.
-            The default is None.
         energies : numpy array, pandas series, or list. Optional
             energy values. The default is None.
         e_units : string, optional
             string of energy units e.g. "MeV". The default is None.
+        realtime : int or float, optional
+            real time of the measurement. The default is None.
+        livetime : int or float, optional
+            live time of the measurement. The default is None.
+        cps : bool, optional
+            if counts per second are used instead of counts,
+            set this to True. The default is False.
+        acq_date : string, optional
+            aqcquisition date for record keeping. The default is None.
+        energy_cal : string, optional
+            energy calibration equation for record keeping. The default is None.
+        description : string, optional
+            experiment description for record keeping. The default is None.
+        label : string, optional
+            label experiment for plotting and record keeping. The default is None.
 
         Returns
         -------
@@ -160,6 +172,20 @@ class Spectrum:
         y0_min = np.amin(self.counts[self.counts > 0.0])
         # replace negative values and zeros by 1/10th of the minimum
         self.counts[self.counts < 0.0] = y0_min * 1e-1
+
+    def remove_calibration(self):
+        self.__init__(
+            counts=self.counts,
+            energies=None,
+            e_units=None,
+            realtime=self.realtime,
+            livetime=self.livetime,
+            cps=self.cps,
+            acq_date=self.acq_date,
+            energy_cal=None,
+            description=self.description,
+            label=self.label,
+        )
 
     def to_csv(self, fileName):
         """

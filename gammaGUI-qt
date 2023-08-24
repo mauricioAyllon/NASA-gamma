@@ -1079,7 +1079,7 @@ class NasaGammaApp(QMainWindow):
     def remove_cal(self):
         try:
             self.e_units = "channels"
-            self.spect = sp.Spectrum(counts=self.spect.counts, e_units=self.e_units)
+            self.spect.remove_calibration()
             self.create_graph(fit=False, reset=True)
             self.search = 0
         except:
