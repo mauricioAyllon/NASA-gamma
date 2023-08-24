@@ -16,7 +16,7 @@ df = pd.read_csv(file)
 
 
 # instantiate a Spectrum object
-spect = sp.Spectrum(counts=df["counts"], energies=df["Energy [keV]"])
+spect = sp.Spectrum(counts=df["counts"], energies=df["Energy [keV]"], e_units="keV")
 
 fig = plt.figure(figsize=(10, 6))
 ax = fig.add_subplot()
