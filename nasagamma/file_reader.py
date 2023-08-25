@@ -109,14 +109,14 @@ def read_txt(filename):
             if l[0].lower() == "label:" and len(l) > 1:
                 plot_label = " ".join(l[1:])
             if l[0].lower() == "date" and l[1].lower() == "created:" and len(l) > 2:
-                date_created = " ".join(l[2])
+                date_created = " ".join(l[2:])
             if l[0].lower() == "real" and l[1].lower() == "time" and len(l) > 2:
                 realtime = l[3]
             if l[0].lower() == "live" and l[1].lower() == "time" and len(l) > 2:
                 livetime = l[3]
             if l[0].lower() == "energy" and l[1].lower() == "calibration:":
                 if len(l) > 2:
-                    erg_cal = " ".join(l[2])
+                    erg_cal = " ".join(l[2:])
                 start_idx = i+1
                 break
     df = pd.read_csv(filename, skiprows=start_idx)
