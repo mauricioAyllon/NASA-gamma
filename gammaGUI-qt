@@ -2426,7 +2426,7 @@ class NasaGammaApp(QMainWindow):
         self.w_isot_id.lab_src.setChecked(False)
         self.w_isot_id.natural_rad.setChecked(False)
         self.w_isot_id.neutron_capt.setChecked(False)
-        self.w_isot_id.neutron_inl_talys.setChecked(False)
+        self.w_isot_id.neutron_talys.setChecked(False)
         self.w_isot_id.neutron_inl_baghdad.setChecked(False)
 
     @staticmethod
@@ -2462,8 +2462,8 @@ class NasaGammaApp(QMainWindow):
         capt_IAEA_file = pkg_resources.resource_filename(
             "nasagamma", "data/Capture_IAEA.csv"
         )
-        inl_talys_file = pkg_resources.resource_filename(
-            "nasagamma", "data/Inelastic_14MeV_Talys.csv"
+        talys_file = pkg_resources.resource_filename(
+            "nasagamma", "data/Talys-14MeV.csv"
         )
         inl_baghdad_file = pkg_resources.resource_filename(
             "nasagamma", "data/Inelastic_Baghdad.csv"
@@ -2479,8 +2479,8 @@ class NasaGammaApp(QMainWindow):
             file = capt_file
         elif self.w_isot_id.neutron_capt_IAEA.isChecked():
             file = capt_IAEA_file
-        elif self.w_isot_id.neutron_inl_talys.isChecked():
-            file = inl_talys_file
+        elif self.w_isot_id.neutron_talys.isChecked():
+            file = talys_file
         elif self.w_isot_id.neutron_inl_baghdad.isChecked():
             file = inl_baghdad_file
         else:

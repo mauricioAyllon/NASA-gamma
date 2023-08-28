@@ -564,7 +564,7 @@ sources</string>
               </widget>
              </item>
              <item row="1" column="1" rowspan="2">
-              <widget class="QCheckBox" name="neutron_inl_talys">
+              <widget class="QCheckBox" name="neutron_talys">
                <property name="font">
                 <font>
                  <pointsize>12</pointsize>
@@ -574,8 +574,7 @@ sources</string>
                 <string notr="true"/>
                </property>
                <property name="text">
-                <string>Neutron inelastic 
-14 MeV (Talys)</string>
+                <string>(n,x) 14 MeV (Talys)</string>
                </property>
                <property name="autoExclusive">
                 <bool>true</bool>
