@@ -1,4 +1,7 @@
 """
+Tools to display and interact with gamma ray spectra.
+The Spectrum class is used for all subsequent spectrum manipulations 
+including peak fitting, calibration, and line identification.
 """
 
 import matplotlib.pyplot as plt
@@ -174,6 +177,14 @@ class Spectrum:
         self.counts[self.counts < 0.0] = y0_min * 1e-1
 
     def remove_calibration(self):
+        """
+        Remove energy calibration and reinitialize Spectrum object
+
+        Returns
+        -------
+        None.
+
+        """
         self.__init__(
             counts=self.counts,
             energies=None,
