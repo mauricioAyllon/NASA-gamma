@@ -574,7 +574,7 @@ sources</string>
                 <string notr="true"/>
                </property>
                <property name="text">
-                <string>(n,x) 14 MeV (Talys)</string>
+                <string>14 MeV (n,x) - Talys</string>
                </property>
                <property name="autoExclusive">
                 <bool>true</bool>

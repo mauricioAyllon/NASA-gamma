@@ -40,8 +40,6 @@ pred_erg, efit = ecal.ecalibration(
     mean_vals=mean_values, erg=erg, channels=ch, n=1, plot=True, residual=True
 )
 
-pred_erg[0] = 0  # because negative entry
-
 spect2 = sp.Spectrum(counts=df.counts, energies=pred_erg, e_units="keV")
 spect2.plot()
 

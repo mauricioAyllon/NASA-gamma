@@ -57,7 +57,7 @@ def ecalibration(
     terms = [f"${coeffs[0]:.3E}$", f"${coeffs[1]:.3E}x$"]
     for i, c in enumerate(coeffs):
         if i >= 2:
-            terms.append(f"${c:.3E}x^{i}$")
+            terms.append(rf"${c:.3E}x^{i}$")
     equation = " + ".join(terms)
     if plot:
         plt.rc("font", size=14)

@@ -348,7 +348,7 @@ class NasaGammaApp(QMainWindow):
         self.openFile.triggered.connect(self.load_spe_file)
         self.saveSpect.triggered.connect(self.save_spect)
         self.saveIDpeaks.triggered.connect(self.save_ID_peaks)
-        self.info_file.triggered.connect(self.display_info_file)
+        self.info_file.triggered.connect(self.try_display_info_file)
         self.clearSpectrum.triggered.connect(self.clear_spectrum)
 
         self.initialize_main_figure()
@@ -405,6 +405,7 @@ class NasaGammaApp(QMainWindow):
         self.df_ecal_fit = None
         self.flag_check_e_units = 0
         self.flag_e_legend = 0
+        self.ecal_eqn = None
 
         self.w_info_cal = WindowCalInfo()
         self.button_info_cal.clicked.connect(self.cal_info_activate)
@@ -1122,6 +1123,12 @@ class NasaGammaApp(QMainWindow):
             ax_fit=self.ax_cal,
             ax_res=self.ax_cal_res,
         )
+        # C0, C1,...
+        coeffs = list(self.efit.best_values.values())
+        coeffs_str = []
+        for i, c in enumerate(coeffs):
+            coeffs_str.append(f"{c:.4E}ch^{i}")
+        self.ecal_eqn = " + ".join(coeffs_str)
 
     def add_point_dont_fit(self, erg_lst=None, ch_lst=None):
 
@@ -1346,21 +1353,21 @@ class NasaGammaApp(QMainWindow):
             d_txt = self.w_cal_eqns.d.text()
             ch = self.spect.channels
             erg = 0
-            label = "Equation: $a + bx + cx^2 + dx^3$\n"
+            self.ecal_eqn = "Equation: $a + bx + cx^2 + dx^3$\n"
             if self.isevaluable(a_txt):
                 erg = erg + eval(a_txt)
-                label = label + f"a = {eval(a_txt)}"
+                self.ecal_eqn = self.ecal_eqn + f"a = {eval(a_txt)}"
             if self.isevaluable(b_txt):
                 erg = erg + eval(b_txt) * ch
-                label = label + f"\nb = {eval(b_txt)}"
+                self.ecal_eqn = self.ecal_eqn + f"\nb = {eval(b_txt)}"
             if self.isevaluable(c_txt):
                 erg = erg + eval(c_txt) * ch**2
-                label = label + f"\nc = {eval(c_txt)}"
+                self.ecal_eqn = self.ecal_eqn + f"\nc = {eval(c_txt)}"
             if self.isevaluable(d_txt):
                 erg = erg + eval(d_txt) * ch**3
-                label = label + f"\nd = {eval(d_txt)}"
+                self.ecal_eqn = self.ecal_eqn + f"\nd = {eval(d_txt)}"
             self.pred_erg = erg
-            self.plot_cal_eqns(label)
+            self.plot_cal_eqns(self.ecal_eqn)
         except:
             print("Could not set calibration equations")
 
@@ -1403,21 +1410,27 @@ class NasaGammaApp(QMainWindow):
     def apply_cal(self):
         try:
             if self.cal_e_units is None:
-                self.spect = sp.Spectrum(
-                    counts=self.spect.counts,
-                    energies=self.pred_erg,
-                    e_units=self.e_units,
-                )
+                e_units = self.spect.e_units
             else:
-                self.spect = sp.Spectrum(
-                    counts=self.spect.counts,
-                    energies=self.pred_erg,
-                    e_units=self.cal_e_units,
-                )
+                e_units = self.cal_e_units
+
+            self.spect = sp.Spectrum(
+                counts=self.spect.counts,
+                energies=self.pred_erg,
+                e_units=e_units,
+                realtime=self.spect.realtime,
+                livetime=self.spect.livetime,
+                cps=self.spect.cps,
+                acq_date=self.spect.acq_date,
+                energy_cal=self.ecal_eqn,
+                description=self.spect.description,
+                label=self.spect.label,
+            )
             self.create_graph(fit=False, reset=True)
             self.search = 0
-        except:
+        except Exception as e:
             print("Could not apply calibration")
+            print("An error occurred:", str(e))
 
     def ecal_remove_selected(self):
         if (
@@ -2737,10 +2750,16 @@ class NasaGammaApp(QMainWindow):
             print("ERROR: Cannot save file")
             print("An unknown error occurred:", str(e))
 
+    def try_display_info_file(self):
+        try:
+            self.display_info_file()
+        except Exception as e:
+            print("Make sure to load a spectrum file.")
+            print("The following error occurred:", str(e))
+
     def display_info_file(self):
         self.w_info_file = WindowInfoFile()
         self.w_info_file.show()
-
         tot_cts = self.spect.counts.sum()
         nch = self.spect.counts.shape[0]
         self.w_info_file.label_tc.setText(str(tot_cts))
@@ -2827,27 +2846,24 @@ class NasaGammaApp(QMainWindow):
                 fileName_lc = fileName.lower()
                 if fileName_lc[-4:] == ".csv":
                     try:
-                        e_units, spect = file_reader.read_csv_file(fileName)
+                        spect = file_reader.read_csv_file(fileName)
+                        e_units = spect.e_units
                     except:
                         self.lynxcsv = file_reader.ReadLynxCsv(fileName)
                         spect = self.lynxcsv.spect
                         e_units = spect.e_units
 
                 elif fileName_lc[-4:] == ".cnf":
-                    e_units, spect = file_reader.read_cnf_to_spect(fileName)
+                    spect = file_reader.read_cnf_to_spect(fileName)
+                    e_units = spect.e_units
                 elif fileName_lc[-4:] == ".mca":
                     mca = file_reader.ReadMCA(fileName)
+                    spect = mca.spect
                     e_units = "channels"
-                    spect = sp.Spectrum(
-                        counts=mca.counts, e_units=e_units, livetime=mca.live_time
-                    )
-                elif fileName_lc[-3:] == "spe":
+                elif fileName_lc[-4:] == ".spe":
                     spe = file_reader.ReadSPE(fileName)
                     e_units = "channels"
-                    spect = sp.Spectrum(
-                        counts=spe.counts, e_units=e_units, livetime=spe.live_time
-                    )
-
+                    spect = spe.spect
                 elif fileName_lc[-8:] == ".pha.txt":
                     multiscanPHA = file_reader.ReadMultiscanPHA(fileName)
                     spect = multiscanPHA.spect

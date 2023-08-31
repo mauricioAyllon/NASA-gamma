@@ -90,7 +90,7 @@ def read_csv_file(file_name):
         spect = sp.Spectrum(counts=df[cts_col], energies=df[erg], e_units=e_units)
         spect.x = spect.energies
 
-    return e_units, spect
+    return spect
 
 
 def read_txt(filename):
@@ -117,7 +117,7 @@ def read_txt(filename):
             if l[0].lower() == "energy" and l[1].lower() == "calibration:":
                 if len(l) > 2:
                     erg_cal = " ".join(l[2:])
-                start_idx = i+1
+                start_idx = i + 1
                 break
     df = pd.read_csv(filename, skiprows=start_idx)
     unit, cts_col, erg = process_df(df)
@@ -168,7 +168,6 @@ def read_txt(filename):
             energy_cal=erg_cal,
             label=plot_label,
         )
-        spect.x = spect.energies
     return spect
 
 
@@ -189,24 +188,38 @@ def read_cnf_to_spect(filename):
         Spectrum object from nasagamma.
 
     """
-    dict_cnf = read_cnf.read_cnf_file(filename, False)
+    dict_cnf = read_cnf.read_cnf_file(filename, write_output=False)
 
     counts = dict_cnf["Channels data"]
     energy = dict_cnf["Energy"]
     livetime = dict_cnf["Live time"]
+    realtime = dict_cnf["Real time"]
+    start_date_time = dict_cnf["Start time"]
 
     if energy is None:
         e_units = "channels"
-        spect = sp.Spectrum(counts=counts, e_units=e_units, livetime=livetime)
-        spect.x = spect.channels
+        spect = sp.Spectrum(
+            counts=counts,
+            e_units=e_units,
+            livetime=livetime,
+            realtime=realtime,
+            acq_date=start_date_time,
+        )
     else:
+        erg_coeff = dict_cnf["Energy coefficients"]
+        erg_eqn = f"{erg_coeff[0]} + {erg_coeff[1]}*ch + {erg_coeff[2]}*ch^2 + {erg_coeff[3]}*ch^3"
         e_units = dict_cnf["Energy unit"]
         spect = sp.Spectrum(
-            counts=counts, energies=energy, e_units=e_units, livetime=livetime
+            counts=counts,
+            energies=energy,
+            e_units=e_units,
+            livetime=livetime,
+            realtime=realtime,
+            acq_date=start_date_time,
+            energy_cal=erg_eqn,
         )
-        spect.x = spect.energies
 
-    return e_units, spect
+    return spect
 
 
 class ReadMCA:
@@ -287,7 +300,15 @@ class ReadMCA:
             elif l[0] == "<<data>>":
                 start_idx = i
                 break
-        self.counts = np.array(filelst[start_idx + 1 : -1], dtype=int)
+        counts = np.array(filelst[start_idx + 1 : -1], dtype=int)
+        self.spect = sp.Spectrum(
+            counts=counts,
+            livetime=self.live_time,
+            realtime=self.real_time,
+            acq_date=self.start_time,
+            description=self.description,
+            label=self.tag,
+        )
 
 
 class ReadSPE:
@@ -319,6 +340,7 @@ class ReadSPE:
         self.channels = None
         self.ROI = None
         self.counts = None
+        self.erg_cal = None
 
         if file[-3:].lower() != "spe":
             print("ERROR: Must be a Spe file")
@@ -351,7 +373,17 @@ class ReadSPE:
             if "$roi:" in l:
                 self.ROI = filelst[i + 1].split()[0]
                 end_idx = i
+            if "$ener_fit:" in l:
+                self.erg_cal = filelst[i + 1].split()
         self.counts = np.array(filelst[start_idx + 2 : end_idx - 1], dtype=int)
+        self.spect = sp.Spectrum(
+            counts=self.counts,
+            livetime=self.live_time,
+            realtime=self.real_time,
+            acq_date=self.date + " " + self.time_str,
+            description=self.description,
+            energy_cal=self.erg_cal,
+        )
 
 
 def read_lynx_csv(file_name):
@@ -495,7 +527,6 @@ class ReadMultiscanPHA:
             energy_cal=self.energy_calibration,
             acq_date=self.start_time,
         )
-        self.spect.x = self.spect.energies
         self.counts = self.spect.counts.sum()
         self.count_rate = self.counts / self.live_time
         self.nch = self.spect.counts.shape[0]

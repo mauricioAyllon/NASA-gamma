@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1600</width>
-    <height>850</height>
+    <height>878</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -538,7 +538,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                   <x>0</x>
                   <y>0</y>
                   <width>741</width>
-                  <height>148</height>
+                  <height>149</height>
                  </rect>
                 </property>
                </widget>
@@ -841,7 +841,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                 <x>0</x>
                 <y>0</y>
                 <width>444</width>
-                <height>580</height>
+                <height>608</height>
                </rect>
               </property>
              </widget>
@@ -890,19 +890,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_6">
-           <item row="0" column="2">
-            <widget class="QPushButton" name="button_fit1_eff">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Fit 1</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="5">
+           <item row="0" column="6">
             <widget class="QPushButton" name="button_reset_eff">
              <property name="font">
               <font>
@@ -915,18 +903,18 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
             </widget>
            </item>
            <item row="0" column="3">
-            <widget class="QPushButton" name="button_fit2_eff">
+            <widget class="QPushButton" name="button_fit1_eff">
              <property name="font">
               <font>
                <pointsize>14</pointsize>
               </font>
              </property>
              <property name="text">
-              <string>Fit 2</string>
+              <string>Fit 1</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="4">
+           <item row="0" column="5">
             <spacer name="horizontalSpacer_7">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -939,7 +927,19 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              </property>
             </spacer>
            </item>
-           <item row="0" column="0">
+           <item row="0" column="4">
+            <widget class="QPushButton" name="button_fit2_eff">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Fit 2</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
             <widget class="QPushButton" name="button_yscale_eff">
              <property name="font">
               <font>
@@ -951,7 +951,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
+           <item row="0" column="2">
             <spacer name="horizontalSpacer_21">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -963,6 +963,21 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
               </size>
              </property>
             </spacer>
+           </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="pushButton">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 255, 127);</string>
+             </property>
+             <property name="text">
+              <string>Info</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -2305,7 +2320,6 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
     <addaction name="clearSpectrum"/>
     <addaction name="separator"/>
     <addaction name="info_file"/>
-    <addaction name="actionTheme"/>
    </widget>
    <widget class="QMenu" name="menuSave">
     <property name="title">
