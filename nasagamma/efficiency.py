@@ -15,6 +15,7 @@ class Efficiency:
         self.livetime = float(livetime)  # s
         self.t_elapsed = float(t_elapsed)  # s
         self.which_peak = which_peak
+        self.error = 0
 
     def calculate_N_emitted(self):
         A0_bq = self.A0
@@ -35,8 +36,42 @@ class Efficiency:
         N_detected = self.calculate_N_detected(fit_obj)
         self.eff = N_detected / N_emitted
 
+    def calculate_error(
+        self, fit_obj, t_half_sig, A0_sig, Br_sig, livetime_sig, t_elapsed_sig
+    ):
+        N_detected = fit_obj.peak_info[self.which_peak][f"area{self.which_peak+1}"]
+        N_detected_sig = fit_obj.peak_err[self.which_peak][
+            f"area_err{self.which_peak+1}"
+        ]
+        # denominator function denoted as f
+        # sig_f = sqrt(df_dA0**2 * sig_A0**2 + ...)
+        lmd = np.log(2) / self.t_half
+        lmd_sig = lmd * t_half_sig / self.t_half
+        f = self.A0 * np.exp(-lmd * self.t_elapsed) * self.Br * self.livetime
+        dfdA0 = np.exp(-lmd * self.t_elapsed) * self.Br * self.livetime
+        dfdlmd = (
+            self.A0
+            * self.Br
+            * self.livetime
+            * (-self.t_elapsed)
+            * np.exp(-lmd * self.t_elapsed)
+        )
+        dfdte = (
+            self.A0 * self.Br * self.livetime * (-lmd) * np.exp(-lmd * self.t_elapsed)
+        )
+        dfdb = self.A0 * np.exp(-lmd * self.t_elapsed) * self.livetime
+        dfdtc = self.A0 * np.exp(-lmd * self.t_elapsed) * self.Br
+        sig_f = np.sqrt(
+            dfdA0**2 * A0_sig
+            + dfdlmd**2 * lmd_sig**2
+            + dfdte**2 * t_elapsed_sig**2
+            + dfdb**2 * Br_sig**2
+            + dfdtc**2 * livetime_sig**2
+        )
+        self.error = f * np.sqrt((N_detected_sig / N_detected) ** 2 + (sig_f / f) ** 2)
 
-def eff_fit(en, eff, order=1, plot_table=True, fig=None, ax=None):
+
+def eff_fit(en, eff, order=1, fig=None, ax=None):
     plt.rc("font", size=14)
     plt.style.use("seaborn-darkgrid")
 

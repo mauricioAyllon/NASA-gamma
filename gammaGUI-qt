@@ -1546,9 +1546,7 @@ class NasaGammaApp(QMainWindow):
             x = np.array(self.eff_vals)[:, 0]
             y = np.array(self.eff_vals)[:, 1]
             self.ax_eff.clear()
-            efficiency.eff_fit(
-                x, y, order=1, plot_table=True, fig=self.fig_eff, ax=self.ax_eff
-            )
+            efficiency.eff_fit(x, y, order=1, fig=self.fig_eff, ax=self.ax_eff)
             self.ax_eff.set_xlabel(self.fit.x_units)
             self.ax_eff.set_ylabel("Efficiency [%]")
             self.fig_eff.canvas.draw_idle()
