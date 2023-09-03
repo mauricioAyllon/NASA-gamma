@@ -5,7 +5,21 @@ import lmfit
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import datetime
 
+def calculate_t_elapsed(date0, date1):
+    """
+    Calculate number of seconds between two dates.
+    date0 and date1 must be strings in YYYY-MM-DD format
+    """
+    fmt_str = "%Y-%m-%d"
+    date0_str = str(date0)
+    date1_str = str(date1)
+    date0 = datetime.datetime.strptime(date0_str, fmt_str)
+    date1 = datetime.datetime.strptime(date1_str, fmt_str)
+    delta_t = date1 - date0
+    delta_t_sec = delta_t.days * 24 * 3600
+    return delta_t_sec
 
 class Efficiency:
     def __init__(self, t_half, A0, Br, livetime, t_elapsed, which_peak=0):
@@ -15,6 +29,12 @@ class Efficiency:
         self.livetime = float(livetime)  # s
         self.t_elapsed = float(t_elapsed)  # s
         self.which_peak = which_peak
+        self.t_half_sig = 0
+        self.A0_sig = 0
+        self.Br_sig = 0
+        self.livetime_sig = 0
+        self.t_elapsed_sig = 0
+        self.eff = 0
         self.error = 0
 
     def calculate_N_emitted(self):
@@ -39,6 +59,11 @@ class Efficiency:
     def calculate_error(
         self, fit_obj, t_half_sig, A0_sig, Br_sig, livetime_sig, t_elapsed_sig
     ):
+        self.t_half_sig = t_half_sig
+        self.A0_sig = A0_sig
+        self.Br_sig = Br_sig
+        self.livetime_sig = livetime_sig
+        self.t_elapsed_sig = t_elapsed_sig
         N_detected = fit_obj.peak_info[self.which_peak][f"area{self.which_peak+1}"]
         N_detected_sig = fit_obj.peak_err[self.which_peak][
             f"area_err{self.which_peak+1}"
@@ -68,7 +93,42 @@ class Efficiency:
             + dfdb**2 * Br_sig**2
             + dfdtc**2 * livetime_sig**2
         )
-        self.error = f * np.sqrt((N_detected_sig / N_detected) ** 2 + (sig_f / f) ** 2)
+        self.error = (N_detected/f) * np.sqrt((N_detected_sig / N_detected) ** 2 + (sig_f / f) ** 2)
+
+    def to_df(self):
+        cols = ["Efficiency", "Eff_error", "t_half (s)", "t_half_error (s)", "A0 (Bq)", "A0_error (Bq)",
+                "B", "B_error", "t_count (s)", "t_count_error (s)", "t_elapsed (s)",
+                "t_elapsed_error (s)"]
+        data = [self.eff, self.error, self.t_half, self.t_half_sig, self.A0, self.A0_sig,
+                self.Br, self.Br_sig, self.livetime, self.livetime_sig, self.t_elapsed,
+                self.t_elapsed_sig]
+        df = pd.DataFrame(columns=cols, data=np.array(data).reshape(1,len(data)))
+        return df
+
+def plot_points(e_vals, eff_vals, err_vals, e_units="keV", ax=None):
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot()
+    ax.errorbar(
+        e_vals,
+        eff_vals,
+        yerr=err_vals,
+        ecolor="red",
+        elinewidth=5,
+        capsize=12,
+        capthick=3,
+        marker="s",
+        mfc="black",
+        mec="black",
+        markersize=7,
+        ls=" ",
+        lw=3,
+        label="Data",
+    )
+    ax.set_xlabel(f"Energy ({e_units})")
+    ax.set_ylabel(f"Efficiency (%)")
+    ax.legend()
+
 
 
 def eff_fit(en, eff, order=1, fig=None, ax=None):

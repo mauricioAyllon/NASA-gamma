@@ -1501,8 +1501,8 @@ class NasaGammaApp(QMainWindow):
 
     def add_eff(self):
         try:
-            self.get_eff_params()
-            eff_class = efficiency.Efficiency(
+            self.get_eff_input()
+            self.eff_obj = efficiency.Efficiency(
                 t_half=self.t_half,
                 A0=self.A0,
                 Br=self.B,
@@ -1510,23 +1510,29 @@ class NasaGammaApp(QMainWindow):
                 t_elapsed=self.delta_t_sec,
                 which_peak=self.n_peak_eff,
             )
-            eff_class.calculate_efficiency(self.fit)
-            self.append_to_eff(eff_class.eff * 100, eff_class.mean_val)
+            self.eff_obj.calculate_efficiency(self.fit)
+            self.eff_obj.calculate_error(self.fit, self.t_half_sig, self.A0_sig, self.B_sig,
+                                    self.delta_t_sig, self.acq_time_sig)
+            self.append_to_eff(self.eff_obj.eff * 100, self.eff_obj.mean_val, self.eff_obj.error)
             self.plot_eff_points()
-        except:
-            pass
+        except Exception as e:
+            print("ERROR: could not add efficiency value")
+            print(e)
 
     def plot_eff_points(self):
         x = np.array(self.eff_vals)[:, 0]
         y = np.array(self.eff_vals)[:, 1]
+        y_err = np.array(self.eff_vals)[:, 2]
         self.ax_eff.clear()
         self.ax_eff_tab.clear()
-        self.ax_eff.plot(x, y, "o", color="k")
-        # self.ax_eff.legend(loc='best')
-        self.ax_eff.set_xlabel(self.fit.x_units)
-        self.ax_eff.set_ylabel("Efficiency [%]")
-        self.ax_eff.set_yscale(self.eff_scale)
-        self.ax_eff.set_title("Efficiency")
+        efficiency.plot_points(e_vals=x, eff_vals=y, err_vals=y_err,
+                                 e_units=self.e_units, ax=self.ax_eff)
+        # self.ax_eff.plot(x, y, "o", color="k")
+        # # self.ax_eff.legend(loc='best')
+        # self.ax_eff.set_xlabel(self.fit.x_units)
+        # self.ax_eff.set_ylabel("Efficiency [%]")
+        # self.ax_eff.set_yscale(self.eff_scale)
+        # self.ax_eff.set_title("Efficiency")
         efficiency.eff_table(
             x_lst=x,
             eff_lst=y,
@@ -1536,9 +1542,9 @@ class NasaGammaApp(QMainWindow):
         )
         self.fig_eff.canvas.draw_idle()
 
-    def append_to_eff(self, eff, mean):
-        if (mean, eff) not in self.eff_vals:
-            self.eff_vals.append((mean, eff))
+    def append_to_eff(self, eff, mean, error):
+        if (mean, eff, error) not in self.eff_vals:
+            self.eff_vals.append((mean, eff, error))
         self.eff_vals.sort(key=lambda x: x[0])
 
     def eff_fit1(self):
@@ -1563,7 +1569,7 @@ class NasaGammaApp(QMainWindow):
             self.eff_scale = "log"
         self.fig_eff.canvas.draw_idle()
 
-    def get_eff_params(self):
+    def get_eff_input(self):
         # which peak?
         if self.w_eff.button_first.isChecked():
             self.n_peak_eff = 0
@@ -1583,6 +1589,8 @@ class NasaGammaApp(QMainWindow):
             msg = "ERROR: time units not determined"
             print(msg)
         self.t_half = float(self.w_eff.txt_t_half.text()) * t_fact
+        # t_half sigma
+        self.t_half_sig = float(self.w_eff.txt_t_half_sig.text())
 
         # A0
         if self.w_eff.button_Ci.isChecked():
@@ -1593,21 +1601,34 @@ class NasaGammaApp(QMainWindow):
             msg = "ERROR: activity units not determined"
             print(msg)
         self.A0 = float(self.w_eff.txt_activity.text()) * A_fact
+        # A0 sigma
+        self.A0_sig = float(self.w_eff.txt_activity_sig.text())
 
-        # dates
+        # dates or time since production
         date_str0 = self.w_eff.txt_init_date.text()
-        fmt_str = "%Y-%m-%d"
-        date0 = datetime.datetime.strptime(date_str0, fmt_str)
-        date_str1 = self.w_eff.txt_end_date.text()
-        date1 = datetime.datetime.strptime(date_str1, fmt_str)
-        delta_t = date1 - date0
-        self.delta_t_sec = delta_t.days * 24 * 3600
+        t_duration = self.w_eff.txt_t_duration.text()
+        if date_str0 != " ":
+            fmt_str = "%Y-%m-%d"
+            date0 = datetime.datetime.strptime(date_str0, fmt_str)
+            date_str1 = self.w_eff.txt_end_date.text()
+            date1 = datetime.datetime.strptime(date_str1, fmt_str)
+            delta_t = date1 - date0
+            self.delta_t_sec = delta_t.days * 24 * 3600
+        elif t_duration != " ":
+            self.delta_t_sec = float(t_duration)
+        else:
+            msg = "ERROR: either dates or time since production must be specified"
+            print(msg)
+        self.delta_t_sig = float(self.w_eff.txt_t_duration_sig.text())
+
 
         # branching ratio
         self.B = float(self.w_eff.txt_B.text())
+        self.B_sig = float(self.w_eff.txt_B_sig.text())
 
         # acquisition time
         self.acq_time = float(self.w_eff.txt_acq.text())
+        self.acq_time_sig = float(self.w_eff.txt_acq_sig.text())
 
     ## Resolution (FWHM)
     def reset_fwhm_figure(self):
