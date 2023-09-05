@@ -50,10 +50,10 @@ from nasagamma import read_cnf
 from nasagamma import tlist
 from nasagamma import energy_calibration as ecal
 from nasagamma import efficiency
-from nasagamma import resolution
-from nasagamma import file_reader
-from nasagamma import read_parquet_api
-from nasagamma import parse_NIST
+from nasagamma import resolution  
+from nasagamma import file_reader  
+from nasagamma import read_parquet_api  
+from nasagamma import parse_NIST  
 from nasagamma import diagnostics
 import pkg_resources
 
@@ -1477,17 +1477,15 @@ class NasaGammaApp(QMainWindow):
         self.fig_eff = self.efficiency_plot.canvas.figure
         self.fig_eff.clear()
         self.fig_eff.set_constrained_layout(True)
-        gs2 = self.fig_eff.add_gridspec(
-            1, 2, width_ratios=[0.5, 0.5], height_ratios=[1]
-        )
+        gs2 = self.fig_eff.add_gridspec(2, 1, height_ratios=[0.3, 1.5])
         # axes
-        self.ax_eff = self.fig_eff.add_subplot(gs2[:, 0])
-        self.ax_eff_tab = self.fig_eff.add_subplot(gs2[:, 1])
+        self.ax_eff = self.fig_eff.add_subplot(gs2[1, :])
+        self.ax_eff_res = self.fig_eff.add_subplot(gs2[0, :])
         # remove ticks
         self.ax_eff.set_xticks([])
         self.ax_eff.set_yticks([])
-        self.ax_eff_tab.set_xticks([])
-        self.ax_eff_tab.set_yticks([])
+        self.ax_eff_res.set_xticks([])
+        self.ax_eff_res.set_yticks([])
 
     def reset_eff_all(self):
         self.reset_eff_figure()
@@ -1524,22 +1522,16 @@ class NasaGammaApp(QMainWindow):
         y = np.array(self.eff_vals)[:, 1]
         y_err = np.array(self.eff_vals)[:, 2]
         self.ax_eff.clear()
-        self.ax_eff_tab.clear()
+        self.ax_eff_res.clear()
         efficiency.plot_points(e_vals=x, eff_vals=y, err_vals=y_err,
                                  e_units=self.e_units, ax=self.ax_eff)
-        # self.ax_eff.plot(x, y, "o", color="k")
-        # # self.ax_eff.legend(loc='best')
-        # self.ax_eff.set_xlabel(self.fit.x_units)
-        # self.ax_eff.set_ylabel("Efficiency [%]")
-        # self.ax_eff.set_yscale(self.eff_scale)
-        # self.ax_eff.set_title("Efficiency")
-        efficiency.eff_table(
-            x_lst=x,
-            eff_lst=y,
-            e_units=self.e_units,
-            ax=self.ax_eff_tab,
-            fig=self.fig_eff,
-        )
+        # efficiency.eff_table(
+        #     x_lst=x,
+        #     eff_lst=y,
+        #     e_units=self.e_units,
+        #     ax=self.ax_eff_tab,
+        #     fig=self.fig_eff,
+        # )
         self.fig_eff.canvas.draw_idle()
 
     def append_to_eff(self, eff, mean, error):

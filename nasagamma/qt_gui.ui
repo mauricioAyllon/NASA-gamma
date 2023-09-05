@@ -871,8 +871,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
        <attribute name="title">
         <string>Efficiency</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_28">
-        <item row="0" column="0">
+       <layout class="QGridLayout" name="gridLayout_41">
+        <item row="0" column="0" colspan="2">
          <widget class="QFrame" name="frame_8">
           <property name="maximumSize">
            <size>
@@ -983,13 +983,65 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="MplWidget" name="efficiency_plot" native="true">
-          <property name="mouseTracking">
-           <bool>false</bool>
+         <widget class="QFrame" name="frame_18">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <property name="autoFillBackground">
-           <bool>false</bool>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
           </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_28">
+           <item row="0" column="0">
+            <widget class="MplWidget" name="efficiency_plot" native="true">
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="mouseTracking">
+              <bool>false</bool>
+             </property>
+             <property name="autoFillBackground">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QFrame" name="frame_19">
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_40">
+           <item row="0" column="0">
+            <widget class="QScrollArea" name="scrollArea_eff">
+             <property name="widgetResizable">
+              <bool>true</bool>
+             </property>
+             <widget class="QWidget" name="scrollAreaWidgetContents_3">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>743</width>
+                <height>648</height>
+               </rect>
+              </property>
+             </widget>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
