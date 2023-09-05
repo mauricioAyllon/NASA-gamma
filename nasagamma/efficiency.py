@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import datetime
 
+
 def calculate_t_elapsed(date0, date1):
     """
     Calculate number of seconds between two dates.
@@ -20,6 +21,7 @@ def calculate_t_elapsed(date0, date1):
     delta_t = date1 - date0
     delta_t_sec = delta_t.days * 24 * 3600
     return delta_t_sec
+
 
 class Efficiency:
     def __init__(self, t_half, A0, Br, livetime, t_elapsed, which_peak=0):
@@ -93,17 +95,44 @@ class Efficiency:
             + dfdb**2 * Br_sig**2
             + dfdtc**2 * livetime_sig**2
         )
-        self.error = (N_detected/f) * np.sqrt((N_detected_sig / N_detected) ** 2 + (sig_f / f) ** 2)
+        self.error = (N_detected / f) * np.sqrt(
+            (N_detected_sig / N_detected) ** 2 + (sig_f / f) ** 2
+        )
 
-    def to_df(self):
-        cols = ["Efficiency", "Eff_error", "t_half (s)", "t_half_error (s)", "A0 (Bq)", "A0_error (Bq)",
-                "B", "B_error", "t_count (s)", "t_count_error (s)", "t_elapsed (s)",
-                "t_elapsed_error (s)"]
-        data = [self.eff, self.error, self.t_half, self.t_half_sig, self.A0, self.A0_sig,
-                self.Br, self.Br_sig, self.livetime, self.livetime_sig, self.t_elapsed,
-                self.t_elapsed_sig]
-        df = pd.DataFrame(columns=cols, data=np.array(data).reshape(1,len(data)))
+    def to_df(self, e_units="keV"):
+        cols = [
+            f"Energy ({e_units})",
+            "Efficiency",
+            "+/- Efficiency",
+            "t_half (s)",
+            "+/- t_half (s)",
+            "A0 (Bq)",
+            "+/- A0 (Bq)",
+            "B",
+            "+/- B",
+            "t_count (s)",
+            "+/- t_count (s)",
+            "t_elapsed (s)",
+            "+/- t_elapsed (s)",
+        ]
+        data = [
+            self.mean_val,
+            self.eff,
+            self.error,
+            self.t_half,
+            self.t_half_sig,
+            self.A0,
+            self.A0_sig,
+            self.Br,
+            self.Br_sig,
+            self.livetime,
+            self.livetime_sig,
+            self.t_elapsed,
+            self.t_elapsed_sig,
+        ]
+        df = pd.DataFrame(columns=cols, data=np.array(data).reshape(1, len(data)))
         return df
+
 
 def plot_points(e_vals, eff_vals, err_vals, e_units="keV", ax=None):
     if ax is None:
@@ -128,7 +157,6 @@ def plot_points(e_vals, eff_vals, err_vals, e_units="keV", ax=None):
     ax.set_xlabel(f"Energy ({e_units})")
     ax.set_ylabel(f"Efficiency (%)")
     ax.legend()
-
 
 
 def eff_fit(en, eff, order=1, fig=None, ax=None):

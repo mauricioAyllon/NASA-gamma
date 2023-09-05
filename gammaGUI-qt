@@ -50,10 +50,10 @@ from nasagamma import read_cnf
 from nasagamma import tlist
 from nasagamma import energy_calibration as ecal
 from nasagamma import efficiency
-from nasagamma import resolution  
-from nasagamma import file_reader  
-from nasagamma import read_parquet_api  
-from nasagamma import parse_NIST  
+from nasagamma import resolution
+from nasagamma import file_reader
+from nasagamma import read_parquet_api
+from nasagamma import parse_NIST
 from nasagamma import diagnostics
 import pkg_resources
 
@@ -481,6 +481,7 @@ class NasaGammaApp(QMainWindow):
         ## Efficiency
         self.eff_vals = []
         self.eff_scale = "log"
+        self.df_eff = None
         # push butons
         self.button_yscale_eff.setStyleSheet("background-color : lightgoldenrodyellow")
         self.button_yscale_eff.clicked.connect(self.eff_yscale)
@@ -1491,6 +1492,12 @@ class NasaGammaApp(QMainWindow):
         self.reset_eff_figure()
         self.fig_eff.canvas.draw_idle()
         self.eff_vals = []
+        self.df_eff = None
+        try:
+            self.table_eff.setParent(None)
+        except Exception as e:
+            print("Cannot reset table")
+            print(str(e))
 
     def new_window_eff(self):
         self.w_eff = WindowEff()
@@ -1509,9 +1516,20 @@ class NasaGammaApp(QMainWindow):
                 which_peak=self.n_peak_eff,
             )
             self.eff_obj.calculate_efficiency(self.fit)
-            self.eff_obj.calculate_error(self.fit, self.t_half_sig, self.A0_sig, self.B_sig,
-                                    self.delta_t_sig, self.acq_time_sig)
-            self.append_to_eff(self.eff_obj.eff * 100, self.eff_obj.mean_val, self.eff_obj.error)
+            self.eff_obj.calculate_error(
+                self.fit,
+                self.t_half_sig,
+                self.A0_sig,
+                self.B_sig,
+                self.delta_t_sig,
+                self.acq_time_sig,
+            )
+            self.append_to_eff(
+                self.eff_obj.eff * 100, self.eff_obj.mean_val, self.eff_obj.error
+            )
+            df = self.eff_obj.to_df(e_units=self.e_units)
+            self.concat_df_eff(df)
+            self.update_eff_table()
             self.plot_eff_points()
         except Exception as e:
             print("ERROR: could not add efficiency value")
@@ -1523,16 +1541,57 @@ class NasaGammaApp(QMainWindow):
         y_err = np.array(self.eff_vals)[:, 2]
         self.ax_eff.clear()
         self.ax_eff_res.clear()
-        efficiency.plot_points(e_vals=x, eff_vals=y, err_vals=y_err,
-                                 e_units=self.e_units, ax=self.ax_eff)
-        # efficiency.eff_table(
-        #     x_lst=x,
-        #     eff_lst=y,
-        #     e_units=self.e_units,
-        #     ax=self.ax_eff_tab,
-        #     fig=self.fig_eff,
-        # )
+        efficiency.plot_points(
+            e_vals=x, eff_vals=y, err_vals=y_err, e_units=self.e_units, ax=self.ax_eff
+        )
         self.fig_eff.canvas.draw_idle()
+
+    def concat_df_eff(self, df):
+        if df is None:
+            self.df_eff = df
+        else:
+            self.df_eff = pd.concat([self.df_eff, df], ignore_index=True)
+
+    def update_eff_table(self):
+        self.df_eff.fillna(value=0, inplace=True)
+        self.df_eff.sort_values(
+            by=[f"Energy ({self.e_units})"], inplace=True, ignore_index=True
+        )
+        self.df_eff = self.df_eff.round(6)
+        self.activate_eff_table(data=self.df_eff)
+
+    def activate_eff_table(self, data):
+        self.selected_rows_eff = []
+        self.table_eff = QtWidgets.QTableView()
+        self.table_eff.setAlternatingRowColors(True)
+        self.table_eff.setSortingEnabled(False)
+        stylesheet_header = "::section{Background-color:lightgreen}"
+        self.table_eff.horizontalHeader().setStyleSheet(stylesheet_header)
+        self.table_eff.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        self.table_eff.resizeColumnsToContents()
+        self.model_eff = TableModel(data)
+        self.table_eff.setModel(self.model_eff)
+        self.table_eff_area.setWidget(self.table_eff)
+        stylesheet_ix = "::section{Background-color:lightgoldenrodyellow}"
+        self.table_eff.setStyleSheet(stylesheet_ix)
+        self.table_eff.setColumnWidth(10, 150)
+        self.table_eff.setColumnWidth(12, 150)
+        self.table_eff.selectionModel().selectionChanged.connect(
+            self.on_selectionChanged_eff
+        )
+
+    def on_selectionChanged_eff(self, selected, deselected):
+        for ix in selected.indexes():
+            self.selected_rows_eff.append(ix.row())
+        for ix in deselected.indexes():
+            try:
+                self.selected_rows_eff.remove(ix.row())
+            except ValueError:
+                pass
+        self.selected_rows_eff = list(set(self.selected_rows_ecal))
+        self.selected_indexes_eff = list(
+            self.model_eff._data.index[self.selected_rows_eff]
+        )
 
     def append_to_eff(self, eff, mean, error):
         if (mean, eff, error) not in self.eff_vals:
@@ -1587,7 +1646,7 @@ class NasaGammaApp(QMainWindow):
         # A0
         if self.w_eff.button_Ci.isChecked():
             A_fact = 3.7e10
-        elif self.w_eff.button_Sv.isChecked():
+        elif self.w_eff.button_Bq.isChecked():
             A_fact = 1
         else:
             msg = "ERROR: activity units not determined"
@@ -1612,7 +1671,6 @@ class NasaGammaApp(QMainWindow):
             msg = "ERROR: either dates or time since production must be specified"
             print(msg)
         self.delta_t_sig = float(self.w_eff.txt_t_duration_sig.text())
-
 
         # branching ratio
         self.B = float(self.w_eff.txt_B.text())
