@@ -990,6 +990,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(212, 217, 208);</string>
+          </property>
           <property name="frameShape">
            <enum>QFrame::Box</enum>
           </property>
@@ -1017,6 +1020,15 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
         </item>
         <item row="1" column="1">
          <widget class="QFrame" name="frame_19">
+          <property name="maximumSize">
+           <size>
+            <width>650</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(212, 217, 208);</string>
+          </property>
           <property name="frameShape">
            <enum>QFrame::Box</enum>
           </property>
@@ -1024,8 +1036,32 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_40">
+           <item row="1" column="0">
+            <widget class="QPushButton" name="pushButton_2">
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 170, 127);</string>
+             </property>
+             <property name="text">
+              <string>Remove selected</string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="0">
-            <widget class="QScrollArea" name="scrollArea_eff">
+            <widget class="QScrollArea" name="table_eff_area">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(223, 223, 223);
+font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
+             </property>
              <property name="widgetResizable">
               <bool>true</bool>
              </property>
@@ -1034,11 +1070,26 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>743</width>
-                <height>648</height>
+                <width>622</width>
+                <height>568</height>
                </rect>
               </property>
              </widget>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QPushButton" name="pushButton_3">
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(153, 230, 230);</string>
+             </property>
+             <property name="text">
+              <string>Add point manually</string>
+             </property>
             </widget>
            </item>
           </layout>
