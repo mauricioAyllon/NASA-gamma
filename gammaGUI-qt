@@ -367,11 +367,11 @@ class NasaGammaApp(QMainWindow):
             (
                 self.spect,
                 self.search,
-                self.e_units,
                 self.ref_x,
                 self.fwhm_at_0,
                 self.ref_fwhm,
             ) = get_input
+            self.e_units = self.spect.e_units
             self.create_graph(fit=True, reset=True)
         try:
             self.min_snr = float(self.commands["--min_snr"])
@@ -480,6 +480,7 @@ class NasaGammaApp(QMainWindow):
 
         ## Efficiency
         self.eff_vals = []
+        self.selected_rows_eff = []
         self.eff_scale = "log"
         self.df_eff = None
         # push butons
@@ -493,6 +494,7 @@ class NasaGammaApp(QMainWindow):
         self.button_fit2_eff.clicked.connect(self.eff_fit2)
         self.button_add_eff.setStyleSheet("background-color : sandybrown")
         self.button_add_eff.clicked.connect(self.new_window_eff)
+        self.button_remove_selected_eff.clicked.connect(self.eff_remove_selected)
         self.reset_eff_figure()
 
         ## Lynx
@@ -816,7 +818,7 @@ class NasaGammaApp(QMainWindow):
         if xunits != "":
             self.e_units = xunits
             self.spect.e_units = xunits
-            self.spect.x_units = f"Energy [{self.e_units}]"
+            self.spect.x_units = f"Energy ({self.e_units})"
             self.create_graph(fit=False, reset=True)
             self.search = 0
 
@@ -1481,7 +1483,7 @@ class NasaGammaApp(QMainWindow):
         gs2 = self.fig_eff.add_gridspec(2, 1, height_ratios=[0.3, 1.5])
         # axes
         self.ax_eff = self.fig_eff.add_subplot(gs2[1, :])
-        self.ax_eff_res = self.fig_eff.add_subplot(gs2[0, :])
+        self.ax_eff_res = self.fig_eff.add_subplot(gs2[0, :], sharex=self.ax_eff)
         # remove ticks
         self.ax_eff.set_xticks([])
         self.ax_eff.set_yticks([])
@@ -1524,9 +1526,7 @@ class NasaGammaApp(QMainWindow):
                 self.delta_t_sig,
                 self.acq_time_sig,
             )
-            self.append_to_eff(
-                self.eff_obj.eff * 100, self.eff_obj.mean_val, self.eff_obj.error
-            )
+
             df = self.eff_obj.to_df(e_units=self.e_units)
             self.concat_df_eff(df)
             self.update_eff_table()
@@ -1536,15 +1536,21 @@ class NasaGammaApp(QMainWindow):
             print(e)
 
     def plot_eff_points(self):
-        x = np.array(self.eff_vals)[:, 0]
-        y = np.array(self.eff_vals)[:, 1]
-        y_err = np.array(self.eff_vals)[:, 2]
-        self.ax_eff.clear()
-        self.ax_eff_res.clear()
-        efficiency.plot_points(
-            e_vals=x, eff_vals=y, err_vals=y_err, e_units=self.e_units, ax=self.ax_eff
-        )
-        self.fig_eff.canvas.draw_idle()
+        if self.df_eff.shape[0] > 0:
+            x = self.df_eff[f"Energy ({self.e_units})"]
+            y = self.df_eff["Efficiency"] * 100
+            y_err = self.df_eff["+/- Efficiency"]
+            self.ax_eff.clear()
+            # self.ax_eff_res.clear()
+            efficiency.plot_points(
+                e_vals=x,
+                eff_vals=y,
+                err_vals=y_err,
+                e_units=self.e_units,
+                ax=self.ax_eff,
+            )
+            self.ax_eff_res.tick_params(axis="x", colors="white")
+            self.fig_eff.canvas.draw_idle()
 
     def concat_df_eff(self, df):
         if df is None:
@@ -1558,10 +1564,14 @@ class NasaGammaApp(QMainWindow):
             by=[f"Energy ({self.e_units})"], inplace=True, ignore_index=True
         )
         self.df_eff = self.df_eff.round(6)
+        self.df_eff.drop_duplicates(
+            subset=[f"Energy ({self.e_units})"], inplace=True, ignore_index=True
+        )
         self.activate_eff_table(data=self.df_eff)
 
     def activate_eff_table(self, data):
         self.selected_rows_eff = []
+        self.selected_indexes_eff = []
         self.table_eff = QtWidgets.QTableView()
         self.table_eff.setAlternatingRowColors(True)
         self.table_eff.setSortingEnabled(False)
@@ -1588,28 +1598,53 @@ class NasaGammaApp(QMainWindow):
                 self.selected_rows_eff.remove(ix.row())
             except ValueError:
                 pass
-        self.selected_rows_eff = list(set(self.selected_rows_ecal))
+        self.selected_rows_eff = list(set(self.selected_rows_eff))
         self.selected_indexes_eff = list(
             self.model_eff._data.index[self.selected_rows_eff]
         )
+        print(self.selected_indexes_eff)
 
-    def append_to_eff(self, eff, mean, error):
-        if (mean, eff, error) not in self.eff_vals:
-            self.eff_vals.append((mean, eff, error))
-        self.eff_vals.sort(key=lambda x: x[0])
+    def eff_remove_selected(self):
+        if len(self.selected_indexes_eff) > 0 and self.df_eff is not None:
+            self.df_eff = self.df_eff.drop(self.selected_indexes_eff)
+            self.df_eff.reset_index(drop=True, inplace=True)
+            self.update_eff_table()
+            self.plot_eff_points()
+            self.button_fit1_eff.setChecked(False)
+            self.button_fit2_eff.setChecked(False)
 
     def eff_fit1(self):
-        if len(self.eff_vals) > 3:
-            x = np.array(self.eff_vals)[:, 0]
-            y = np.array(self.eff_vals)[:, 1]
-            self.ax_eff.clear()
-            efficiency.eff_fit(x, y, order=1, fig=self.fig_eff, ax=self.ax_eff)
-            self.ax_eff.set_xlabel(self.fit.x_units)
-            self.ax_eff.set_ylabel("Efficiency [%]")
-            self.fig_eff.canvas.draw_idle()
+        if self.button_fit2_eff.isChecked():
+            self.button_fit2_eff.setChecked(False)
+        if self.df_eff is not None and self.button_fit1_eff.isChecked():
+            if self.df_eff.shape[0] > 1:
+                x = self.df_eff[f"Energy ({self.e_units})"]
+                y = self.df_eff["Efficiency"] * 100
+                y_err = self.df_eff["+/- Efficiency"]
+                # self.ax_eff.clear()
+                efficiency.eff_fit(x, y, y_err, order=1, ax=self.ax_eff)
+                self.ax_eff.set_xlabel(self.fit.x_units)
+                self.ax_eff.set_ylabel("Efficiency [%]")
+                self.fig_eff.canvas.draw_idle()
+        elif self.df_eff is not None and not self.button_fit1_eff.isChecked():
+            self.plot_eff_points()
 
     def eff_fit2(self):  # TODO
-        pass
+        if self.button_fit1_eff.isChecked():
+            self.button_fit1_eff.setChecked(False)
+        if self.df_eff is not None and self.button_fit2_eff.isChecked():
+            if self.df_eff.shape[0] > 3:
+                x = self.df_eff[f"Energy ({self.e_units})"]
+                y = self.df_eff["Efficiency"] * 100
+                y_err = self.df_eff["+/- Efficiency"]
+                # self.ax_eff.clear()
+                efficiency.eff_fit(x, y, y_err, order=2, ax=self.ax_eff)
+                self.ax_eff.set_xlabel(self.fit.x_units)
+                self.ax_eff.set_ylabel("Efficiency [%]")
+                self.ax_eff_res.set_xticks([])
+                self.fig_eff.canvas.draw_idle()
+        elif self.df_eff is not None and not self.button_fit2_eff.isChecked():
+            self.plot_eff_points()
 
     def eff_yscale(self):
         if self.eff_scale == "log":

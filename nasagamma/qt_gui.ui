@@ -912,6 +912,15 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              <property name="text">
               <string>Fit 1</string>
              </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="autoRepeat">
+              <bool>false</bool>
+             </property>
+             <property name="autoExclusive">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
            <item row="0" column="5">
@@ -936,6 +945,12 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              </property>
              <property name="text">
               <string>Fit 2</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="autoExclusive">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -965,7 +980,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
             </spacer>
            </item>
            <item row="0" column="0">
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="button_info_eff">
              <property name="font">
               <font>
                <pointsize>14</pointsize>
@@ -1037,7 +1052,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_40">
            <item row="1" column="0">
-            <widget class="QPushButton" name="pushButton_2">
+            <widget class="QPushButton" name="button_remove_selected_eff">
              <property name="font">
               <font>
                <pointsize>12</pointsize>
@@ -1071,25 +1086,10 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                 <x>0</x>
                 <y>0</y>
                 <width>622</width>
-                <height>568</height>
+                <height>608</height>
                </rect>
               </property>
              </widget>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QPushButton" name="pushButton_3">
-             <property name="font">
-              <font>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(153, 230, 230);</string>
-             </property>
-             <property name="text">
-              <string>Add point manually</string>
-             </property>
             </widget>
            </item>
           </layout>

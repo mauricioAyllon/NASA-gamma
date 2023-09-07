@@ -41,9 +41,11 @@ def get_spect_search(commands):
 
     file_name = file_name.lower()
     if file_name[-4:] == ".csv":
-        e_units, spect = file_reader.read_csv_file(file_name)
+        spect = file_reader.read_csv_file(file_name)
     elif file_name[-4:] == ".cnf":
-        e_units, spect = file_reader.read_cnf.read_cnf_to_spect(file_name)
+        spect = file_reader.read_cnf.read_cnf_to_spect(file_name)
+    elif file_name[-4:] == ".txt":
+        spect = file_reader.read_txt(file_name)
     # peaksearch class
     search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
-    return spect, search, e_units, ref_x, fwhm_at_0, ref_fwhm
+    return spect, search, ref_x, fwhm_at_0, ref_fwhm

@@ -159,23 +159,38 @@ def plot_points(e_vals, eff_vals, err_vals, e_units="keV", ax=None):
     ax.legend()
 
 
-def eff_fit(en, eff, order=1, fig=None, ax=None):
+def eff_fit(en, eff, eff_err, order=1, ax=None):
     plt.rc("font", size=14)
     plt.style.use("seaborn-darkgrid")
 
     def eff_func(x, a0, a1, a2, a3):
         return (a0 + a1 * np.log(x) + a2 * (np.log(x)) ** 2 + a3 * (np.log(x)) ** 3) / x
 
-    if fig is None:
-        fig = plt.figure(constrained_layout=True, figsize=(16, 8))
     if ax is None:
+        fig = plt.figure(constrained_layout=True, figsize=(16, 8))
         ax = fig.add_subplot()
-
     energies = np.array(en)
     effs = np.array(eff)
+    effs_sig = np.array(eff_err)
     if order == 1:
+        poly_mod = lmfit.models.PolynomialModel(degree=1)
+        pars = poly_mod.guess(effs, x=energies)
+        model = poly_mod
+        fit = model.fit(effs, params=pars, x=energies, weights=1.0 / effs_sig)
+        erg_continuous = np.linspace(energies[0], energies[-1], num=100)
+        y = fit.eval(x=erg_continuous)
+        ye = fit.eval_uncertainty()
+        coeffs = list(fit.best_values.values())
+        equation = f"${coeffs[0]:.5E}$" + f"${coeffs[1]:.5E}E$"
+        ax.plot(erg_continuous, y, ls="-", lw=3, color="green", label=equation)
+
+        # ax.set_title(equation)
+        ax.legend(loc="best")
+    elif order == 2:
         emodel = lmfit.Model(eff_func)
-        fit = emodel.fit(effs, x=energies, a0=0, a1=0, a2=0, a3=0)
+        fit = emodel.fit(
+            effs, x=energies, a0=0, a1=0, a2=0, a3=0, weights=1.0 / effs_sig
+        )
         best_vals = fit.best_values
         ye = fit.eval_uncertainty()
         a0 = best_vals["a0"]
@@ -185,31 +200,17 @@ def eff_fit(en, eff, order=1, fig=None, ax=None):
         erg_continuous = np.linspace(energies[0], energies[-1], num=100)
         y = eff_func(x=erg_continuous, a0=a0, a1=a1, a2=a2, a3=a3)
 
-        ax.errorbar(
-            energies,
-            effs,
-            yerr=ye,
-            ecolor="red",
-            elinewidth=5,
-            capsize=12,
-            capthick=3,
-            marker="s",
-            # mfc="black",
-            # mec="black",
-            markersize=7,
-            ls=" ",
+        ax.plot(
+            erg_continuous,
+            y,
+            ls="-",
             lw=3,
-            # label="Distance = 2.5 cm",
+            color="green",
+            label=f"a0 = {round(a0,3)}\na1 = {round(a1,3)}\na2 = {round(a2,3)}\na3 = {round(a3,3)}",
         )
-    ax.plot(
-        erg_continuous,
-        y,
-        ls="-",
-        lw=3,
-        # color="green",
-    )
 
-    ax.set_title(r"$eff = \frac{a0 + a1ln(E) + a2ln(E)^2 + a3ln(E)^3}{E}$")
+        ax.set_title(r"$eff = \frac{a0 + a1ln(E) + a2ln(E)^2 + a3ln(E)^3}{E}$")
+        ax.legend(loc="best")
     return ye
 
 

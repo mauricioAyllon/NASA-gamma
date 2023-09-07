@@ -171,6 +171,9 @@
               <property name="styleSheet">
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
+              <property name="text">
+               <string>30</string>
+              </property>
              </widget>
             </item>
            </layout>
@@ -295,7 +298,7 @@
            <string notr="true">background-color: rgb(255, 255, 255);</string>
           </property>
           <property name="text">
-           <string/>
+           <string>5e-6</string>
           </property>
          </widget>
         </item>
@@ -420,7 +423,7 @@
            <string notr="true">background-color: rgb(255, 255, 255);</string>
           </property>
           <property name="text">
-           <string/>
+           <string>2006-06-01</string>
           </property>
          </widget>
         </item>
@@ -447,7 +450,7 @@
            <string notr="true">background-color: rgb(255, 255, 255);</string>
           </property>
           <property name="text">
-           <string/>
+           <string>2022-08-19</string>
           </property>
          </widget>
         </item>
@@ -536,7 +539,7 @@
            <string notr="true">background-color: rgb(255, 255, 255);</string>
           </property>
           <property name="text">
-           <string/>
+           <string>0.85</string>
           </property>
          </widget>
         </item>
@@ -594,7 +597,7 @@
            <string notr="true">background-color: rgb(255, 255, 255);</string>
           </property>
           <property name="text">
-           <string/>
+           <string>600</string>
           </property>
          </widget>
         </item>
@@ -694,8 +697,8 @@ font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup_time"/>
   <buttongroup name="buttonGroup_radiation_units"/>
+  <buttongroup name="buttonGroup_time"/>
   <buttongroup name="buttonGroup_which"/>
  </buttongroups>
 </ui>
