@@ -159,16 +159,19 @@ def plot_points(e_vals, eff_vals, err_vals, e_units="keV", ax=None):
     ax.legend()
 
 
-def eff_fit(en, eff, eff_err, order=1, ax=None):
+def eff_fit(en, eff, eff_err, order=1, ax_fit=None, ax_res=None):
     plt.rc("font", size=14)
     plt.style.use("seaborn-darkgrid")
 
     def eff_func(x, a0, a1, a2, a3):
         return (a0 + a1 * np.log(x) + a2 * (np.log(x)) ** 2 + a3 * (np.log(x)) ** 3) / x
 
-    if ax is None:
+    if ax_fit is None:
         fig = plt.figure(constrained_layout=True, figsize=(16, 8))
-        ax = fig.add_subplot()
+        gs = fig.add_gridspec(2, 1, height_ratios=[1, 4])
+        ax_fit = fig.add_subplot(gs[1, 0])
+        if ax_res is None:
+            ax_res = fig.add_subplot(gs[0, 0])
     energies = np.array(en)
     effs = np.array(eff)
     effs_sig = np.array(eff_err)
@@ -182,10 +185,14 @@ def eff_fit(en, eff, eff_err, order=1, ax=None):
         ye = fit.eval_uncertainty()
         coeffs = list(fit.best_values.values())
         equation = f"${coeffs[0]:.5E}$" + f"${coeffs[1]:.5E}E$"
-        ax.plot(erg_continuous, y, ls="-", lw=3, color="green", label=equation)
-
-        # ax.set_title(equation)
-        ax.legend(loc="best")
+        ax_fit.plot(erg_continuous, y, ls="-", lw=3, color="green", label=equation)
+        res = fit.residual
+        ax_res.plot(energies, res, ".", ms=12, alpha=0.5, color="C1")
+        ax_res.hlines(y=0, xmin=energies.min(), xmax=energies.max(), lw=3)
+        ax_res.set_ylabel("Residual")
+        # ax_res.set_xlim([energies.min(), energies.max()])
+        ax_res.set_title(f"Reduced $\chi^2$ = {round(fit.redchi,4)}")
+        ax_fit.legend(loc="best")
     elif order == 2:
         emodel = lmfit.Model(eff_func)
         fit = emodel.fit(
@@ -200,7 +207,7 @@ def eff_fit(en, eff, eff_err, order=1, ax=None):
         erg_continuous = np.linspace(energies[0], energies[-1], num=100)
         y = eff_func(x=erg_continuous, a0=a0, a1=a1, a2=a2, a3=a3)
 
-        ax.plot(
+        ax_fit.plot(
             erg_continuous,
             y,
             ls="-",
@@ -209,8 +216,13 @@ def eff_fit(en, eff, eff_err, order=1, ax=None):
             label=f"a0 = {round(a0,3)}\na1 = {round(a1,3)}\na2 = {round(a2,3)}\na3 = {round(a3,3)}",
         )
 
-        ax.set_title(r"$eff = \frac{a0 + a1ln(E) + a2ln(E)^2 + a3ln(E)^3}{E}$")
-        ax.legend(loc="best")
+        ax_fit.set_title(r"$eff = \frac{a0 + a1ln(E) + a2ln(E)^2 + a3ln(E)^3}{E}$")
+        ax_fit.legend(loc="best")
+        res = fit.residual
+        ax_res.plot(energies, res, ".", ms=12, alpha=0.5, color="C1")
+        ax_res.hlines(y=0, xmin=energies.min(), xmax=energies.max(), lw=3)
+        ax_res.set_ylabel("Residual")
+        ax_res.set_title(f"Reduced $\chi^2$ = {round(fit.redchi,4)}")
     return ye
 
 

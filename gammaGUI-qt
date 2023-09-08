@@ -1530,6 +1530,7 @@ class NasaGammaApp(QMainWindow):
             df = self.eff_obj.to_df(e_units=self.e_units)
             self.concat_df_eff(df)
             self.update_eff_table()
+            self.ax_eff_res.clear()
             self.plot_eff_points()
         except Exception as e:
             print("ERROR: could not add efficiency value")
@@ -1537,6 +1538,7 @@ class NasaGammaApp(QMainWindow):
 
     def plot_eff_points(self):
         if self.df_eff.shape[0] > 0:
+            self.ax_eff_res.clear()
             x = self.df_eff[f"Energy ({self.e_units})"]
             y = self.df_eff["Efficiency"] * 100
             y_err = self.df_eff["+/- Efficiency"]
@@ -1616,13 +1618,16 @@ class NasaGammaApp(QMainWindow):
     def eff_fit1(self):
         if self.button_fit2_eff.isChecked():
             self.button_fit2_eff.setChecked(False)
+            self.plot_eff_points()
         if self.df_eff is not None and self.button_fit1_eff.isChecked():
             if self.df_eff.shape[0] > 1:
                 x = self.df_eff[f"Energy ({self.e_units})"]
                 y = self.df_eff["Efficiency"] * 100
                 y_err = self.df_eff["+/- Efficiency"]
                 # self.ax_eff.clear()
-                efficiency.eff_fit(x, y, y_err, order=1, ax=self.ax_eff)
+                efficiency.eff_fit(
+                    x, y, y_err, order=1, ax_fit=self.ax_eff, ax_res=self.ax_eff_res
+                )
                 self.ax_eff.set_xlabel(self.fit.x_units)
                 self.ax_eff.set_ylabel("Efficiency [%]")
                 self.fig_eff.canvas.draw_idle()
@@ -1632,16 +1637,18 @@ class NasaGammaApp(QMainWindow):
     def eff_fit2(self):  # TODO
         if self.button_fit1_eff.isChecked():
             self.button_fit1_eff.setChecked(False)
+            self.plot_eff_points()
         if self.df_eff is not None and self.button_fit2_eff.isChecked():
             if self.df_eff.shape[0] > 3:
                 x = self.df_eff[f"Energy ({self.e_units})"]
                 y = self.df_eff["Efficiency"] * 100
                 y_err = self.df_eff["+/- Efficiency"]
                 # self.ax_eff.clear()
-                efficiency.eff_fit(x, y, y_err, order=2, ax=self.ax_eff)
+                efficiency.eff_fit(
+                    x, y, y_err, order=2, ax_fit=self.ax_eff, ax_res=self.ax_eff_res
+                )
                 self.ax_eff.set_xlabel(self.fit.x_units)
                 self.ax_eff.set_ylabel("Efficiency [%]")
-                self.ax_eff_res.set_xticks([])
                 self.fig_eff.canvas.draw_idle()
         elif self.df_eff is not None and not self.button_fit2_eff.isChecked():
             self.plot_eff_points()
