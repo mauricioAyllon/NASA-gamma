@@ -153,6 +153,12 @@ class WindowEff(Dialog_from_UI):
         self.window_title = "Efficiency calibration"
 
 
+class WindowEffInfo(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_info_eff.ui"
+        self.window_title = "Efficiency calibration information"
+
+
 class WindowInfoFile(Dialog_from_UI):
     def define_ui_vars(self):
         self.ui_name = "win_info_file.ui"
@@ -484,6 +490,8 @@ class NasaGammaApp(QMainWindow):
         self.eff_scale = "log"
         self.df_eff = None
         # push butons
+        self.w_info_eff = WindowEffInfo()
+        self.button_info_eff.clicked.connect(self.eff_info_activate)
         self.button_yscale_eff.setStyleSheet("background-color : lightgoldenrodyellow")
         self.button_yscale_eff.clicked.connect(self.eff_yscale)
         self.button_reset_eff.setStyleSheet("background-color : lightcoral")
@@ -1476,6 +1484,10 @@ class NasaGammaApp(QMainWindow):
             print("Could not add point manually")
 
     ## efficiency calibration
+    def eff_info_activate(self):
+        self.w_info_eff.activateWindow()
+        self.w_info_eff.show()
+
     def reset_eff_figure(self):
         self.fig_eff = self.efficiency_plot.canvas.figure
         self.fig_eff.clear()
