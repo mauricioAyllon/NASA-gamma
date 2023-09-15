@@ -474,59 +474,51 @@ class ReadLynxCsv:
         self.nch = self.spect.counts.shape[0]
 
 
-class ReadMultiscanPHA:
-    def __init__(self, file):
-        self.file = file
-        self.description = None
-        self.start_time = None
-        self.energy_calibration = None
-        self.live_time = None
-        self.real_time = None
-        self.eunits = None
-        self.counts = None
-        self.count_rate = None
-        self.spect = None
-        self.nch = None
-        if file[-8:].lower() != ".pha.txt":
-            print("ERROR: Must be a .pha.txt file")
-        self.parse_file()
-
-    def parse_file(self):
-        with open(self.file, "r") as myfile:
+def read_multiscan(file):
+    description = None
+    start_time = None
+    energy_calibration = None
+    live_time = None
+    real_time = None
+    eunits = None
+    tot_counts = None
+    count_rate = None
+    if file[-8:].lower() != ".pha.txt":
+        print("ERROR: Must be a .pha.txt file")
+    else:
+        with open(file, "r") as myfile:
             filelst = myfile.readlines()
         for i, line in enumerate(filelst):
             l = line.lower().strip().split(",")
             if "name" in l and len(l) > 1:
-                self.description = l[1]
+                description = l[1]
             if "time started" in l:
-                self.start_time = ",".join(l[1:]).strip('"')
+                start_time = ",".join(l[1:]).strip('"')
             if "live time when finished" in l:
                 tme = datetime.datetime.strptime(l[1], "%H:%M:%S.%f")
-                self.live_time = tme.hour * 60 * 60 + tme.minute * 60 + tme.second
+                live_time = tme.hour * 60 * 60 + tme.minute * 60 + tme.second
             if "real time when finished" in l:
                 tme = datetime.datetime.strptime(l[1], "%H:%M:%S.%f")
-                self.real_time = tme.hour * 60 * 60 + tme.minute * 60 + tme.second
+                real_time = tme.hour * 60 * 60 + tme.minute * 60 + tme.second
             if "energy equation" in l:
-                self.energy_calibration = l[1]
-                self.eunits = l[1].split("+")[0][-3:]
+                energy_calibration = l[1]
+                eunits = l[1].split("+")[0][-3:]
             if "total counts" in l:
-                self.counts = float(l[1])
+                tot_counts = float(l[1])
             if ["channel", "energy", "counts"] == l:
                 istart = i
                 cols = l
                 break
-        df = pd.read_csv(self.file, skiprows=istart, dtype=float)
+        df = pd.read_csv(file, skiprows=istart, dtype=float)
         df.columns = cols
-        self.spect = sp.Spectrum(
+        spect = sp.Spectrum(
             counts=df["counts"],
             energies=df["energy"],
-            description=self.description,
-            e_units=self.eunits,
-            livetime=self.live_time,
-            realtime=self.real_time,
-            energy_cal=self.energy_calibration,
-            acq_date=self.start_time,
+            description=description,
+            e_units=eunits,
+            livetime=live_time,
+            realtime=real_time,
+            energy_cal=energy_calibration,
+            acq_date=start_time,
         )
-        self.counts = self.spect.counts.sum()
-        self.count_rate = self.counts / self.live_time
-        self.nch = self.spect.counts.shape[0]
+        return spect

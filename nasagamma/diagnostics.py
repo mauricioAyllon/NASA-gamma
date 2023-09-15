@@ -30,12 +30,13 @@ class Diagnostics:
         self.spects, count_rates, tot_counts, livetimes, realtimes = [], [], [], [], []
         for file in files:
             if file.lower()[-8:] == ".pha.txt":
-                f = file_reader.ReadMultiscanPHA(file)
-                self.spects.append(f.spect)
-                count_rates.append(f.count_rate)
-                tot_counts.append(f.counts)
-                livetimes.append(f.live_time)
-                realtimes.append(f.real_time)
+                spect = file_reader.read_multiscan(file)
+                self.spects.append(spect)
+                cr = spect.counts.sum() / spect.livetime
+                count_rates.append(cr)
+                tot_counts.append(spect.counts.sum())
+                livetimes.append(spect.livetime)
+                realtimes.append(spect.realtime)
             elif file.lower()[-4:] == ".txt" and file.lower()[-8:] != ".pha.txt":
                 spect = file_reader.read_txt(file)
                 self.spects.append(spect)
@@ -46,15 +47,13 @@ class Diagnostics:
                 realtimes.append(spect.realtime)
             elif file.lower()[-4:] == ".spe":
                 spe = file_reader.ReadSPE(file)
-                spect = sp.Spectrum(
-                    counts=spe.counts, livetime=spe.live_time, realtime=spe.real_time
-                )
+                spect = spe.spect
                 self.spects.append(spect)
-                cr = spe.counts.sum() / spe.live_time
+                cr = spect.counts.sum() / spect.livetime
                 count_rates.append(cr)
-                tot_counts.append(spe.counts.sum())
-                livetimes.append(spe.live_time)
-                realtimes.append(spe.real_time)
+                tot_counts.append(spect.counts.sum())
+                livetimes.append(spect.livetime)
+                realtimes.append(spect.realtime)
             else:
                 continue
         if self.spects[0].energies is None:

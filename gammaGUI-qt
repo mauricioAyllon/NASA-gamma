@@ -2988,8 +2988,7 @@ class NasaGammaApp(QMainWindow):
                     e_units = "channels"
                     spect = spe.spect
                 elif fileName_lc[-8:] == ".pha.txt":
-                    multiscanPHA = file_reader.ReadMultiscanPHA(fileName)
-                    spect = multiscanPHA.spect
+                    spect = file_reader.read_multiscan(fileName)
                     e_units = spect.e_units
 
                 elif fileName_lc[-4:] == ".txt" and fileName_lc[-8:] != ".pha.txt":
