@@ -335,7 +335,6 @@ class NasaGammaApp(QMainWindow):
             self.cal_plot,
             self.efficiency_plot,
             self.resolution_plot,
-            self.lynx_plot,
             self.api_plot,
             self.diag_plot00,
         ]:
@@ -504,26 +503,6 @@ class NasaGammaApp(QMainWindow):
         self.button_add_eff.clicked.connect(self.new_window_eff)
         self.button_remove_selected_eff.clicked.connect(self.eff_remove_selected)
         self.reset_eff_figure()
-
-        ## Lynx
-        self.reset_lynx_figure()
-        self.button_load_tlist.setStyleSheet("background-color : lightblue")
-        self.button_load_tlist.clicked.connect(self.open_tlist_file)
-        self.button_lynx_yscale.setStyleSheet("background-color : lightyellow")
-        self.button_lynx_yscale.clicked.connect(self.lynx_yscale)
-        self.button_apply_lynx.setStyleSheet("background-color : ivory")
-        self.button_apply_lynx.clicked.connect(self.apply_period_tbins)
-        self.button_filter_lynx.setStyleSheet("background-color : ivory")
-        self.button_filter_lynx.clicked.connect(self.filter_time)
-        self.button_reset_1.setStyleSheet("background-color : lightcoral")
-        self.button_reset_1.clicked.connect(self.reset_plot1)
-        self.button_send_to_spect.setStyleSheet("background-color : lightgreen")
-        self.button_send_to_spect.clicked.connect(self.send_to_spect)
-        # energy filter
-        self.button_apply_lynx_e.setStyleSheet("background-color : ivory")
-        self.button_apply_lynx_e.clicked.connect(self.apply_dt_bins)
-        self.button_filter_lynx_e.setStyleSheet("background-color : ivory")
-        self.button_filter_lynx_e.clicked.connect(self.filter_erg)
 
         ## Diagnostics
         self.folder_path = None
@@ -1869,132 +1848,6 @@ class NasaGammaApp(QMainWindow):
                 self.fig_fwhm.canvas.draw_idle()
             else:
                 self.update_fwhm_figure()
-        except:
-            pass
-
-    ## Lynx
-    def open_tlist_file(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(
-            self,
-            "QFileDialog.getOpenFileName()",
-            "",
-            "All Files (*);;",
-            options=options,
-        )
-
-        if fileName == "":
-            pass
-        else:
-            try:
-                print("Open file: ", fileName)
-                fileName = fileName.lower()
-
-                self.reset_lynx_figure()
-                self.tl = tlist.Tlist(period=1000, fname=fileName)
-                self.tl.plot_time_hist(ax=self.ax_lynx_dt)
-                self.tl.plot_spect_erg_all(ax=self.ax_lynx_spect1)
-                self.fig_lynx.canvas.draw_idle()
-                self.setWindowTitle(f"NASA-gamma: {fileName}")
-            except:
-                print("Could not open file")
-
-    def reset_lynx_figure(self):
-        try:
-            self.fig_lynx = self.lynx_plot.canvas.figure
-            self.fig_lynx.clear()
-            self.fig_lynx.set_constrained_layout(True)
-            gs = self.fig_lynx.add_gridspec(
-                2, 2, width_ratios=[0.5, 0.5], height_ratios=[0.5, 0.5]
-            )
-
-            # axes
-            self.ax_lynx_dt = self.fig_lynx.add_subplot(gs[0, 0])
-            # self.ax_lynx_buttons = self.fig_lynx.add_subplot(gs[1, 0])
-            self.ax_lynx_spect1 = self.fig_lynx.add_subplot(gs[0, 1])
-            self.ax_lynx_spect2 = self.fig_lynx.add_subplot(gs[1, 1])
-            self.lynx_scale = "linear"
-            self.fig_lynx.canvas.draw_idle()
-        except:
-            pass
-
-    def lynx_yscale(self):
-        try:
-            if self.lynx_scale == "log":
-                self.ax_lynx_spect1.set_yscale("linear")
-                self.lynx_scale = "linear"
-            else:
-                self.ax_lynx_spect1.set_yscale("log")
-                self.lynx_scale = "log"
-            self.fig_lynx.canvas.draw_idle()
-        except:
-            pass
-
-    def apply_period_tbins(self):
-        try:
-            period = self.edit_period.text()
-            tbins = self.edit_tbins.text()
-            if period != "":
-                self.tl.period = float(period)
-                self.tl.change_period(self.tl.period)
-            if tbins != "":
-                self.tl.tbins = int(tbins)
-            self.ax_lynx_dt.clear()
-            self.tl.plot_time_hist(ax=self.ax_lynx_dt)
-            self.fig_lynx.canvas.draw_idle()
-        except:
-            pass
-
-    def filter_time(self):
-        try:
-            self.ax_lynx_dt.clear()
-            t0 = float(self.edit_t0.text())
-            t1 = float(self.edit_t1.text())
-            self.tl.trange = [t0, t1]
-            self.tl.filter_data(self.tl.trange)
-            self.tl.plot_time_hist(ax=self.ax_lynx_dt)
-            self.tl.plot_spect_erg_all(ax=self.ax_lynx_spect1)
-            self.tl.plot_vlines(ax=self.ax_lynx_dt)
-            self.fig_lynx.canvas.draw_idle()
-        except:
-            pass
-
-    def filter_erg(self):
-        try:
-            self.ax_lynx_spect2.clear()
-            ch0 = float(self.edit_ch0.text())
-            ch1 = float(self.edit_ch1.text())
-            self.tl.erange = [ch0, ch1]
-            self.tl.filter_edata(self.tl.erange)
-            self.tl.plot_spect_erg_range(ax=self.ax_lynx_spect2)
-            self.fig_lynx.canvas.draw_idle()
-        except:
-            pass
-
-    def apply_dt_bins(self):
-        try:
-            dt_bins = self.edit_dt_bins.text()
-            if dt_bins != "":
-                self.tl.dt_bins = int(dt_bins)
-                self.ax_lynx_spect2.clear()
-                self.tl.plot_spect_erg_range(ax=self.ax_lynx_spect2)
-                self.fig_lynx.canvas.draw_idle()
-        except:
-            pass
-
-    def reset_plot1(self):
-        self.ax_lynx_spect1.clear()
-        self.fig_lynx.canvas.draw_idle()
-
-    def send_to_spect(self):
-        try:
-            self.spect = sp.Spectrum(counts=self.tl.spect_cts)
-            self.e_units = "channels"
-            self.e_units_orig = deepcopy(self.e_units)
-            self.spect_orig = deepcopy(self.spect)
-            self.create_graph(fit=False, reset=True)
-            self.remove_ticks_fit()
         except:
             pass
 
