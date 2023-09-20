@@ -380,8 +380,8 @@ class NasaGammaApp(QMainWindow):
             self.create_graph(fit=True, reset=True)
         try:
             self.min_snr = float(self.commands["--min_snr"])
-        except:
-            pass
+        except Exception as e:
+            print("An unknown error occurred:", str(e))
 
         self.button_remove_cal.clicked.connect(self.remove_cal)
         # peak search range
@@ -746,8 +746,9 @@ class NasaGammaApp(QMainWindow):
     def try_cust_labels(self):
         try:
             self.cust_labels()
-        except:
+        except Exception as e:
             print("Invalid label/constant values")
+            print("An unknown error occurred:", str(e))
 
     def try_cust_smooth(self):
         # try:
@@ -758,14 +759,16 @@ class NasaGammaApp(QMainWindow):
     def try_cust_countRate(self):
         try:
             self.cust_countRate()
-        except:
+        except Exception as e:
             print("Invalid count rate values")
+            print("An unknown error occurred:", str(e))
 
     def try_cust_shift(self):
         try:
             self.cust_shift()
-        except:
+        except Exception as e:
             print("Invalid gain shift values")
+            print("An unknown error occurred:", str(e))
 
     def cust_labels(self):
         description = self.w_cust.descript_txt.text()
@@ -860,16 +863,18 @@ class NasaGammaApp(QMainWindow):
     def load_file1(self):
         try:
             self.file1, self.e_units1, self.spect1 = self.open_file()
-        except:
+        except Exception as e:
             self.file1 = "**ERROR loading file**"
+            print("An unknown error occurred:", str(e))
         disp1 = self.file1.split("/")[-1]
         self.w_add_sub.filename1.setText(disp1)
 
     def load_file2(self):
         try:
             self.file2, self.e_units2, self.spect2 = self.open_file()
-        except:
+        except Exception as e:
             self.file2 = "**ERROR loading file**"
+            print("An unknown error occurred:", str(e))
         disp2 = self.file2.split("/")[-1]
         self.w_add_sub.filename2.setText(disp2)
 
@@ -888,8 +893,9 @@ class NasaGammaApp(QMainWindow):
                 self.spect = sp.Spectrum(counts=cts, e_units=self.e_units1)
             self.create_graph(fit=False, reset=True)
             self.search = 0
-        except:
+        except Exception as e:
             print("Could not perform operation")
+            print("An unknown error occurred:", str(e))
 
     ## Fitting
     def which_button(self):
@@ -929,8 +935,9 @@ class NasaGammaApp(QMainWindow):
                 )
                 data = self.get_values_table_fit()
                 self.activate_fit_table(data)
-            except:
+            except Exception as e:
                 print("update_poly: could not perform fit")
+                print("An unknown error occurred:", str(e))
             self.fig_fit.canvas.draw_idle()
 
     def update_gauss(self):
@@ -950,8 +957,9 @@ class NasaGammaApp(QMainWindow):
                 )
                 data = self.get_values_table_fit()
                 self.activate_fit_table(data)
-            except:
+            except Exception as e:
                 print("update_gauss:could not perform fit")
+                print("An unknown error occurred:", str(e))
             self.fig_fit.canvas.draw_idle()
 
     def span_select(self):
@@ -1073,8 +1081,9 @@ class NasaGammaApp(QMainWindow):
             self.spect.remove_calibration()
             self.create_graph(fit=False, reset=True)
             self.search = 0
-        except:
+        except Exception as e:
             print("Cannot remove calibration")
+            print("An unknown error occurred:", str(e))
 
     def get_mean_vals(self):
         mean_lst = []
@@ -1196,8 +1205,9 @@ class NasaGammaApp(QMainWindow):
                 self.add_point_fit(erg, mean_vals)
             self.update_ecal_table()
             self.fig_cal.canvas.draw_idle()
-        except:
+        except Exception as e:
             print("Not valid entry for energy calibration")
+            print("An unknown error occurred:", str(e))
 
     def retrieve_evals(self):
         erg = self.w_cal.energy_txt.text().split(",")
@@ -1327,8 +1337,9 @@ class NasaGammaApp(QMainWindow):
             self.plot_point_dont_fit()
             self.update_ecal_table()
             self.fig_cal.canvas.draw_idle()
-        except:
+        except Exception as e:
             print("Calibration data not updated")
+            print("An unknown error occurred:", str(e))
 
     def new_window_cal_eqns(self):
         self.w_cal_eqns = WindowCalEqns()
@@ -1358,8 +1369,9 @@ class NasaGammaApp(QMainWindow):
                 self.ecal_eqn = self.ecal_eqn + f"\nd = {eval(d_txt)}"
             self.pred_erg = erg
             self.plot_cal_eqns(self.ecal_eqn)
-        except:
+        except Exception as e:
             print("Could not set calibration equations")
+            print("An unknown error occurred:", str(e))
 
     def plot_cal_eqns(self, label):
         self.reset_cal()
@@ -1459,8 +1471,9 @@ class NasaGammaApp(QMainWindow):
                 self.update_cal()
             else:
                 print("Channels and energies must be the same length")
-        except:
+        except Exception as e:
             print("Could not add point manually")
+            print("An unknown error occurred:", str(e))
 
     ## efficiency calibration
     def eff_info_activate(self):
@@ -1766,8 +1779,8 @@ class NasaGammaApp(QMainWindow):
             self.update_table_fwhm()
             self.update_gauss_fwhm()
             self.fig_fwhm.canvas.draw_idle()
-        except:
-            pass
+        except Exception as e:
+            print("An unknown error occurred:", str(e))
 
     def update_table_fwhm(self):
         self.ax_fwhm_tab.clear()
@@ -1802,8 +1815,8 @@ class NasaGammaApp(QMainWindow):
             self.fwhm.sort()
             self.perform_fwhm()
             # self.update_fwhm_table()
-        except:
-            pass
+        except Exception as e:
+            print("An unknown error occurred:", str(e))
 
     def update_fwhm_figure(self):
         self.ax_fwhm.clear()
@@ -1848,8 +1861,8 @@ class NasaGammaApp(QMainWindow):
                 self.fig_fwhm.canvas.draw_idle()
             else:
                 self.update_fwhm_figure()
-        except:
-            pass
+        except Exception as e:
+            print("An unknown error occurred:", str(e))
 
     ## Diagnostics
     def initialize_plots_diagnostics(self):
@@ -2060,8 +2073,8 @@ class NasaGammaApp(QMainWindow):
             self.df_current = self.df_api.copy()
             self.df_previous = self.df_api.copy()
             self.initialize_plots_api()
-        except:
-            pass
+        except Exception as e:
+            print("An unknown error occurred:", str(e))
 
     def send_to_spect_api(self):
         try:
@@ -2072,8 +2085,8 @@ class NasaGammaApp(QMainWindow):
             self.spect_orig = deepcopy(self.spect)
             self.create_graph(fit=False, reset=True)
             self.search = 0
-        except:
-            pass
+        except Exception as e:
+            print("An unknown error occurred:", str(e))
 
     def plot_energy_hist_api(self, df):
         self.api_gam, self.api_edg = np.histogram(
@@ -2118,8 +2131,8 @@ class NasaGammaApp(QMainWindow):
             elif self.api_xy_scale == "log":
                 self.plot_xy_api(self.df_current, cbar=False, logxy=False)
                 self.api_xy_scale = "linear"
-        except:
-            pass
+        except Exception as e:
+            print("An unknown error occurred:", str(e))
 
     def api_on_returnXY(self):
         try:
@@ -2127,8 +2140,8 @@ class NasaGammaApp(QMainWindow):
             self.plot_xy_api(self.df_current, cbar=False, logxy=False, vmax=self.vmax)
             self.api_xy_scale = "linear"
             self.api_button_logxy.setChecked(False)
-        except:
-            pass
+        except Exception as e:
+            print("An unknown error occurred:", str(e))
 
     def api_spect_yscale(self):
         try:
@@ -2139,16 +2152,16 @@ class NasaGammaApp(QMainWindow):
                 self.ax_api_spe.set_yscale("log")
                 self.api_spect_scale = "log"
             self.fig_api.canvas.draw_idle()
-        except:
-            pass
+        except Exception as e:
+            print("An unknown error occurred:", str(e))
 
     def api_window_filters(self):
         self.w_api_filt = WindowAPIfilters()
         self.w_api_filt.show()
         try:
             self.w_api_filt.button_api_apply.clicked.connect(self.apply_api_filters)
-        except:
-            pass
+        except Exception as e:
+            print("An unknown error occurred:", str(e))
 
     def apply_api_filters(self):
         # Add vertical lines in plot indicating filter values
@@ -2358,13 +2371,14 @@ class NasaGammaApp(QMainWindow):
             else:
                 self.snr_state = "off"
             self.create_graph(fit=True, reset=True)
-        except:
+        except Exception as e:
             print(
                 (
                     "ERROR: non-numeric entry or if more than 9000 channels,"
                     "constrain the range using x0 and x1."
                 )
             )
+            print("An unknown error occurred:", str(e))
             # self.create_graph(fit=False)
 
     def peakFind_check_hpge(self):
@@ -2678,8 +2692,9 @@ class NasaGammaApp(QMainWindow):
 
             with open(f"{fileName}", "w") as text_file:
                 text_file.write(report2)
-        except:
+        except Exception as e:
             print("Cannot save file with fit info")
+            print("An unknown error occurred:", str(e))
 
     def save_spect(self):
         options = QFileDialog.Options()
@@ -2692,8 +2707,9 @@ class NasaGammaApp(QMainWindow):
             else:
                 self.spect.to_csv(fileName)
             print("Saved file: ", fileName)
-        except:
+        except Exception as e:
             print("Cannot save file")
+            print("An unknown error occurred:", str(e))
 
     def save_ID_peaks(self):
         options = QFileDialog.Options()
@@ -2707,8 +2723,9 @@ class NasaGammaApp(QMainWindow):
                 df.to_csv(f"{fileName}", index=False)
             else:
                 df.to_csv(f"{fileName}.csv", index=False)
-        except:
+        except Exception as e:
             print("Cannot save file with peak info")
+            print("An unknown error occurred:", str(e))
 
     def save_multiple_spectra(self):
         options = QFileDialog.Options()
