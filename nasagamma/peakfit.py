@@ -11,7 +11,7 @@ from . import peaksearch as ps
 
 
 class PeakFit:
-    def __init__(self, search, xrange, bkg="linear", skew=False):
+    def __init__(self, search, xrange, bkg="poly1", skew=False):
         """
         Use the package LMfit to fit and plot peaks with Gaussians with a
         given background. It must be initialized with a PeakSearch object.
@@ -26,7 +26,7 @@ class PeakFit:
             was initialized.
         bkg : string, optional
             Can be 'linear', 'quadratic', 'exponential' or 'polyn', where n
-            is any degree polynomial. The default is 'linear'.
+            is any degree polynomial. The default is 'poly1'.
         skew : bool, optional
             fit a skewed Gaussian instead. The default is 'False'
 
