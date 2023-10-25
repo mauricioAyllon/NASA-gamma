@@ -380,8 +380,8 @@ class NasaGammaApp(QMainWindow):
             self.create_graph(fit=True, reset=True)
         try:
             self.min_snr = float(self.commands["--min_snr"])
-        except Exception as e:
-            print("An unknown error occurred:", str(e))
+        except:
+            print("Opening a blank GUI")
 
         self.button_remove_cal.clicked.connect(self.remove_cal)
         # peak search range
@@ -2200,7 +2200,7 @@ class NasaGammaApp(QMainWindow):
             "horizontal",
             useblit=True,
             interactive=True,
-            props=dict(alpha=0.3, facecolor="green"),
+            props=dict(alpha=0.3, facecolor="yellow"),
         )
 
     def enselect_api(self, xmin, xmax):
