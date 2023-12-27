@@ -711,16 +711,16 @@ class NasaGammaApp(QMainWindow):
         self.w_adv_fit.activateWindow()
         self.parea = pa.PeakArea(spectrum=self.spect, xrange=self.fit.xrange)
         self.w_adv_fit.show()
-        self.reset_plot_area()
-        self.plot_area(bool_area=False)
+        self.reset_plot_adv_fit()
+        self.plot_adv_fit(bool_area=False)
 
-    def reset_plot_area(self):
-        self.fig_adv_fit = self.w_adv_fit.plot_area.canvas.figure
+    def reset_plot_adv_fit(self):
+        self.fig_adv_fit = self.w_adv_fit.plot_adv_fit.canvas.figure
         self.fig_adv_fit.clear()
         self.fig_adv_fit.set_constrained_layout(True)
         self.ax_area = self.fig_adv_fit.add_subplot()
 
-    def plot_area(self, bool_area=False):
+    def plot_adv_fit(self, bool_area=False):
         self.parea.plot(ax=self.ax_area, areas=bool_area)
         self.fig_adv_fit.canvas.draw_idle()
 
