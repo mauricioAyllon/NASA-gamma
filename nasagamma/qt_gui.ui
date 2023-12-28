@@ -364,6 +364,18 @@
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_18">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item row="0" column="0">
             <widget class="MplWidget" name="main_plot" native="true">
              <property name="autoFillBackground">
@@ -409,6 +421,18 @@
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_20">
+           <property name="leftMargin">
+            <number>5</number>
+           </property>
+           <property name="topMargin">
+            <number>3</number>
+           </property>
+           <property name="rightMargin">
+            <number>5</number>
+           </property>
+           <property name="bottomMargin">
+            <number>3</number>
+           </property>
            <item row="0" column="0">
             <layout class="QGridLayout" name="gridLayout_17">
              <item row="0" column="0">
@@ -537,8 +561,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>741</width>
-                  <height>149</height>
+                  <width>753</width>
+                  <height>165</height>
                  </rect>
                 </property>
                </widget>
@@ -1070,7 +1094,11 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
             <widget class="QScrollArea" name="table_eff_area">
              <property name="font">
               <font>
+               <family>MS Shell Dlg 2</family>
                <pointsize>11</pointsize>
+               <weight>50</weight>
+               <italic>false</italic>
+               <bold>false</bold>
               </font>
              </property>
              <property name="styleSheet">
