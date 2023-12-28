@@ -377,6 +377,7 @@ class NasaGammaApp(QMainWindow):
                 self.ref_fwhm,
             ) = get_input
             self.e_units = self.spect.e_units
+            self.fileName = self.commands["<file_name>"]
             self.create_graph(fit=True, reset=True)
         try:
             self.min_snr = float(self.commands["--min_snr"])
