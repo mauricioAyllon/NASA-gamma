@@ -2879,7 +2879,7 @@ if __name__ == "__main__":
     print(commands)
 
     # initialize figure
-    plt.rc("font", size=16)
+    plt.rc("font", size=14)
     plt.style.use("seaborn-v0_8-darkgrid")
 
     # initialize app

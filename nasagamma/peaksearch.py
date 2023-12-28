@@ -310,7 +310,7 @@ class PeakSearch:
         None.
 
         """
-        plt.rc("font", size=14)
+        plt.rc("font", size=12)
         plt.style.use("seaborn-v0_8-darkgrid")
         if self.spectrum.energies is None:
             # x = self.spectrum.channels[:-1]
@@ -360,7 +360,7 @@ class PeakSearch:
             x = self.spectrum.channels[self.channel_idx]
         else:
             x = self.spectrum.energies[self.channel_idx]
-        plt.rc("font", size=14)
+        plt.rc("font", size=12)
         plt.style.use("seaborn-v0_8-darkgrid")
         plt.figure(figsize=(10, 6))
         plt.plot(x, self.spectrum.counts[self.channel_idx], label="Raw spectrum")
