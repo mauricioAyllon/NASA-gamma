@@ -170,34 +170,7 @@
            </item>
            <item>
             <layout class="QGridLayout" name="gridLayout_10">
-             <item row="0" column="2">
-              <widget class="QRadioButton" name="radioButton_3">
-               <property name="font">
-                <font>
-                 <pointsize>10</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>JPEG</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QRadioButton" name="radioButton_2">
-               <property name="font">
-                <font>
-                 <pointsize>10</pointsize>
-                </font>
-               </property>
-               <property name="layoutDirection">
-                <enum>Qt::LeftToRight</enum>
-               </property>
-               <property name="text">
-                <string>PNG</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
+             <item row="2" column="2">
               <widget class="QPushButton" name="pushButton_3">
                <property name="font">
                 <font>
@@ -212,24 +185,9 @@
                </property>
               </widget>
              </item>
-             <item row="0" column="0">
-              <widget class="QRadioButton" name="radioButton">
-               <property name="font">
-                <font>
-                 <pointsize>10</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>PDF</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0" colspan="2">
+             <item row="2" column="0" colspan="2">
               <layout class="QGridLayout" name="gridLayout_9">
-               <item row="0" column="0">
+               <item row="1" column="0">
                 <widget class="QLabel" name="label_4">
                  <property name="font">
                   <font>
@@ -241,7 +199,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="0" column="1">
+               <item row="1" column="1">
                 <widget class="QLineEdit" name="lineEdit">
                  <property name="font">
                   <font>
@@ -260,6 +218,72 @@
                 </widget>
                </item>
               </layout>
+             </item>
+             <item row="0" column="1">
+              <widget class="QRadioButton" name="radioButton_2">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="layoutDirection">
+                <enum>Qt::LeftToRight</enum>
+               </property>
+               <property name="text">
+                <string>PNG</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QRadioButton" name="radioButton_3">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>JPEG</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QRadioButton" name="radioButton">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>PDF</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_17">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Name:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1" colspan="2">
+              <widget class="QLineEdit" name="lineEdit_8">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(255, 255, 255);</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -427,7 +451,7 @@
              <item row="4" column="0">
               <layout class="QGridLayout" name="gridLayout_6">
                <item row="0" column="0">
-                <widget class="QCheckBox" name="checkBox">
+                <widget class="QCheckBox" name="checkBox_area_lin">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -439,7 +463,7 @@
                 </widget>
                </item>
                <item row="0" column="1" colspan="2">
-                <widget class="QCheckBox" name="checkBox_6">
+                <widget class="QCheckBox" name="checkBox_gauss_poly">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -635,7 +659,7 @@
                 </widget>
                </item>
                <item row="0" column="1">
-                <widget class="QLabel" name="label_23">
+                <widget class="QLabel" name="label_redchi2">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -669,7 +693,7 @@
                 </widget>
                </item>
                <item row="0" column="1">
-                <widget class="QLabel" name="label_31">
+                <widget class="QLabel" name="label_peak_area">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -711,7 +735,7 @@
                 </widget>
                </item>
                <item row="0" column="3">
-                <widget class="QLabel" name="label_39">
+                <widget class="QLabel" name="uncert_peak_area">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -745,7 +769,7 @@
                 </widget>
                </item>
                <item row="0" column="1">
-                <widget class="QLabel" name="label_32">
+                <widget class="QLabel" name="label_fwhm">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -787,7 +811,7 @@
                 </widget>
                </item>
                <item row="0" column="3">
-                <widget class="QLabel" name="label_46">
+                <widget class="QLabel" name="uncert_fwhm">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -821,7 +845,7 @@
                 </widget>
                </item>
                <item row="0" column="1">
-                <widget class="QLabel" name="label_33">
+                <widget class="QLabel" name="label_sigma">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -863,7 +887,7 @@
                 </widget>
                </item>
                <item row="0" column="3">
-                <widget class="QLabel" name="label_47">
+                <widget class="QLabel" name="uncert_sigma">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -897,7 +921,7 @@
                 </widget>
                </item>
                <item row="0" column="1">
-                <widget class="QLabel" name="label_34">
+                <widget class="QLabel" name="label_height">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -939,7 +963,7 @@
                 </widget>
                </item>
                <item row="0" column="3">
-                <widget class="QLabel" name="label_48">
+                <widget class="QLabel" name="uncert_height">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -973,7 +997,7 @@
                 </widget>
                </item>
                <item row="0" column="1">
-                <widget class="QLabel" name="label_35">
+                <widget class="QLabel" name="label_mean">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -1015,7 +1039,7 @@
                 </widget>
                </item>
                <item row="0" column="3">
-                <widget class="QLabel" name="label_49">
+                <widget class="QLabel" name="uncert_mean">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -1044,12 +1068,12 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Polynomial coeff:</string>
+                  <string>Poly. coeff:</string>
                  </property>
                 </widget>
                </item>
                <item row="0" column="1">
-                <widget class="QLabel" name="label_36">
+                <widget class="QLabel" name="label_poly_coeff">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -1091,7 +1115,7 @@
                 </widget>
                </item>
                <item row="0" column="3">
-                <widget class="QLabel" name="label_50">
+                <widget class="QLabel" name="uncert_poly_coeff">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -1125,7 +1149,7 @@
                 </widget>
                </item>
                <item row="0" column="1">
-                <widget class="QLabel" name="label_37">
+                <widget class="QLabel" name="label_gamma">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -1167,7 +1191,7 @@
                 </widget>
                </item>
                <item row="0" column="3">
-                <widget class="QLabel" name="label_51">
+                <widget class="QLabel" name="uncert_gamma">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -1219,22 +1243,22 @@
             <layout class="QGridLayout" name="gridLayout_81">
              <item row="2" column="0">
               <layout class="QGridLayout" name="gridLayout_29">
-               <item row="1" column="0">
-                <layout class="QGridLayout" name="gridLayout_14">
+               <item row="6" column="0">
+                <layout class="QGridLayout" name="gridLayout_26">
                  <item row="0" column="0">
-                  <widget class="QLabel" name="label_7">
+                  <widget class="QLabel" name="label_19">
                    <property name="font">
                     <font>
                      <pointsize>10</pointsize>
                     </font>
                    </property>
                    <property name="text">
-                    <string>X2:</string>
+                    <string>Gamma:</string>
                    </property>
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_3">
+                  <widget class="QLineEdit" name="lineEdit_gamma">
                    <property name="styleSheet">
                     <string notr="true">background-color: rgb(255, 255, 255);</string>
                    </property>
@@ -1242,237 +1266,7 @@
                  </item>
                 </layout>
                </item>
-               <item row="4" column="0">
-                <layout class="QGridLayout" name="gridLayout_16">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_14">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>B2:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_5">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: rgb(255, 255, 255);</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="5" column="0" rowspan="2">
-                <layout class="QGridLayout" name="gridLayout_17">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_15">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>B3:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_6">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: rgb(255, 255, 255);</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="7" column="0">
-                <layout class="QGridLayout" name="gridLayout_18">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_16">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>B4:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_7">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: rgb(255, 255, 255);</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="10" column="0">
-                <layout class="QGridLayout" name="gridLayout_20">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_18">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>A2:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_9">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: rgb(255, 255, 255);</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="8" column="0" rowspan="2">
-                <layout class="QGridLayout" name="gridLayout_19">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_17">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>A1:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_8">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: rgb(255, 255, 255);</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="8" column="1">
-                <layout class="QGridLayout" name="gridLayout_27">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_20">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>XX2:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_16">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: rgb(255, 255, 255);</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="3" column="1">
-                <layout class="QGridLayout" name="gridLayout_23">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_10">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>No. of peaks:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_12">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: rgb(255, 255, 255);</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="4" column="1" rowspan="2">
-                <layout class="QGridLayout" name="gridLayout_24">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_11">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Amplitude:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_13">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: rgb(255, 255, 255);</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="3" column="0">
-                <layout class="QGridLayout" name="gridLayout_15">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_13">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>B1:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_4">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: rgb(255, 255, 255);</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="0" column="1">
-                <layout class="QGridLayout" name="gridLayout_21">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_8">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Mean:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_10">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: rgb(255, 255, 255);</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="1" column="1">
+               <item row="2" column="0">
                 <layout class="QGridLayout" name="gridLayout_22">
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_9">
@@ -1487,7 +1281,102 @@
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_11">
+                  <widget class="QLineEdit" name="lineEdit_fwhm">
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(255, 255, 255);</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="5" column="0">
+                <layout class="QGridLayout" name="gridLayout_25">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_12">
+                   <property name="font">
+                    <font>
+                     <pointsize>10</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Height ratios:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="lineEdit_height_ratios">
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(255, 255, 255);</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="4" column="1">
+                <layout class="QGridLayout" name="gridLayout_15">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_13">
+                   <property name="font">
+                    <font>
+                     <pointsize>10</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>B1:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="lineEdit_B1">
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(255, 255, 255);</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="5" column="1">
+                <layout class="QGridLayout" name="gridLayout_16">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_14">
+                   <property name="font">
+                    <font>
+                     <pointsize>10</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>B2:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="lineEdit_B2">
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(255, 255, 255);</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="4" column="0">
+                <layout class="QGridLayout" name="gridLayout_24">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_11">
+                   <property name="font">
+                    <font>
+                     <pointsize>10</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Height:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="lineEdit_height">
                    <property name="styleSheet">
                     <string notr="true">background-color: rgb(255, 255, 255);</string>
                    </property>
@@ -1496,6 +1385,75 @@
                 </layout>
                </item>
                <item row="0" column="0">
+                <layout class="QGridLayout" name="gridLayout_21">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_8">
+                   <property name="font">
+                    <font>
+                     <pointsize>10</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Mean:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="lineEdit_mean">
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(255, 255, 255);</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="1" column="0">
+                <layout class="QGridLayout" name="gridLayout_23">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_10">
+                   <property name="font">
+                    <font>
+                     <pointsize>10</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>No. of peaks:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="lineEdit_no_peaks">
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(255, 255, 255);</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="1" column="1">
+                <layout class="QGridLayout" name="gridLayout_14">
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="lineEdit_x2">
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(255, 255, 255);</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_7">
+                   <property name="font">
+                    <font>
+                     <pointsize>10</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>X2:</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="0" column="1">
                 <layout class="QGridLayout" name="gridLayout_13">
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_6">
@@ -1510,7 +1468,7 @@
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_2">
+                  <widget class="QLineEdit" name="lineEdit_x1">
                    <property name="enabled">
                     <bool>true</bool>
                    </property>
@@ -1527,76 +1485,53 @@
                 </layout>
                </item>
                <item row="6" column="1">
-                <layout class="QGridLayout" name="gridLayout_25">
+                <layout class="QGridLayout" name="gridLayout_17">
                  <item row="0" column="0">
-                  <widget class="QLabel" name="label_12">
+                  <widget class="QLabel" name="label_15">
                    <property name="font">
                     <font>
                      <pointsize>10</pointsize>
                     </font>
                    </property>
                    <property name="text">
-                    <string>Amplitude ratios:</string>
+                    <string>B3:</string>
                    </property>
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_14">
+                  <widget class="QLineEdit" name="lineEdit_B3">
                    <property name="styleSheet">
                     <string notr="true">background-color: rgb(255, 255, 255);</string>
                    </property>
                   </widget>
                  </item>
-                </layout>
-               </item>
-               <item row="7" column="1">
-                <layout class="QGridLayout" name="gridLayout_26">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_19">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>XX1:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_15">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: rgb(255, 255, 255);</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="9" column="1" rowspan="2">
-                <layout class="QGridLayout" name="gridLayout_28">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_21">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>XX3:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_17">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: rgb(255, 255, 255);</string>
-                   </property>
-                  </widget>
+                 <item row="1" column="0" colspan="2">
+                  <layout class="QGridLayout" name="gridLayout_18">
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="label_16">
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>B4:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QLineEdit" name="lineEdit_B4">
+                     <property name="styleSheet">
+                      <string notr="true">background-color: rgb(255, 255, 255);</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
                  </item>
                 </layout>
                </item>
                <item row="2" column="1">
-                <widget class="QCheckBox" name="checkBox_14">
+                <widget class="QCheckBox" name="checkBox_sqrt_E">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
