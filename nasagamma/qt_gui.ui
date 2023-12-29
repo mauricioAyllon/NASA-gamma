@@ -507,6 +507,9 @@
                    <pointsize>12</pointsize>
                   </font>
                  </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color: rgb(170, 255, 0);</string>
+                 </property>
                  <property name="text">
                   <string>Advanced fitting</string>
                  </property>
@@ -864,8 +867,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>444</width>
-                <height>608</height>
+                <width>98</width>
+                <height>28</height>
                </rect>
               </property>
              </widget>
@@ -1113,8 +1116,8 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>622</width>
-                <height>608</height>
+                <width>98</width>
+                <height>28</height>
                </rect>
               </property>
              </widget>
