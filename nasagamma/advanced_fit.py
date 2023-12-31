@@ -11,12 +11,13 @@ from nasagamma import peaksearch as ps
 from nasagamma import peakfit as pf
 
 
-class PeakArea:
-    def __init__(self, spectrum, xrange):
+class PeakAreaLinearBkg:
+    def __init__(self, spectrum, x1, x2):
         if not isinstance(spectrum, sp.Spectrum):
             raise Exception("spectrum must be a Spectrum object")
         self.spect = spectrum
-        self.xrange = xrange
+        self.x1 = x1
+        self.x2 = x2
         self.ch = self.spect.channels
         self.prange = 0
         self.B = 0
@@ -26,32 +27,22 @@ class PeakArea:
         self.y_eqn = 0
         if self.spect.energies is None:
             # print("Working with channel numbers")
-            self.chrange = [round(self.xrange[0]), round(self.xrange[1])]
-            self.x = self.spect.channels[self.chrange[0] : self.chrange[1] + 1]
+            self.ch1 = int(x1)
+            self.ch2 = int(x2)
+            #self.chrange = [round(self.xrange[0]), round(self.xrange[1])]
         else:
             # print("Working with energy values")
             erg = self.spect.energies
-            tot_xrange = self.ch[(erg >= self.xrange[0]) * (erg <= self.xrange[1])]
-            self.chrange = [round(tot_xrange[0]), round(tot_xrange[-1])]
-            self.x = self.spect.energies[self.chrange[0] : self.chrange[1] + 1]
+            self.ch1 = int(self.spect.channels[erg > x1][0])
+            self.ch2 = int(self.spect.channels[erg > x2][0])
+            self.e1 = erg[self.ch1]
+            self.e2 = erg[self.ch2]
+        self.y1 = self.spect.counts[self.ch1]
+        self.y2 = self.spect.counts[self.ch2]
+        self.xr = self.spect.channels[self.ch1 : self.ch2 + 1]
+        self.yr = self.spect.counts[self.ch1 : self.ch2 + 1]
 
-        self.y = self.spect.counts[self.chrange[0] : self.chrange[1] + 1]
-
-    def calculate_peak_area(self, prange):
-        self.prange = prange
-        if self.spect.energies is None:
-            self.pchrange = [round(prange[0]), round(prange[1])]
-        else:
-            erg = self.spect.energies
-            tot_prange = self.ch[(erg >= prange[0]) * (erg <= prange[1])]
-            self.pchrange = [round(tot_prange[0]), round(tot_prange[-1])]
-        self.x1 = round(self.pchrange[0])
-        self.x2 = round(self.pchrange[1])
-        self.y1 = self.spect.counts[self.x1]
-        self.y2 = self.spect.counts[self.x2]
-        # only the region of interest
-        self.xr = self.spect.channels[self.x1 : self.x2 + 1]
-        self.yr = self.spect.counts[self.x1 : self.x2 + 1]
+    def calculate_peak_area(self):
         # linear equation for background
         self.y_eqn = (self.y2 - self.y1) / (self.x2 - self.x1) * (
             self.xr - self.x1
@@ -59,7 +50,6 @@ class PeakArea:
         self.A = self.yr.sum() - self.y_eqn.sum()
         self.B = self.y_eqn.sum()
         # print(f"Peak area based on linear background = {self.A}")
-
         # Errors
         sigAB = np.sqrt(self.yr.sum())
         self.sigB = np.sqrt(self.y_eqn.sum())

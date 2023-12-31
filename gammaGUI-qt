@@ -709,7 +709,7 @@ class NasaGammaApp(QMainWindow):
     ## TODO
     def open_adv_fit(self):
         self.w_adv_fit.activateWindow()
-        self.parea = adv.PeakArea(spectrum=self.spect, xrange=self.fit.xrange)
+        self.parea = adv.PeakAreaLinearBkg(spectrum=self.spect, xrange=self.fit.xrange)
         self.w_adv_fit.show()
         self.reset_plot_adv_fit()
         self.plot_adv_fit(bool_area=False)
