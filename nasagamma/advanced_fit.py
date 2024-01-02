@@ -29,7 +29,7 @@ class PeakAreaLinearBkg:
             # print("Working with channel numbers")
             self.ch1 = int(x1)
             self.ch2 = int(x2)
-            #self.chrange = [round(self.xrange[0]), round(self.xrange[1])]
+            # self.chrange = [round(self.xrange[0]), round(self.xrange[1])]
         else:
             # print("Working with energy values")
             erg = self.spect.energies
@@ -63,11 +63,15 @@ class PeakAreaLinearBkg:
         plt.style.use("seaborn-darkgrid")
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
-            fig.patch.set_alpha(0.3) # set background transparent
+            fig.patch.set_alpha(0.3)  # set background transparent
             ax = fig.add_subplot()
 
         if areas is False:
-            line = ax.plot(self.x, self.y, drawstyle="steps")
+            line = ax.plot(
+                self.spect.x[self.ch1 : self.ch2],
+                self.spect.counts[self.ch1 : self.ch2],
+                drawstyle="steps",
+            )
         else:
             if self.spect.energies is None:
                 xarea = self.xr
