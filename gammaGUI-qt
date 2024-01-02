@@ -2028,7 +2028,7 @@ class NasaGammaApp(QMainWindow):
 
     def initialize_plots_api(self, flood_field=False):
         self.trange = [-40, 120]  # dt range
-        self.ebins = 2**16  # energy bins
+        self.ebins = 2**12  # energy bins
         self.hexbins = 80  # x-y bins
         self.tbins = 512  # time bins
         self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
