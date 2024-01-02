@@ -45,7 +45,7 @@ from nasagamma import param_handle
 from nasagamma import peakfit as pf
 from nasagamma import peaksearch as ps
 from nasagamma import spectrum as sp
-from nasagamma import peakarea as pa
+from nasagamma import advanced_fit as adv
 from nasagamma import read_cnf
 from nasagamma import tlist
 from nasagamma import energy_calibration as ecal
@@ -377,6 +377,7 @@ class NasaGammaApp(QMainWindow):
                 self.ref_fwhm,
             ) = get_input
             self.e_units = self.spect.e_units
+            self.fileName = self.commands["<file_name>"]
             self.create_graph(fit=True, reset=True)
         try:
             self.min_snr = float(self.commands["--min_snr"])
@@ -391,10 +392,9 @@ class NasaGammaApp(QMainWindow):
         # advanced fitting
         # TODO
         self.parea = None
-        self.button_adv_fit.setStyleSheet("background-color : limegreen")
         self.w_adv_fit = WindowAdvFit()
         self.button_adv_fit.clicked.connect(self.open_adv_fit)
-        self.w_adv_fit.button_plot_area.clicked.connect(self.calculate_peak_area)
+        self.w_adv_fit.button_perform_fit.clicked.connect(self.calculate_peak_area)
 
         ## energy calibration
         self.mean_vals = [0]
@@ -613,7 +613,7 @@ class NasaGammaApp(QMainWindow):
         self.fig.set_constrained_layout(True)
         self.fig_fit.set_constrained_layout(True)
         gs = self.fig_fit.add_gridspec(2, 1, height_ratios=[0.3, 1.5])
-        self.fig.patch.set_alpha(0.3)
+        self.fig.patch.set_alpha(0)
         # axes
         self.ax_main = self.fig.add_subplot()
         self.ax_res = self.fig_fit.add_subplot(gs[0, 0])
@@ -709,24 +709,25 @@ class NasaGammaApp(QMainWindow):
     ## TODO
     def open_adv_fit(self):
         self.w_adv_fit.activateWindow()
-        self.parea = pa.PeakArea(spectrum=self.spect, xrange=self.fit.xrange)
+        self.parea = adv.PeakAreaLinearBkg(spectrum=self.spect, xrange=self.fit.xrange)
         self.w_adv_fit.show()
-        self.reset_plot_area()
-        self.plot_area(bool_area=False)
+        self.reset_plot_adv_fit()
+        self.plot_adv_fit(bool_area=False)
 
-    def reset_plot_area(self):
-        self.fig_adv_fit = self.w_adv_fit.plot_area.canvas.figure
+    def reset_plot_adv_fit(self):
+        self.fig_adv_fit = self.w_adv_fit.plot_adv_fit.canvas.figure
         self.fig_adv_fit.clear()
         self.fig_adv_fit.set_constrained_layout(True)
+        self.fig_adv_fit.patch.set_alpha(0)
         self.ax_area = self.fig_adv_fit.add_subplot()
 
-    def plot_area(self, bool_area=False):
+    def plot_adv_fit(self, bool_area=False):
         self.parea.plot(ax=self.ax_area, areas=bool_area)
         self.fig_adv_fit.canvas.draw_idle()
 
     def calculate_peak_area(self):
-        x1 = self.w_adv_fit.x1.text()
-        x2 = self.w_adv_fit.x2.text()
+        x1 = self.w_adv_fit.edit_x1.text()
+        x2 = self.w_adv_fit.edit_x2.text()
         if self.isevaluable(x1) and self.isevaluable(x2) and self.parea is not None:
             peak_range = [eval(x1), eval(x2)]
             self.parea.calculate_peak_area(prange=peak_range)
@@ -1887,7 +1888,7 @@ class NasaGammaApp(QMainWindow):
         for fig in self.figs_diag:
             fig.clear()
             fig.set_constrained_layout(True)
-            fig.patch.set_alpha(0.3)
+            fig.patch.set_alpha(0)
         self.ax00 = self.fig_diag00.add_subplot()
         self.ax01 = self.fig_diag01.add_subplot()
         self.ax02 = self.fig_diag02.add_subplot()
@@ -2878,7 +2879,7 @@ if __name__ == "__main__":
     print(commands)
 
     # initialize figure
-    plt.rc("font", size=16)
+    plt.rc("font", size=14)
     plt.style.use("seaborn-v0_8-darkgrid")
 
     # initialize app

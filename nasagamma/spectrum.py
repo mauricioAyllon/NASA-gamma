@@ -283,7 +283,7 @@ class Spectrum:
 
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
-            fig.patch.set_alpha(0.3)
+            fig.patch.set_alpha(0.3) # set background transparent
             ax = fig.add_subplot()
 
         integral = round(self.counts.sum())

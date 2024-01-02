@@ -281,7 +281,7 @@ class PeakFit:
             bkg_label = self.bkg
 
         if plot_type == "simple":
-            plt.rc("font", size=14)
+            plt.rc("font", size=12)
             plt.style.use("seaborn-v0_8-darkgrid")
             if fig is None:
                 fig = plt.figure(constrained_layout=True, figsize=(8, 6))
@@ -343,7 +343,7 @@ class PeakFit:
 
             rs = np.array([mean, area, fwhm]).T
             colors = [["lightblue"] * len(cols)] * len(rs)
-            plt.rc("font", size=14)
+            plt.rc("font", size=12)
             plt.style.use("seaborn-v0_8-darkgrid")
 
             if fig is None:
@@ -427,7 +427,7 @@ class PeakFit:
             )
             t.scale(table_scale[0], table_scale[1])
             t.auto_set_font_size(False)
-            t.set_fontsize(14)
+            t.set_fontsize(12)
             ax_tab.axis("off")
             # plt.style.use("default")
 
@@ -505,7 +505,7 @@ class GaussianComponents:
 
     def plot_gauss(self, plot_type="simple", table_scale=[1, 3], fig=None, ax=None):
         if plot_type == "simple":
-            plt.rc("font", size=14)
+            plt.rc("font", size=12)
             plt.style.use("seaborn-v0_8-darkgrid")
             plt.figure(figsize=(12, 8))
             for i in range(self.npeaks):
@@ -528,7 +528,7 @@ class GaussianComponents:
             fwhm = self.fwhm
             rs = np.array([mean, area, fwhm]).T
             rs = np.round(rs, decimals=2)
-            plt.rc("font", size=14)
+            plt.rc("font", size=12)
             plt.style.use("seaborn-v0_8-darkgrid")
             fig = plt.figure(constrained_layout=False, figsize=(18, 8))
             gs = fig.add_gridspec(1, 2, width_ratios=[3, 2.5])  # 5 , 3
@@ -594,7 +594,7 @@ class GaussianComponents:
             if fig is None:
                 pass  # remove in later releases
             if ax is None:
-                plt.rc("font", size=14)
+                plt.rc("font", size=12)
                 plt.style.use("seaborn-v0_8-darkgrid")
                 fig = plt.figure(constrained_layout=False, figsize=(18, 8))
                 ax = fig.add_subplot()
