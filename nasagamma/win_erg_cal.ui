@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>442</width>
-    <height>299</height>
+    <height>259</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,21 +38,6 @@
         </property>
         <property name="text">
          <string>Display but do not use for fitting</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_ecal_warning">
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;You are starting a new calibration.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -220,7 +205,10 @@ font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <string notr="true">background-color: rgb(255, 255, 255);</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignCenter</set>
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+          <property name="cursorMoveStyle">
+           <enum>Qt::LogicalMoveStyle</enum>
           </property>
          </widget>
         </item>
@@ -238,6 +226,21 @@ font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
          </spacer>
         </item>
        </layout>
+      </item>
+      <item row="6" column="0" colspan="2">
+       <widget class="QLabel" name="label_ecal_warning">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0000ff;&quot;&gt;You are starting a new calibration.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
