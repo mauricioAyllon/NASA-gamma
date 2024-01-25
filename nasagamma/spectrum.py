@@ -240,7 +240,8 @@ class Spectrum:
         None.
 
         """
-        current_date = datetime.date.today()
+        if self.acq_date is None:
+            self.acq_date = datetime.date.today()
         if fileName[-4:] == ".txt":
             file_txt = fileName
         else:
@@ -249,7 +250,7 @@ class Spectrum:
             # write metadata
             f.write(f"Description: {self.description}\n")
             f.write(f"Label: {self.label}\n")
-            f.write(f"Date created: {current_date}\n")
+            f.write(f"Date created: {self.acq_date}\n")
             f.write(f"Real time (s): {self.realtime}\n")
             f.write(f"Live time (s): {self.livetime}\n")
             f.write(f"Energy calibration: {self.energy_cal}\n")
@@ -283,7 +284,7 @@ class Spectrum:
 
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
-            fig.patch.set_alpha(0.3) # set background transparent
+            fig.patch.set_alpha(0.3)  # set background transparent
             ax = fig.add_subplot()
 
         integral = round(self.counts.sum())
