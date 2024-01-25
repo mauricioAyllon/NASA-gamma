@@ -1229,7 +1229,7 @@ class NasaGammaApp(QMainWindow):
             if self.e_units == "MeV":
                 self.w_cal.radio_button_mev.setChecked(True)
             self.disable_checkRadioButtons()
-            txt = "Warning: calibration has been initialized"
+            txt = "Note: calibration has already been initialized"
             self.w_cal.label_ecal_warning.setText(txt)
             self.w_cal.label_ecal_warning.setStyleSheet("color: red ; font: 10")
 
@@ -1357,20 +1357,21 @@ class NasaGammaApp(QMainWindow):
             d_txt = self.w_cal_eqns.d.text()
             ch = self.spect.channels
             erg = 0
-            self.ecal_eqn = "Equation: $a + bx + cx^2 + dx^3$\n"
+            self.ecal_eqn = ""
             if self.isevaluable(a_txt):
                 erg = erg + eval(a_txt)
-                self.ecal_eqn = self.ecal_eqn + f"a = {eval(a_txt)}"
+                self.ecal_eqn = self.ecal_eqn + f"{eval(a_txt)}"
             if self.isevaluable(b_txt):
                 erg = erg + eval(b_txt) * ch
-                self.ecal_eqn = self.ecal_eqn + f"\nb = {eval(b_txt)}"
+                self.ecal_eqn = self.ecal_eqn + f" + {eval(b_txt)}x"
             if self.isevaluable(c_txt):
                 erg = erg + eval(c_txt) * ch**2
-                self.ecal_eqn = self.ecal_eqn + f"\nc = {eval(c_txt)}"
+                self.ecal_eqn = self.ecal_eqn + f" + {eval(c_txt)}x^2"
             if self.isevaluable(d_txt):
                 erg = erg + eval(d_txt) * ch**3
-                self.ecal_eqn = self.ecal_eqn + f"\nd = {eval(d_txt)}"
+                self.ecal_eqn = self.ecal_eqn + f" + {eval(d_txt)}x^3"
             self.pred_erg = erg
+            self.which_button_cal_eqn()
             self.plot_cal_eqns(self.ecal_eqn)
         except Exception as e:
             print("Could not set calibration equations")
