@@ -27,6 +27,33 @@ def get_data_path(data_path=None):
         data_path_txt = data_path
     return Path(data_path_txt)
 
+def get_files_in_path(date, runnr, folder="binary-data", data_path_txt=None):
+    # TODO: merge with read_parquet_file
+    RUNNR = runnr
+    DATE = dateparser.parse(date)
+    if DATE is None:
+        print("ERROR: cannot parse date")
+    DATA_PATH = get_data_path(data_path_txt)
+    DATA_DIR = DATA_PATH / f"{DATE.year}-{DATE.month:02d}-{DATE.day:02d}"
+    if not DATA_DIR.is_dir():
+        print(
+            (
+                f"ERROR: cannot find directory {DATA_DIR}."
+                "ERROR: Make sure you create a text file with your data path"
+                " named 'data-path.txt' in the directory NASA-gamma/nasagamma"
+                " For example, my data path is: "
+                "C:/Users/mayllonu/Documents/NASA-GSFC/Technical/Data-LBL"
+            )
+        )
+    fname = f"RUN-{DATE.year}-{DATE.month:02d}-{DATE.day:02d}-{RUNNR:05d}"
+    FILE = DATA_DIR / fname
+    if not FILE.is_dir():
+        print(f"ERROR: cannot find file {FILE}")
+
+    # load data
+    files = list(FILE.glob(f"{folder}/*"))
+    return files
+    
 
 def read_parquet_file(date, runnr, ch, flood_field=False, data_path_txt=None):
     # only channels 4 (LaBr==True) and 5 (LaBr==False)
