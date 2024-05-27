@@ -31,13 +31,14 @@ import docopt
 import pandas as pd
 import numpy as np
 import datetime
+from scipy import ndimage
 import re
 import sys
 from copy import deepcopy
 from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
-from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore, QtWidgets, QtGui, QtWebEngineWidgets
+from PyQt5.QtCore import Qt, QUrl
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.widgets import SpanSelector, RectangleSelector
@@ -55,7 +56,11 @@ from nasagamma import file_reader
 from nasagamma import read_parquet_api
 from nasagamma import parse_NIST
 from nasagamma import diagnostics
+from nasagamma import apipandas
 import pkg_resources
+import plotly.graph_objs as go
+import plotly.io as pio
+import tempfile
 
 
 class Dialog_from_UI(QDialog):
@@ -183,6 +188,12 @@ class WindowAdvFit(Dialog_from_UI):
     def define_ui_vars(self):
         self.ui_name = "win_adv_fit.ui"
         self.window_title = "Advanced Fitting"
+
+
+class WindowAPI3D(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_api_3D.ui"
+        self.window_title = "API 3D plot"
 
 
 class WindowAPIfilters(Dialog_from_UI):
@@ -524,23 +535,21 @@ class NasaGammaApp(QMainWindow):
         self.button_centroid_max.clicked.connect(self.change_centroid_max_diag)
         self.button_combine_send.clicked.connect(self.combine_and_send_to_spect)
         self.button_diag_save.clicked.connect(self.save_multiple_spectra)
+
         ## API
         self.api_spect_scale = "linear"
         self.api_xy_scale = "linear"
-        self.api_yscale.setStyleSheet("background-color : lightyellow")
         self.api_yscale.clicked.connect(self.api_spect_yscale)
-        self.api_button_logxy.setStyleSheet("background-color : lightgoldenrodyellow")
         self.api_button_logxy.setCheckable(True)
         self.api_button_logxy.clicked.connect(self.api_xylog)
         self.api_vmax_txt.returnPressed.connect(self.api_on_returnXY)
-        self.api_send_to_spect.setStyleSheet("background-color : lightgreen")
         self.api_send_to_spect.clicked.connect(self.send_to_spect_api)
-        self.api_load_file.setStyleSheet("background-color : lightblue")
         self.api_load_file.clicked.connect(self.activate_load_api_file)
-        self.api_reset.setStyleSheet("background-color : lightcoral")
         self.api_reset.clicked.connect(self.reset_button_api)
-        self.api_button_filters.setStyleSheet("background-color : silver")
         self.api_button_filters.clicked.connect(self.api_window_filters)
+        # API 3D
+        self.button_api_3D.clicked.connect(self.open_api_3D)
+        # self.button_api_plot3D.clicked.connect(self.create_plot_api3D)
 
         ## Find peaks
         self.button_find_peaks.setStyleSheet("background-color : mediumaquamarine")
@@ -2311,6 +2320,74 @@ class NasaGammaApp(QMainWindow):
         self.fig_api.canvas.draw_idle()
         # espan.update()
         # tspan.update()
+
+    def open_api_3D(self):
+        self.w_api_3D = WindowAPI3D()
+        self.w_api_3D.activateWindow()
+        self.w_api_3D.show()
+        try:
+            self.w_api_3D.button_api_plot3D.clicked.connect(self.create_plot_api3D)
+        except Exception as e:
+            print("An unknown error occurred:", str(e))
+
+    def create_plot_api3D(self):
+        try:
+            self.df_current
+        except Exception as e:
+            print("Make sure you load an API file on the previous window.", str(e))
+        X, Y, Z = apipandas.api_xyz(
+            df=self.df_current, det_pos=[0, 22.2, -25.515], use_det=False
+        )
+        # Define the number of bins for the histogram
+        num_bins = 50
+        # Compute the 3D histogram
+        hist, edges = np.histogramdd((X, Y, Z), bins=num_bins)
+        # Compute the bin centers
+        x_bin_centers = 0.5 * (edges[0][1:] + edges[0][:-1])
+        y_bin_centers = 0.5 * (edges[1][1:] + edges[1][:-1])
+        z_bin_centers = 0.5 * (edges[2][1:] + edges[2][:-1])
+        # Create a meshgrid of the bin centers
+        x_bin_centers, y_bin_centers, z_bin_centers = np.meshgrid(
+            x_bin_centers, y_bin_centers, z_bin_centers, indexing="ij"
+        )
+        # Flatten the arrays for plotting
+        x_flat = x_bin_centers.flatten()
+        y_flat = y_bin_centers.flatten()
+        z_flat = z_bin_centers.flatten()
+        values_flat = hist.flatten()
+        # Normalize the histogram values for color mapping
+        norm_values = (values_flat - values_flat.min()) / (
+            values_flat.max() - values_flat.min()
+        )
+        vol = ndimage.gaussian_filter(norm_values, 4)
+        vol /= vol.max()
+        # Create a volume plot
+        fig = go.Figure(
+            go.Volume(
+                x=x_flat,
+                y=y_flat,
+                z=z_flat,
+                value=vol,
+                isomin=0.1,
+                isomax=0.8,
+                opacity=0.1,  # Needs to be small to see through all surfaces
+                surface_count=20,  # Number of iso-surfaces, more surfaces = more detailed plot
+                colorscale="Viridis",
+            )
+        )
+        fig.update_layout(
+            scene_xaxis_showticklabels=False,
+            scene_yaxis_showticklabels=False,
+            scene_zaxis_showticklabels=False,
+        )
+        self.w_api_3D.browser.setHtml(fig.to_html(include_plotlyjs="cdn"))
+        # Render the plot to an HTML file
+        html = pio.to_html(fig, full_html=True)
+        # Write the HTML to a temporary file and load it in the QWebEngineView
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
+            f.write(html.encode("utf-8"))
+            temp_file_path = f.name
+        self.w_api_3D.browser.setUrl(QUrl.fromLocalFile(temp_file_path))
 
     ## Peak finder
     def peakFind_info_activate(self):

@@ -270,15 +270,14 @@ def plot_scatter_density(df):
     plt.show()
 
 
-def api(df, xrange, yrange, erange, trange, det_pos, toffset=None, use_det=True):
+def api_xyz(df, det_pos=[0, 22.2, -25.515], toffset=None, use_det=True):
     """Returns X, Y, Z reconstructed positions. Use the raw dataframe.
     if use_det=False, the location of the gamma detector is ignored"""
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a pandas dataframe")
 
-    df_txye = dftxye(df, xrange, yrange, erange, trange)
     if toffset is not None:
-        df_txye["dt"] = df_txye["dt"] - toffset
+        df["dt"] = df["dt"] - toffset
     # convert alpha detector hits to cm
     res, xed, yed = np.histogram2d(df.Y2, df.X2, bins=1000)
     resx = res.sum(axis=0)
@@ -292,19 +291,19 @@ def api(df, xrange, yrange, erange, trange, det_pos, toffset=None, use_det=True)
     maxy = yed[0:-1][masky][-1]
 
     mx = (2.4 + 2.4) / (maxx - minx)  # assume 4.8 cm active detector area
-    xa = mx * (df_txye["X2"] - maxx) + 2.4
+    xa = mx * (df["X2"] - maxx) + 2.4
     my = (2.4 + 2.4) / (maxy - miny)  # assume 4.8 cm active detector area
-    ya = my * (df_txye["Y2"] - maxy) + 2.4
-    za = 6 * np.ones(len(xa))  # distance YAP-target (cm)
+    ya = my * (df["Y2"] - maxy) + 2.4
+    za = 6.7 * np.ones(len(xa))  # distance YAP-target (cm)
 
     # gamma detector location [cm]
     dx = det_pos[0]
     dy = det_pos[1]
     dz = det_pos[2]
-    dg = np.sqrt(dx ** 2 + dy ** 2 + dz ** 2)  # cm
+    dg = np.sqrt(dx**2 + dy**2 + dz**2)  # cm
     c = 3e10  # speed of light [cm/s]
     # normal directional vectors
-    alength = np.sqrt(xa ** 2 + ya ** 2 + za ** 2)  # a
+    alength = np.sqrt(xa**2 + ya**2 + za**2)  # a
     ux = -xa / alength
     uy = -ya / alength
     uz = za / alength
@@ -316,15 +315,15 @@ def api(df, xrange, yrange, erange, trange, det_pos, toffset=None, use_det=True)
     En = 14.1  # MeV
     mn = 939.56563  # MeV/c2
     vn = np.sqrt(2 * En / mn) * 3e10  # cm/s
-    ntof = df_txye.dt * 1e-9 + ta  # neutron time of flight [s], dta
+    ntof = df.dt * 1e-9 + ta  # neutron time of flight [s], dta
 
     if use_det:
         theta = np.arccos((ux * dx + uy * dy + uz * dz) / dg)  # radians
-        aa = 1 - c ** 2 / vn ** 2
-        bb = 2 * ntof * c ** 2 / vn - 2 * dg * np.cos(theta)
-        cc = dg ** 2 - c ** 2 * ntof ** 2
+        aa = 1 - c**2 / vn**2
+        bb = 2 * ntof * c**2 / vn - 2 * dg * np.cos(theta)
+        cc = dg**2 - c**2 * ntof**2
 
-        Ln = (-bb - np.sqrt(bb ** 2 - 4 * aa * cc)) / (2 * aa)  # cm
+        Ln = (-bb - np.sqrt(bb**2 - 4 * aa * cc)) / (2 * aa)  # cm
 
         X2 = -xa / alength * Ln
         Y2 = -ya / alength * Ln

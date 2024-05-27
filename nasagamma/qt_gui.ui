@@ -867,8 +867,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>98</width>
-                <height>28</height>
+                <width>444</width>
+                <height>608</height>
                </rect>
               </property>
              </widget>
@@ -1116,8 +1116,8 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>98</width>
-                <height>28</height>
+                <width>622</width>
+                <height>608</height>
                </rect>
               </property>
              </widget>
@@ -1296,43 +1296,6 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_26">
-           <item row="0" column="0">
-            <widget class="QPushButton" name="api_yscale">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Y-scale</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QPushButton" name="api_send_to_spect">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Send to Spectrum</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <spacer name="horizontalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>21</width>
-               <height>62</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
            <item row="0" column="3">
             <layout class="QGridLayout" name="gridLayout">
              <item row="0" column="0">
@@ -1418,6 +1381,94 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
              </item>
             </layout>
            </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="api_send_to_spect">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(170, 255, 127);</string>
+             </property>
+             <property name="text">
+              <string>Send to Spectrum</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>21</width>
+               <height>62</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="api_yscale">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(0, 170, 255);</string>
+             </property>
+             <property name="text">
+              <string>Y-scale</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="5">
+            <widget class="QPushButton" name="api_load_file">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(170, 255, 255);</string>
+             </property>
+             <property name="text">
+              <string>Load File</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="9">
+            <widget class="QPushButton" name="api_button_filters">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(188, 200, 190);</string>
+             </property>
+             <property name="text">
+              <string>Filters</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="10">
+            <widget class="QPushButton" name="api_button_logxy">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(233, 231, 255);</string>
+             </property>
+             <property name="text">
+              <string>LogXY</string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="4">
             <layout class="QGridLayout" name="gridLayout_15">
              <item row="0" column="0">
@@ -1449,18 +1500,6 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
              </item>
             </layout>
            </item>
-           <item row="0" column="5">
-            <widget class="QPushButton" name="api_load_file">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Load File</string>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="6">
             <spacer name="horizontalSpacer_3">
              <property name="orientation">
@@ -1473,6 +1512,21 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
               </size>
              </property>
             </spacer>
+           </item>
+           <item row="0" column="11">
+            <widget class="QPushButton" name="api_reset">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 192, 172);</string>
+             </property>
+             <property name="text">
+              <string>Reset</string>
+             </property>
+            </widget>
            </item>
            <item row="0" column="7">
             <layout class="QGridLayout" name="gridLayout_25">
@@ -1490,6 +1544,12 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
              </item>
              <item row="0" column="1">
               <widget class="QLineEdit" name="api_vmax_txt">
+               <property name="maximumSize">
+                <size>
+                 <width>80</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="font">
                 <font>
                  <pointsize>12</pointsize>
@@ -1506,38 +1566,17 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
             </layout>
            </item>
            <item row="0" column="8">
-            <widget class="QPushButton" name="api_button_filters">
+            <widget class="QPushButton" name="button_api_3D">
              <property name="font">
               <font>
                <pointsize>14</pointsize>
               </font>
              </property>
-             <property name="text">
-              <string>Filters</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="9">
-            <widget class="QPushButton" name="api_button_logxy">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 170, 0);</string>
              </property>
              <property name="text">
-              <string>LogXY</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="10">
-            <widget class="QPushButton" name="api_reset">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Reset</string>
+              <string>Plot 3D</string>
              </property>
             </widget>
            </item>
