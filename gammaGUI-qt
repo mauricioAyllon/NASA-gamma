@@ -2139,10 +2139,10 @@ class NasaGammaApp(QMainWindow):
     def api_xylog(self):
         try:
             if self.api_xy_scale == "linear":
-                self.plot_xy_api(self.df_current, cbar=False, logxy=True)
+                self.plot_xy_api(self.df_previous, cbar=False, logxy=True)
                 self.api_xy_scale = "log"
             elif self.api_xy_scale == "log":
-                self.plot_xy_api(self.df_current, cbar=False, logxy=False)
+                self.plot_xy_api(self.df_previous, cbar=False, logxy=False)
                 self.api_xy_scale = "linear"
         except Exception as e:
             print("An unknown error occurred:", str(e))
@@ -2284,7 +2284,7 @@ class NasaGammaApp(QMainWindow):
         self.df_current.reset_index(drop=True, inplace=True)
         self.plot_energy_hist_api(df=self.df_current)
         self.plot_time_hist_api(df=self.df_current)
-        self.plot_xy_api(df=self.df_current, cbar=False)
+        self.plot_xy_api(df=self.df_previous, cbar=False)
         # self.toggle_selector.update()
         self.fig_api.canvas.draw_idle()
 
