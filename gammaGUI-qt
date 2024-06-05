@@ -2339,7 +2339,11 @@ class NasaGammaApp(QMainWindow):
             df=self.df_current, det_pos=[0, 22.2, -25.515], use_det=False
         )
         # Define the number of bins for the histogram
-        num_bins = 50
+        num_bins = int(self.w_api_3D.no_bins.text())
+        iso_min = float(self.w_api_3D.isomin.text())
+        iso_max = float(self.w_api_3D.isomax.text())
+        opacity = float(self.w_api_3D.opacity.text())
+        surfcount = int(self.w_api_3D.surfcount.text())
         # Compute the 3D histogram
         hist, edges = np.histogramdd((X, Y, Z), bins=num_bins)
         # Compute the bin centers
@@ -2368,10 +2372,10 @@ class NasaGammaApp(QMainWindow):
                 y=y_flat,
                 z=z_flat,
                 value=vol,
-                isomin=0.1,
-                isomax=0.8,
-                opacity=0.1,  # Needs to be small to see through all surfaces
-                surface_count=20,  # Number of iso-surfaces, more surfaces = more detailed plot
+                isomin=iso_min,
+                isomax=iso_max,
+                opacity=opacity,  # Needs to be small to see through all surfaces
+                surface_count=surfcount,  # Number of iso-surfaces, more surfaces = more detailed plot
                 colorscale="Viridis",
             )
         )
