@@ -29,5 +29,6 @@ setup(
         "natsort >= 7.1.1",
         "plotly >= 5.22.0",
         "scipy >= 1.9.3",
+        "PyQtWebEngine"
     ],
 )
