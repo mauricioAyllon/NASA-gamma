@@ -89,7 +89,12 @@ def read_parquet_file(date, runnr, ch, flood_field=False, data_path_txt=None):
         for f in files[1:]:
             df0 = pd.read_parquet(f)
             df = pd.concat([df, df0])
-    df = api.calc_own_pos(df)
+    if "A" in df.columns or len(df.columns) < 7: # experimental data
+        df = api.calc_own_pos(df)
+    else: # simulations
+        df["X2"] = df["X"]
+        df["Y2"] = df["Y"]
+        df["energy_orig"] = df["energy"]
     if flood_field:
         return df
     else:
@@ -112,6 +117,12 @@ def read_parquet_file_from_path(filepath, ch):
         for f in files[1:]:
             df0 = pd.read_parquet(f)
             df = pd.concat([df, df0])
+    if "A" in df.columns: # experiental data
+        df = api.calc_own_pos(df)
+    else: # simulations
+        df["X2"] = df["X"]
+        df["Y2"] = df["Y"]
+        df["energy_orig"] = df["energy"]
 
     df["dt"] *= 1e9  # to ns
     if ch == 4:

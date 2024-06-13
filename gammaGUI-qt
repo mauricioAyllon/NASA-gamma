@@ -2019,6 +2019,7 @@ class NasaGammaApp(QMainWindow):
         self.dt_flag = 0
         self.xy_flag = 0
         self.en_flag = 0
+        self.sims_flag = 0 # simulations flag
         filepath = self.api_path_txt.text()
         ch_txt = self.api_ch_txt.text()
         date = self.api_date_txt.text()
@@ -2035,17 +2036,27 @@ class NasaGammaApp(QMainWindow):
                 self.df_api = read_parquet_api.read_parquet_file(date, runnr, ch)
             else:
                 self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
+            if "A" not in self.df_api.columns and len(self.df_api.columns) > 7:
+                self.sims_flag = 1
+                print("Loading is simulated data")
+            else:
+                print("Loading experimental data")
             self.initialize_plots_api()
         self.df_current = self.df_api.copy()
         self.df_previous = self.df_api.copy()
 
     def initialize_plots_api(self, flood_field=False):
-        self.trange = [-40, 120]  # dt range
+        if self.sims_flag:
+            self.trange = [0, 60]
+            self.xyplane = (-0.2, 0.2, -0.2, 0.2) 
+            self.erange_api = [0, 10]
+        else:
+            self.trange = [-40, 120]  # dt range
+            self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
+            self.erange_api = [0, 2**16]  # [0,8]
         self.ebins = 2**12  # energy bins
         self.hexbins = 80  # x-y bins
         self.tbins = 512  # time bins
-        self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
-        self.erange_api = [0, 2**16]  # [0,8]
         self.colormap = "plasma"
         if flood_field:
             self.plot_xy_api(self.df_api)
@@ -2092,8 +2103,14 @@ class NasaGammaApp(QMainWindow):
     def send_to_spect_api(self):
         try:
             self.reset_spect_params()
-            self.spect = sp.Spectrum(counts=self.api_gam)
-            self.e_units = "channels"
+            if self.sims_flag:
+                self.e_units = "Mev"
+                self.spect = sp.Spectrum(counts=self.api_gam,
+                                         energies=self.api_gam_x,
+                                         e_units=self.e_units)
+            else:
+                self.spect = sp.Spectrum(counts=self.api_gam)
+                self.e_units = "channels"
             self.e_units_orig = deepcopy(self.e_units)
             self.spect_orig = deepcopy(self.spect)
             self.create_graph(fit=False, reset=True)
@@ -2105,10 +2122,13 @@ class NasaGammaApp(QMainWindow):
         self.api_gam, self.api_edg = np.histogram(
             df["energy_orig"], bins=self.ebins, range=self.erange_api
         )
-        self.api_ch = np.arange(0, self.ebins, 1)
-        self.ax_api_spe.plot(self.api_ch, self.api_gam, color="green")
+        self.api_gam_x = (self.api_edg[1:] + self.api_edg[:-1])/2
+        self.ax_api_spe.plot(self.api_gam_x, self.api_gam, color="green")
         self.ax_api_spe.set_yscale(self.api_spect_scale)
-        self.ax_api_spe.set_xlabel("Channels")
+        if self.sims_flag:
+            self.ax_api_spe.set_xlabel("Energy (Mev)")
+        else:
+            self.ax_api_spe.set_xlabel("Channels")
 
     def plot_time_hist_api(self, df):
         df["dt"].plot.hist(
@@ -2217,25 +2237,31 @@ class NasaGammaApp(QMainWindow):
         )
 
     def enselect_api(self, xmin, xmax):
-        idxmin = int(round(xmin, 4))
-        idxmax = int(round(xmax, 4))
-        print("xmin: ", idxmin)
-        print("xmax: ", idxmax)
-        self.apply_energy_filter(idxmin, idxmax)
+        xmin = round(xmin, 4)
+        xmax = round(xmax, 4)
+        print("xmin: ", xmin)
+        print("xmax: ", xmax)
+        self.apply_energy_filter(xmin, xmax)
 
-    def apply_energy_filter(self, idxmin, idxmax):
+    def apply_energy_filter(self, xmin, xmax):
         self.ax_api_dt.clear()
         self.ax_api_xy.clear()
         if self.en_flag == 0:  # energy filter has not been used before
-            elim = (self.df_current["energy_orig"] > self.api_edg[idxmin]) & (
-                self.df_current["energy_orig"] < self.api_edg[idxmax]
+            # elim = (self.df_current["energy_orig"] > self.api_edg[idxmin]) & (
+            #     self.df_current["energy_orig"] < self.api_edg[idxmax]
+            # )
+            elim = (self.df_current["energy_orig"] > xmin) & (
+                self.df_current["energy_orig"] < xmax
             )
             self.df_previous = self.df_current.copy()
             self.df_current = self.df_current[elim]
             self.en_flag = 1  # set energy filter to used
         else:
-            elim = (self.df_previous["energy_orig"] > self.api_edg[idxmin]) & (
-                self.df_previous["energy_orig"] < self.api_edg[idxmax]
+            # elim = (self.df_previous["energy_orig"] > self.api_edg[idxmin]) & (
+            #     self.df_previous["energy_orig"] < self.api_edg[idxmax]
+            # )
+            elim = (self.df_previous["energy_orig"] > xmin) & (
+                self.df_previous["energy_orig"] < xmax
             )
             self.df_current = self.df_previous[elim]
         self.df_current.reset_index(drop=True, inplace=True)
@@ -2335,9 +2361,13 @@ class NasaGammaApp(QMainWindow):
             self.df_current
         except Exception as e:
             print("Make sure you load an API file on the previous window.", str(e))
-        X, Y, Z = apipandas.api_xyz(
-            df=self.df_current, det_pos=[0, 22.2, -25.515], use_det=False
-        )
+        if self.sims_flag:
+            X, Y, Z = self.df_current["X"], self.df_current["Y"], self.df_current["Z"]
+        else:
+            X, Y, Z = apipandas.api_xyz(
+                df=self.df_current, det_pos=[0, 22.2, -25.515], use_det=False
+            )
+            
         # Define the number of bins for the histogram
         num_bins = int(self.w_api_3D.no_bins.text())
         iso_min = float(self.w_api_3D.isomin.text())
