@@ -57,7 +57,7 @@
        <widget class="QFrame" name="frame_2">
         <property name="maximumSize">
          <size>
-          <width>250</width>
+          <width>300</width>
           <height>16777215</height>
          </size>
         </property>
