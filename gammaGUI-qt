@@ -2038,7 +2038,7 @@ class NasaGammaApp(QMainWindow):
                 self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
             if "A" not in self.df_api.columns and len(self.df_api.columns) > 7:
                 self.sims_flag = 1
-                print("Loading is simulated data")
+                print("Loading simulated data")
             else:
                 print("Loading experimental data")
             self.initialize_plots_api()
