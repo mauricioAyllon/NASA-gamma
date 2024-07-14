@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1600</width>
+    <width>1406</width>
     <height>878</height>
    </rect>
   </property>
@@ -43,7 +43,7 @@
 </string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -564,8 +564,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>753</width>
-                  <height>165</height>
+                  <width>661</width>
+                  <height>211</height>
                  </rect>
                 </property>
                </widget>
@@ -867,8 +867,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>444</width>
-                <height>608</height>
+                <width>434</width>
+                <height>650</height>
                </rect>
               </property>
              </widget>
@@ -1116,8 +1116,8 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>622</width>
-                <height>608</height>
+                <width>623</width>
+                <height>647</height>
                </rect>
               </property>
              </widget>
@@ -1277,13 +1277,19 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
        <attribute name="title">
         <string>API</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_27">
+       <layout class="QGridLayout" name="gridLayout_11">
         <item row="0" column="0">
          <widget class="QFrame" name="frame_7">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>150</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>100</height>
+            <height>120</height>
            </size>
           </property>
           <property name="styleSheet">
@@ -1295,23 +1301,73 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <layout class="QGridLayout" name="gridLayout_26">
-           <item row="0" column="3">
-            <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="0">
-              <widget class="QLabel" name="api_label_date">
+          <layout class="QGridLayout" name="gridLayout_10">
+           <item row="0" column="0">
+            <layout class="QGridLayout" name="gridLayout_8">
+             <item row="0" column="0" colspan="2">
+              <widget class="QPushButton" name="api_send_to_spect">
                <property name="font">
                 <font>
                  <pointsize>14</pointsize>
                 </font>
                </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(170, 255, 127);</string>
+               </property>
                <property name="text">
-                <string>DATE:</string>
+                <string>Send to Spectrum</string>
                </property>
               </widget>
              </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="api_date_txt">
+             <item row="1" column="0">
+              <widget class="QPushButton" name="api_yscale">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(0, 170, 255);</string>
+               </property>
+               <property name="text">
+                <string>Y-scale</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QPushButton" name="api_reset">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(255, 192, 172);</string>
+               </property>
+               <property name="text">
+                <string>Reset</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="0" column="1">
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>21</width>
+               <height>62</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="2">
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="0" column="3">
+              <widget class="QLineEdit" name="api_run_txt">
                <property name="font">
                 <font>
                  <pointsize>12</pointsize>
@@ -1325,20 +1381,60 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                </property>
               </widget>
              </item>
-             <item row="0" column="2">
-              <widget class="QLabel" name="api_label_run">
-               <property name="font">
-                <font>
-                 <pointsize>14</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>RUN:</string>
-               </property>
-              </widget>
+             <item row="2" column="0" colspan="4">
+              <layout class="QGridLayout" name="gridLayout_7">
+               <item row="0" column="0">
+                <widget class="QCheckBox" name="checkBox_exp_raw">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Experimental raw</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                 <property name="autoExclusive">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QCheckBox" name="checkBox_exp_cal">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Experimental calibrated</string>
+                 </property>
+                 <property name="autoExclusive">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QCheckBox" name="checkBox_sims">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Simulation</string>
+                 </property>
+                 <property name="autoExclusive">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
-             <item row="0" column="3">
-              <widget class="QLineEdit" name="api_run_txt">
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="api_path_txt">
                <property name="font">
                 <font>
                  <pointsize>12</pointsize>
@@ -1364,190 +1460,12 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="1" colspan="3">
-              <widget class="QLineEdit" name="api_path_txt">
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: rgb(255, 255, 255);</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="0" column="1">
-            <widget class="QPushButton" name="api_send_to_spect">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(170, 255, 127);</string>
-             </property>
-             <property name="text">
-              <string>Send to Spectrum</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <spacer name="horizontalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>21</width>
-               <height>62</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="0" column="0">
-            <widget class="QPushButton" name="api_yscale">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(0, 170, 255);</string>
-             </property>
-             <property name="text">
-              <string>Y-scale</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="5">
-            <widget class="QPushButton" name="api_load_file">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(170, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>Load File</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="9">
-            <widget class="QPushButton" name="api_button_filters">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(188, 200, 190);</string>
-             </property>
-             <property name="text">
-              <string>Filters</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="10">
-            <widget class="QPushButton" name="api_button_logxy">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(233, 231, 255);</string>
-             </property>
-             <property name="text">
-              <string>LogXY</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="4">
-            <layout class="QGridLayout" name="gridLayout_15">
-             <item row="0" column="0">
-              <widget class="QLabel" name="api_label_ch">
-               <property name="font">
-                <font>
-                 <pointsize>14</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>CH:</string>
-               </property>
-              </widget>
-             </item>
              <item row="0" column="1">
-              <widget class="QLineEdit" name="api_ch_txt">
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: rgb(255, 255, 255);</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="0" column="6">
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>62</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="0" column="11">
-            <widget class="QPushButton" name="api_reset">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(255, 192, 172);</string>
-             </property>
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="7">
-            <layout class="QGridLayout" name="gridLayout_25">
-             <item row="0" column="0">
-              <widget class="QLabel" name="api_label_txt">
-               <property name="font">
-                <font>
-                 <pointsize>14</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>Vmax:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="api_vmax_txt">
-               <property name="maximumSize">
+              <widget class="QLineEdit" name="api_date_txt">
+               <property name="minimumSize">
                 <size>
-                 <width>80</width>
-                 <height>16777215</height>
+                 <width>0</width>
+                 <height>25</height>
                 </size>
                </property>
                <property name="font">
@@ -1563,37 +1481,221 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                </property>
               </widget>
              </item>
+             <item row="1" column="3">
+              <widget class="QLineEdit" name="api_ch_txt">
+               <property name="font">
+                <font>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(255, 255, 255);</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QLabel" name="api_label_run">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>RUN:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QLabel" name="api_label_ch">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>CH:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="api_label_date">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>DATE:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4" rowspan="3">
+              <widget class="QPushButton" name="api_load_file">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(170, 255, 255);</string>
+               </property>
+               <property name="text">
+                <string>Load File</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
-           <item row="0" column="8">
-            <widget class="QPushButton" name="button_api_3D">
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
+           <item row="0" column="3">
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
              </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(255, 170, 0);</string>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>62</height>
+              </size>
              </property>
-             <property name="text">
-              <string>Plot 3D</string>
-             </property>
-            </widget>
+            </spacer>
+           </item>
+           <item row="0" column="4">
+            <layout class="QGridLayout" name="gridLayout_9">
+             <item row="0" column="0">
+              <widget class="QPushButton" name="button_api_3D">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(255, 170, 0);</string>
+               </property>
+               <property name="text">
+                <string>Plot 3D</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QPushButton" name="api_button_filters">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(188, 200, 190);</string>
+               </property>
+               <property name="text">
+                <string>Filters</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <layout class="QGridLayout" name="gridLayout_25">
+               <item row="0" column="3">
+                <spacer name="horizontalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLabel" name="api_label_txt">
+                 <property name="font">
+                  <font>
+                   <pointsize>14</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Vmax:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QLineEdit" name="api_vmax_txt">
+                 <property name="maximumSize">
+                  <size>
+                   <width>80</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color: rgb(255, 255, 255);</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <spacer name="horizontalSpacer_5">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+             <item row="1" column="1">
+              <widget class="QPushButton" name="api_button_logxy">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(233, 231, 255);</string>
+               </property>
+               <property name="text">
+                <string>LogXY</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="MplWidget" name="api_plot" native="true">
-          <property name="mouseTracking">
-           <bool>false</bool>
-          </property>
-          <property name="autoFillBackground">
-           <bool>false</bool>
-          </property>
+         <widget class="QFrame" name="frame_22">
           <property name="styleSheet">
            <string notr="true">background-color: rgb(212, 217, 208);</string>
           </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_15">
+           <item row="0" column="0">
+            <widget class="MplWidget" name="api_plot" native="true"/>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
@@ -2150,8 +2252,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1600</width>
-     <height>26</height>
+     <width>1406</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
