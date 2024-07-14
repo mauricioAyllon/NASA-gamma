@@ -2019,10 +2019,13 @@ class NasaGammaApp(QMainWindow):
         self.dt_flag = 0
         self.xy_flag = 0
         self.en_flag = 0
-        self.sims_flag = 0 # simulations flag
+        self.sims_flag = 0 # simulations data flag
+        self.calibrated_flag = 0 # time-shifted and calibrated data flag
         filepath = self.api_path_txt.text()
         ch_txt = self.api_ch_txt.text()
         date = self.api_date_txt.text()
+        if self.checkBox_exp_raw.isChecked():
+            print("Raw data checked")
         if ch_txt == "9":
             runnr = int(self.api_run_txt.text())
             self.df_api = read_parquet_api.read_parquet_file(
@@ -2036,9 +2039,12 @@ class NasaGammaApp(QMainWindow):
                 self.df_api = read_parquet_api.read_parquet_file(date, runnr, ch)
             else:
                 self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
-            if "A" not in self.df_api.columns and len(self.df_api.columns) > 7:
+            if "atom_type" in self.df_api.columns:
                 self.sims_flag = 1
                 print("Loading simulated data")
+            elif "locX" in self.df_api.columns:
+                self.calibrated_flag = 1
+                print("Loading experimental data that has been calibrated and time-shifted")
             else:
                 print("Loading experimental data")
             self.initialize_plots_api()
@@ -2103,7 +2109,7 @@ class NasaGammaApp(QMainWindow):
     def send_to_spect_api(self):
         try:
             self.reset_spect_params()
-            if self.sims_flag:
+            if self.sims_flag or self.calibrated_flag:
                 self.e_units = "Mev"
                 self.spect = sp.Spectrum(counts=self.api_gam,
                                          energies=self.api_gam_x,
@@ -2119,13 +2125,17 @@ class NasaGammaApp(QMainWindow):
             print("An unknown error occurred:", str(e))
 
     def plot_energy_hist_api(self, df):
+        if self.calibrated_flag:
+            energy_key = "energy"
+        else:
+            energy_key = "energy_orig"   
         self.api_gam, self.api_edg = np.histogram(
-            df["energy_orig"], bins=self.ebins, range=self.erange_api
+            df[energy_key], bins=self.ebins, range=self.erange_api
         )
         self.api_gam_x = (self.api_edg[1:] + self.api_edg[:-1])/2
         self.ax_api_spe.plot(self.api_gam_x, self.api_gam, color="green")
         self.ax_api_spe.set_yscale(self.api_spect_scale)
-        if self.sims_flag:
+        if self.sims_flag or self.calibrated_flag:
             self.ax_api_spe.set_xlabel("Energy (Mev)")
         else:
             self.ax_api_spe.set_xlabel("Channels")

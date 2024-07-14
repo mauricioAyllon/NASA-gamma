@@ -89,16 +89,21 @@ def read_parquet_file(date, runnr, ch, flood_field=False, data_path_txt=None):
         for f in files[1:]:
             df0 = pd.read_parquet(f)
             df = pd.concat([df, df0])
-    if "A" in df.columns or len(df.columns) < 7: # experimental data
-        df = api.calc_own_pos(df)
-    else: # simulations
-        df["X2"] = df["X"]
-        df["Y2"] = df["Y"]
-        df["energy_orig"] = df["energy"]
+    
+    # if "atom_type" in df.columns: # simulation data
+    #     df["X2"] = df["X"]
+    #     df["Y2"] = df["Y"]
+    #     df["energy_orig"] = df["energy"]
+    # elif "locX" in df.columns: # calibrated experimental data
+    #     df = api.calc_own_pos(df)
+    #     dt_multiplier = 1 # already in ns
+    # else: # raw experimental data
+    #     df = api.calc_own_pos(df)
+    #     dt_multiplier = 1e9
     if flood_field:
         return df
     else:
-        df["dt"] *= 1e9  # to ns
+        #df["dt"] *= dt_multiplier  # to ns
         if ch == 4 or ch == 3:
             df = df[df["LaBr[y/n]"] == True]
         elif ch == 5:
@@ -117,14 +122,14 @@ def read_parquet_file_from_path(filepath, ch):
         for f in files[1:]:
             df0 = pd.read_parquet(f)
             df = pd.concat([df, df0])
-    if "A" in df.columns: # experiental data
-        df = api.calc_own_pos(df)
-    else: # simulations
-        df["X2"] = df["X"]
-        df["Y2"] = df["Y"]
-        df["energy_orig"] = df["energy"]
+    # if "A" in df.columns: # experimetal data
+    #     df = api.calc_own_pos(df)
+    # else: # simulations
+    #     df["X2"] = df["X"]
+    #     df["Y2"] = df["Y"]
+    #     df["energy_orig"] = df["energy"]
 
-    df["dt"] *= 1e9  # to ns
+    # df["dt"] *= 1e9  # to ns
     if ch == 4:
         df = df[df["LaBr[y/n]"] == True]
     elif ch == 5:

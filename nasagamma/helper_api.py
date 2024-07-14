@@ -8,6 +8,7 @@ import pkg_resources
 from nasagamma.read_parquet_api import get_data_path
 from nasagamma import read_parquet_api
 from nasagamma import apipandas as api
+import os
 
 
 def find_data_path(date, runnr):
@@ -138,6 +139,23 @@ def approximate_fa(L=30, S=10):
     sample_area = L_alpha * L_alpha
     fa = sample_area / alpha_area
     return fa
+
+def create_directory(directory):
+    """
+    Ensure that the directory exists; if it does not, create it.
+    
+    Parameters:
+    directory (str): Directory path to check/create.
+    """
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        print(f"Directory '{directory}' created successfully.")
+    else:
+        print(f"Directory '{directory}' already exists.")
+        
+def data_reduction(dates, run_numbers, new_date, new_run_number, ch):
+    pass
+
 
 def data_cleanup(runs_dict):
     # Initial filters
