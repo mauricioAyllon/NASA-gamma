@@ -2180,7 +2180,6 @@ class NasaGammaApp(QMainWindow):
             title=f"Total counts = {df.shape[0]}",
             **kwargs,
         )
-        print("xyplane = ", self.xyplane)
         self.fig_api.canvas.draw_idle()
 
     def api_xylog(self):
