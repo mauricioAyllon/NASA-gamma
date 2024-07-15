@@ -2019,58 +2019,78 @@ class NasaGammaApp(QMainWindow):
         self.dt_flag = 0
         self.xy_flag = 0
         self.en_flag = 0
-        self.sims_flag = 0 # simulations data flag
+        self.raw_flag = 0 # raw data flag
         self.calibrated_flag = 0 # time-shifted and calibrated data flag
+        self.sims_flag = 0 # simulations data flag
         filepath = self.api_path_txt.text()
         ch_txt = self.api_ch_txt.text()
         date = self.api_date_txt.text()
         if self.checkBox_exp_raw.isChecked():
-            print("Raw data checked")
+            self.raw_flag = 1
+            print("Loading experimental data")
+        elif self.checkBox_exp_cal.isChecked():
+            self.calibrated_flag = 1
+            print("Loading experimental data that has been calibrated and time-shifted")
+        elif self.checkBox_sims.isChecked():
+            self.sims_flag = 1
+            print("Loading simulated data")
         if ch_txt == "9":
             runnr = int(self.api_run_txt.text())
             self.df_api = read_parquet_api.read_parquet_file(
                 date, runnr, ch=9, flood_field=True
             )
-            self.initialize_plots_api(flood_field=True)
+            FF = True
         else:
+            FF = False
             ch = int(ch_txt)
             if filepath == "":
                 runnr = int(self.api_run_txt.text())
                 self.df_api = read_parquet_api.read_parquet_file(date, runnr, ch)
             else:
                 self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
-            if "atom_type" in self.df_api.columns:
-                self.sims_flag = 1
-                print("Loading simulated data")
-            elif "locX" in self.df_api.columns:
-                self.calibrated_flag = 1
-                print("Loading experimental data that has been calibrated and time-shifted")
-            else:
-                print("Loading experimental data")
-            self.initialize_plots_api()
+        self.df_api["dt"] *= 1e9  # to ns
         self.df_current = self.df_api.copy()
         self.df_previous = self.df_api.copy()
+        self.initialize_plots_api(FF)
 
     def initialize_plots_api(self, flood_field=False):
         if self.sims_flag:
+            self.api_xkey = "X"
+            self.api_ykey = "Y"
+            self.api_ekey = "energy"
             self.trange = [0, 60]
             self.xyplane = (-0.2, 0.2, -0.2, 0.2) 
-            self.erange_api = [0, 10]
-        else:
+            self.erange_api = [0, self.df_current["energy"].max()] # in MeV
+        elif self.calibrated_flag:
+            self.df_current = apipandas.calc_own_pos(self.df_current)
+            self.api_xkey = "X2"
+            self.api_ykey = "Y2"
+            self.api_ekey = "energy"
+            self.trange = [-40, 120]  # dt range
+            self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
+            self.erange_api = [0, self.df_current["energy"].max()]  
+        elif self.raw_flag:
+            self.df_current = apipandas.calc_own_pos(self.df_current)
+            self.api_xkey = "X2"
+            self.api_ykey = "Y2"
+            self.api_ekey = "energy_orig"
             self.trange = [-40, 120]  # dt range
             self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
             self.erange_api = [0, 2**16]  # [0,8]
+        else:
+            print("ERROR: Cannot determine the data type (raw, calibrated, or simulated)")
+            
         self.ebins = 2**12  # energy bins
         self.hexbins = 80  # x-y bins
         self.tbins = 512  # time bins
         self.colormap = "plasma"
         if flood_field:
-            self.plot_xy_api(self.df_api)
+            self.plot_xy_api(self.df_current)
         else:
-            self.plot_energy_hist_api(self.df_api)
+            self.plot_energy_hist_api(self.df_current)
             # self.ax_api_spe.set_yscale(self.api_spect_scale)
-            self.plot_time_hist_api(self.df_api)
-            self.plot_xy_api(self.df_api)
+            self.plot_time_hist_api(self.df_current)
+            self.plot_xy_api(self.df_current)
             self.espan_api()
             self.xyspan_api()
             self.tspan_api()
@@ -2125,12 +2145,8 @@ class NasaGammaApp(QMainWindow):
             print("An unknown error occurred:", str(e))
 
     def plot_energy_hist_api(self, df):
-        if self.calibrated_flag:
-            energy_key = "energy"
-        else:
-            energy_key = "energy_orig"   
         self.api_gam, self.api_edg = np.histogram(
-            df[energy_key], bins=self.ebins, range=self.erange_api
+            df[self.api_ekey], bins=self.ebins, range=self.erange_api
         )
         self.api_gam_x = (self.api_edg[1:] + self.api_edg[:-1])/2
         self.ax_api_spe.plot(self.api_gam_x, self.api_gam, color="green")
@@ -2148,14 +2164,14 @@ class NasaGammaApp(QMainWindow):
             alpha=0.7,
             edgecolor="black",
         )
-        self.ax_api_dt.set_xlabel("dt [ns]")
+        self.ax_api_dt.set_xlabel("dt (ns)")
 
     def plot_xy_api(self, df, cbar=True, logxy=False, **kwargs):
         if logxy:
             kwargs["bins"] = "log"
         df.plot.hexbin(
-            x="X2",
-            y="Y2",
+            x=self.api_xkey,
+            y=self.api_ykey,
             gridsize=self.hexbins,
             cmap=self.colormap,
             ax=self.ax_api_xy,
@@ -2164,6 +2180,7 @@ class NasaGammaApp(QMainWindow):
             title=f"Total counts = {df.shape[0]}",
             **kwargs,
         )
+        print("xyplane = ", self.xyplane)
         self.fig_api.canvas.draw_idle()
 
     def api_xylog(self):
@@ -2260,8 +2277,8 @@ class NasaGammaApp(QMainWindow):
             # elim = (self.df_current["energy_orig"] > self.api_edg[idxmin]) & (
             #     self.df_current["energy_orig"] < self.api_edg[idxmax]
             # )
-            elim = (self.df_current["energy_orig"] > xmin) & (
-                self.df_current["energy_orig"] < xmax
+            elim = (self.df_current[self.api_ekey] > xmin) & (
+                self.df_current[self.api_ekey] < xmax
             )
             self.df_previous = self.df_current.copy()
             self.df_current = self.df_current[elim]
@@ -2270,8 +2287,8 @@ class NasaGammaApp(QMainWindow):
             # elim = (self.df_previous["energy_orig"] > self.api_edg[idxmin]) & (
             #     self.df_previous["energy_orig"] < self.api_edg[idxmax]
             # )
-            elim = (self.df_previous["energy_orig"] > xmin) & (
-                self.df_previous["energy_orig"] < xmax
+            elim = (self.df_previous[self.api_ekey] > xmin) & (
+                self.df_previous[self.api_ekey] < xmax
             )
             self.df_current = self.df_previous[elim]
         self.df_current.reset_index(drop=True, inplace=True)
@@ -2288,8 +2305,8 @@ class NasaGammaApp(QMainWindow):
             self.xyselect_api,
             useblit=True,
             button=[1, 3],  # don't use middle button
-            minspanx=1,
-            minspany=1,
+            minspanx=0,
+            minspany=0,
             spancoords="pixels",
             interactive=True,
             props=dict(facecolor="white", edgecolor="black", alpha=0.1, fill=True),
@@ -2306,15 +2323,16 @@ class NasaGammaApp(QMainWindow):
     def apply_xy_filter(self, x1, x2, y1, y2):
         self.ax_api_spe.clear()
         self.ax_api_dt.clear()
+        self.ax_api_xy.clear()
         if self.xy_flag == 0:  # xy filter not used before
-            xlim = (self.df_current["X2"] > x1) & (self.df_current["X2"] < x2)
-            ylim = (self.df_current["Y2"] > y1) & (self.df_current["Y2"] < y2)
+            xlim = (self.df_current[self.api_xkey] > x1) & (self.df_current[self.api_xkey] < x2)
+            ylim = (self.df_current[self.api_ykey] > y1) & (self.df_current[self.api_ykey] < y2)
             self.df_previous = self.df_current.copy()
             self.df_current = self.df_current[xlim & ylim]
             self.xy_flag = 1  # set energy filter to used
         else:
-            xlim = (self.df_previous["X2"] > x1) & (self.df_previous["X2"] < x2)
-            ylim = (self.df_previous["Y2"] > y1) & (self.df_previous["Y2"] < y2)
+            xlim = (self.df_previous[self.api_xkey] > x1) & (self.df_previous[self.api_xkey] < x2)
+            ylim = (self.df_previous[self.api_ykey] > y1) & (self.df_previous[self.api_ykey] < y2)
             self.df_current = self.df_previous[xlim & ylim]
         self.df_current.fillna(0)
         self.df_current.reset_index(drop=True, inplace=True)

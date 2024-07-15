@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1406</width>
-    <height>878</height>
+    <width>1674</width>
+    <height>944</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -43,7 +43,7 @@
 </string>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -564,8 +564,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>661</width>
-                  <height>211</height>
+                  <width>790</width>
+                  <height>231</height>
                  </rect>
                 </property>
                </widget>
@@ -867,8 +867,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>434</width>
-                <height>650</height>
+                <width>481</width>
+                <height>674</height>
                </rect>
               </property>
              </widget>
@@ -1116,8 +1116,8 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>623</width>
-                <height>647</height>
+                <width>622</width>
+                <height>674</height>
                </rect>
               </property>
              </widget>
@@ -1289,7 +1289,7 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>120</height>
+            <height>160</height>
            </size>
           </property>
           <property name="styleSheet">
@@ -1504,7 +1504,7 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                 </font>
                </property>
                <property name="text">
-                <string>RUN:</string>
+                <string>Run:</string>
                </property>
               </widget>
              </item>
@@ -1528,12 +1528,18 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                 </font>
                </property>
                <property name="text">
-                <string>DATE:</string>
+                <string>Date:</string>
                </property>
               </widget>
              </item>
              <item row="0" column="4" rowspan="3">
               <widget class="QPushButton" name="api_load_file">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="font">
                 <font>
                  <pointsize>14</pointsize>
@@ -1543,7 +1549,8 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                 <string notr="true">background-color: rgb(170, 255, 255);</string>
                </property>
                <property name="text">
-                <string>Load File</string>
+                <string>Load
+File</string>
                </property>
               </widget>
              </item>
@@ -1682,6 +1689,17 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
         </item>
         <item row="1" column="0">
          <widget class="QFrame" name="frame_22">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true">background-color: rgb(212, 217, 208);</string>
           </property>
@@ -1691,9 +1709,31 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
+          <property name="lineWidth">
+           <number>1</number>
+          </property>
           <layout class="QGridLayout" name="gridLayout_15">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <property name="spacing">
+            <number>0</number>
+           </property>
            <item row="0" column="0">
-            <widget class="MplWidget" name="api_plot" native="true"/>
+            <widget class="MplWidget" name="api_plot" native="true">
+             <property name="autoFillBackground">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -2252,8 +2292,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1406</width>
-     <height>22</height>
+     <width>1674</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
