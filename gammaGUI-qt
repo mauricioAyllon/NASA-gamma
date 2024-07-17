@@ -810,11 +810,17 @@ class NasaGammaApp(QMainWindow):
             self.create_graph(fit=False, reset=True)
             self.search = 0
         if xconst != "":
-            new_x = self.spect.channels * eval(xconst)
-            self.e_units = f"Channels * {xconst}"
-            self.spect = sp.Spectrum(
-                counts=self.spect.counts, energies=new_x, e_units=self.e_units
-            )
+            if self.spect.e_units is None:
+                new_x = self.spect.channels * eval(xconst)
+                self.e_units = f"Channels * {xconst}"
+                self.spect = sp.Spectrum(
+                    counts=self.spect.counts, energies=new_x, e_units=self.e_units
+                )
+            else:
+                new_x = self.spect.energies * eval(xconst)
+                self.spect = sp.Spectrum(
+                    counts=self.spect.counts, energies=new_x, e_units=self.e_units
+                )
             self.create_graph(fit=False, reset=True)
             self.search = 0
         if xunits != "":
