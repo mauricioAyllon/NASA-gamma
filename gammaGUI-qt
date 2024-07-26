@@ -2582,6 +2582,7 @@ class NasaGammaApp(QMainWindow):
 
     @staticmethod
     def join_gamma_files(files):
+        # to be deleted
         data = pd.read_csv(files[0])
         if len(files) == 1:
             return data
@@ -2590,8 +2591,9 @@ class NasaGammaApp(QMainWindow):
                 df0 = pd.read_csv(f)
                 data = pd.concat([data, df0], ignore_index=True)
             data["sort"] = (
-                data["Isotope"].str.extract("(\d+)", expand=False).astype(int)
+                data["Isotope"].str.extract(r"(\d+)", expand=False).astype(int)
             )
+            print(data.columns)
             data.sort_values("sort", inplace=True, ascending=True)
             data = data.drop("sort", axis=1)
             data.reset_index(inplace=True, drop=True)
@@ -2639,7 +2641,7 @@ class NasaGammaApp(QMainWindow):
         if file == 0:
             return []
         else:
-            data = self.join_gamma_files([file])
+            data = pd.read_csv(file)
             return data
 
     def isotID_filter_by_element(self, df):
@@ -2650,10 +2652,10 @@ class NasaGammaApp(QMainWindow):
         ixs = []  # indices
         for el in elements_lst:
             elm = el.strip(" ").lower()
-            isot = re.findall("\d+", elm)
+            isot = re.findall(r"\d+", elm)
             if len(isot) == 0:
                 ix = list(
-                    df.index[df["Isotope"].str.match(f"(\d+){elm}(\\b)", case=False)]
+                    df.index[df["Isotope"].str.match(f"(\\d+){elm}(\\b)", case=False)]
                 )
                 ixs.append(ix)
             else:
