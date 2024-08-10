@@ -47,7 +47,6 @@ from nasagamma import peakfit as pf
 from nasagamma import peaksearch as ps
 from nasagamma import spectrum as sp
 from nasagamma import advanced_fit as adv
-from nasagamma import read_cnf
 from nasagamma import tlist
 from nasagamma import energy_calibration as ecal
 from nasagamma import efficiency
@@ -348,6 +347,8 @@ class NasaGammaApp(QMainWindow):
             self.resolution_plot,
             self.api_plot,
             self.diag_plot00,
+            self.plot_dt_png,
+            self.plot_e_png,
         ]:
             tmp = NavigationToolbar(tb.canvas, self)
             tmp.setVisible(False)
@@ -560,9 +561,7 @@ class NasaGammaApp(QMainWindow):
         self.w_peak_find.radioButton_hpge.clicked.connect(self.peakFind_check_hpge)
         self.w_peak_find.radioButton_labr.clicked.connect(self.peakFind_check_labr)
         self.w_peak_find.radioButton_nai.clicked.connect(self.peakFind_check_nai)
-        self.w_peak_find.radioButton_plastic.clicked.connect(
-            self.peakFind_check_plastic
-        )
+        self.w_peak_find.radioButton_plastic.clicked.connect(self.peakFind_check_plastic)
         self.w_peak_find_info = WindowPeakFinderInfo()
         self.w_peak_find.button_info.clicked.connect(self.peakFind_info_activate)
 
@@ -574,19 +573,23 @@ class NasaGammaApp(QMainWindow):
         self.button_identify_peaks.clicked.connect(self.activate_isotope_id)
         self.w_isot_id = WindowIsotID()
         self.w_isot_id.isotID_button_apply.setStyleSheet("background-color : lightblue")
-        self.w_isot_id.isotID_button_clear.setStyleSheet(
-            "background-color : lightcoral"
-        )
+        self.w_isot_id.isotID_button_clear.setStyleSheet("background-color : lightcoral")
         self.w_isot_id.isotID_button_apply.clicked.connect(self.isotID_apply)
         self.w_isot_id.isotID_button_clear.clicked.connect(self.isotID_clear)
-        self.w_isot_id.button_remove_vlines.setStyleSheet(
-            "background-color : lightcoral"
-        )
+        self.w_isot_id.button_remove_vlines.setStyleSheet("background-color : lightcoral")
         self.w_isot_id.button_plot_vlines.clicked.connect(self.isotID_plot_vlines)
         self.w_isot_id.button_remove_vlines.clicked.connect(self.isotID_remove_vlines)
         self.w_isot_id.edit_element_search.returnPressed.connect(self.isotID_textSearch)
         self.w_isotID_info = WindowIsotIDInfo()
         self.w_isot_id.button_info.clicked.connect(self.isotID_info_activate)
+
+        ## PNG
+        self.png_spect_scale = "linear"
+        self.button_yscale_png.clicked.connect(self.png_spect_yscale)
+        self.pushButton_keep_png.setCheckable(True)
+        self.button_loadFile_png.clicked.connect(self.load_file_png)
+        self.pushButton_apply_tbins_png.clicked.connect(self.change_tbins_png)
+        self.initialize_plots_png()
 
     def main_info_activate(self):
         self.w_info_main.activateWindow()
@@ -698,9 +701,7 @@ class NasaGammaApp(QMainWindow):
         x_idx = np.searchsorted(self.search.peaks_idx, xnew)
         self.search.peaks_idx = np.insert(self.search.peaks_idx, x_idx, xnew)
         fwhm_guess_new = self.search.fwhm(xnew)
-        self.search.fwhm_guess = np.insert(
-            self.search.fwhm_guess, x_idx, fwhm_guess_new
-        )
+        self.search.fwhm_guess = np.insert(self.search.fwhm_guess, x_idx, fwhm_guess_new)
         if self.spect.energies is not None:
             self.ax_main.axvline(
                 x=self.spect.energies[xnew], color="red", linestyle="--", alpha=0.2
@@ -1814,9 +1815,7 @@ class NasaGammaApp(QMainWindow):
     def update_gauss_fwhm(self):
         self.ax_fwhm_gauss.clear()
         gauss_comp = pf.GaussianComponents(fit_obj_lst=self.fit_lst)
-        gauss_comp.plot_gauss(
-            plot_type="fwhm", fig=self.fig_fwhm, ax=self.ax_fwhm_gauss
-        )
+        gauss_comp.plot_gauss(plot_type="fwhm", fig=self.fig_fwhm, ax=self.ax_fwhm_gauss)
 
     def add_fwhm(self):
         try:
@@ -2025,9 +2024,9 @@ class NasaGammaApp(QMainWindow):
         self.dt_flag = 0
         self.xy_flag = 0
         self.en_flag = 0
-        self.raw_flag = 0 # raw data flag
-        self.calibrated_flag = 0 # time-shifted and calibrated data flag
-        self.sims_flag = 0 # simulations data flag
+        self.raw_flag = 0  # raw data flag
+        self.calibrated_flag = 0  # time-shifted and calibrated data flag
+        self.sims_flag = 0  # simulations data flag
         filepath = self.api_path_txt.text()
         ch_txt = self.api_ch_txt.text()
         date = self.api_date_txt.text()
@@ -2065,8 +2064,8 @@ class NasaGammaApp(QMainWindow):
             self.api_ykey = "Y"
             self.api_ekey = "energy"
             self.trange = [0, 60]
-            self.xyplane = (-0.2, 0.2, -0.2, 0.2) 
-            self.erange_api = [0, self.df_current["energy"].max()] # in MeV
+            self.xyplane = (-0.2, 0.2, -0.2, 0.2)
+            self.erange_api = [0, self.df_current["energy"].max()]  # in MeV
         elif self.calibrated_flag:
             self.df_current = apipandas.calc_own_pos(self.df_current)
             self.api_xkey = "X2"
@@ -2074,7 +2073,7 @@ class NasaGammaApp(QMainWindow):
             self.api_ekey = "energy"
             self.trange = [-40, 120]  # dt range
             self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
-            self.erange_api = [0, self.df_current["energy"].max()]  
+            self.erange_api = [0, self.df_current["energy"].max()]
         elif self.raw_flag:
             self.df_current = apipandas.calc_own_pos(self.df_current)
             self.api_xkey = "X2"
@@ -2085,7 +2084,7 @@ class NasaGammaApp(QMainWindow):
             self.erange_api = [0, 2**16]  # [0,8]
         else:
             print("ERROR: Cannot determine the data type (raw, calibrated, or simulated)")
-            
+
         self.ebins = 2**12  # energy bins
         self.hexbins = 80  # x-y bins
         self.tbins = 512  # time bins
@@ -2137,9 +2136,9 @@ class NasaGammaApp(QMainWindow):
             self.reset_spect_params()
             if self.sims_flag or self.calibrated_flag:
                 self.e_units = "Mev"
-                self.spect = sp.Spectrum(counts=self.api_gam,
-                                         energies=self.api_gam_x,
-                                         e_units=self.e_units)
+                self.spect = sp.Spectrum(
+                    counts=self.api_gam, energies=self.api_gam_x, e_units=self.e_units
+                )
             else:
                 self.spect = sp.Spectrum(counts=self.api_gam)
                 self.e_units = "channels"
@@ -2154,7 +2153,7 @@ class NasaGammaApp(QMainWindow):
         self.api_gam, self.api_edg = np.histogram(
             df[self.api_ekey], bins=self.ebins, range=self.erange_api
         )
-        self.api_gam_x = (self.api_edg[1:] + self.api_edg[:-1])/2
+        self.api_gam_x = (self.api_edg[1:] + self.api_edg[:-1]) / 2
         self.ax_api_spe.plot(self.api_gam_x, self.api_gam, color="green")
         self.ax_api_spe.set_yscale(self.api_spect_scale)
         if self.sims_flag or self.calibrated_flag:
@@ -2330,14 +2329,22 @@ class NasaGammaApp(QMainWindow):
         self.ax_api_dt.clear()
         self.ax_api_xy.clear()
         if self.xy_flag == 0:  # xy filter not used before
-            xlim = (self.df_current[self.api_xkey] > x1) & (self.df_current[self.api_xkey] < x2)
-            ylim = (self.df_current[self.api_ykey] > y1) & (self.df_current[self.api_ykey] < y2)
+            xlim = (self.df_current[self.api_xkey] > x1) & (
+                self.df_current[self.api_xkey] < x2
+            )
+            ylim = (self.df_current[self.api_ykey] > y1) & (
+                self.df_current[self.api_ykey] < y2
+            )
             self.df_previous = self.df_current.copy()
             self.df_current = self.df_current[xlim & ylim]
             self.xy_flag = 1  # set energy filter to used
         else:
-            xlim = (self.df_previous[self.api_xkey] > x1) & (self.df_previous[self.api_xkey] < x2)
-            ylim = (self.df_previous[self.api_ykey] > y1) & (self.df_previous[self.api_ykey] < y2)
+            xlim = (self.df_previous[self.api_xkey] > x1) & (
+                self.df_previous[self.api_xkey] < x2
+            )
+            ylim = (self.df_previous[self.api_ykey] > y1) & (
+                self.df_previous[self.api_ykey] < y2
+            )
             self.df_current = self.df_previous[xlim & ylim]
         self.df_current.fillna(0)
         self.df_current.reset_index(drop=True, inplace=True)
@@ -2400,7 +2407,7 @@ class NasaGammaApp(QMainWindow):
             X, Y, Z = apipandas.api_xyz(
                 df=self.df_current, det_pos=[0, 22.2, -25.515], use_det=False
             )
-            
+
         # Define the number of bins for the histogram
         num_bins = int(self.w_api_3D.no_bins.text())
         iso_min = float(self.w_api_3D.isomin.text())
@@ -2455,6 +2462,92 @@ class NasaGammaApp(QMainWindow):
             f.write(html.encode("utf-8"))
             temp_file_path = f.name
         self.w_api_3D.browser.setUrl(QUrl.fromLocalFile(temp_file_path))
+
+    ## PNG
+    # TODO
+    def initialize_plots_png(self):
+        self.fig_png_dt = self.plot_dt_png.canvas.figure
+        self.fig_png_e = self.plot_e_png.canvas.figure
+        self.fig_png_decay = self.plot_decay_png.canvas.figure
+        self.fig_png_et = self.plot_EvsT_png.canvas.figure
+        self.fig_png_dt.clear()
+        self.fig_png_e.clear()
+        self.fig_png_decay.clear()
+        self.fig_png_et.clear()
+        self.fig_png_dt.set_constrained_layout(True)
+        self.fig_png_e.set_constrained_layout(True)
+        self.fig_png_decay.set_constrained_layout(True)
+        self.fig_png_et.set_constrained_layout(True)
+        self.fig_png_dt.patch.set_alpha(0)
+        self.fig_png_e.patch.set_alpha(0)
+        self.fig_png_decay.patch.set_alpha(0)
+        self.fig_png_et.patch.set_alpha(0)
+        self.ax_png_dt = self.fig_png_dt.add_subplot()
+        self.ax_png_e = self.fig_png_e.add_subplot()
+        self.ax_png_decay = self.fig_png_decay.add_subplot()
+        self.ax_png_et = self.fig_png_et.add_subplot()
+        self.fig_png_dt.canvas.draw_idle()
+        self.fig_png_e.canvas.draw_idle()
+        self.fig_png_decay.canvas.draw_idle()
+        self.fig_png_et.canvas.draw_idle()
+
+    def load_file_png(self):
+        fname = self.filePath_png.text()
+        period = eval(self.period_png.text())
+        self.png = tlist.Tlist(fname=fname, period=period)
+        if self.isevaluable(self.tbins_png.text()):
+            tbins_png = eval(self.tbins_png.text())
+        else:
+            tbins_png = 200
+        if self.isevaluable(self.ebins_png.text()):
+            ebins_png = eval(self.ebins_png.text())
+        else:
+            ebins_png = 2**12
+        if self.pushButton_keep_png.isChecked():
+            print("Keeping all figures")
+        else:
+            print("Resetting figures")
+            self.reset_png_plots()
+        self.plot_png_dt(tbins=tbins_png)
+        self.plot_png_e(ebins=ebins_png)
+
+    def png_spect_yscale(self):
+        try:
+            if self.png_spect_scale == "log":
+                self.ax_png_e.set_yscale("linear")
+                self.png_spect_scale = "linear"
+            else:
+                self.ax_png_e.set_yscale("log")
+                self.png_spect_scale = "log"
+            self.fig_png_e.canvas.draw_idle()
+        except Exception as e:
+            print("An unknown error occurred:", str(e))
+
+    def reset_png_plots(self):
+        self.ax_png_dt.clear()
+        self.ax_png_e.clear()
+        self.ax_png_decay.clear()
+        self.ax_png_et.clear()
+
+    def plot_png_dt(self, tbins=200):
+        self.png.plot_time_hist(tbins=tbins, ax=self.ax_png_dt)
+        self.fig_png_dt.canvas.draw_idle()
+
+    def plot_png_e(self, ebins=4096):
+        x, spe = self.png.hist_erg(ebins=ebins)
+        self.png.plot_spect_erg_all(x, spe, ax=self.ax_png_e)
+        self.fig_png_e.canvas.draw_idle()
+
+    def plot_png_decay(self):
+        pass
+
+    def plot_png_et(self):
+        pass
+
+    def change_tbins_png(self):
+        tbins = eval(self.tbins_png.text())
+        self.ax_png_dt.clear()
+        self.plot_png_dt(tbins=tbins)
 
     ## Peak finder
     def peakFind_info_activate(self):
@@ -2590,9 +2683,7 @@ class NasaGammaApp(QMainWindow):
             for f in files[1:]:
                 df0 = pd.read_csv(f)
                 data = pd.concat([data, df0], ignore_index=True)
-            data["sort"] = (
-                data["Isotope"].str.extract(r"(\d+)", expand=False).astype(int)
-            )
+            data["sort"] = data["Isotope"].str.extract(r"(\d+)", expand=False).astype(int)
             print(data.columns)
             data.sort_values("sort", inplace=True, ascending=True)
             data = data.drop("sort", axis=1)
@@ -2615,9 +2706,7 @@ class NasaGammaApp(QMainWindow):
         capt_IAEA_file = pkg_resources.resource_filename(
             "nasagamma", "data/Capture_IAEA.csv"
         )
-        talys_file = pkg_resources.resource_filename(
-            "nasagamma", "data/Talys-14MeV.csv"
-        )
+        talys_file = pkg_resources.resource_filename("nasagamma", "data/Talys-14MeV.csv")
         inl_baghdad_file = pkg_resources.resource_filename(
             "nasagamma", "data/Inelastic_Baghdad.csv"
         )
