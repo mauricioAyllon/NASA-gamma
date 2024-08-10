@@ -28,6 +28,7 @@ particular electronic gain used. The examples here are for our specific
 detector configurations.
 """
 import docopt
+import random
 import pandas as pd
 import numpy as np
 import datetime
@@ -588,7 +589,10 @@ class NasaGammaApp(QMainWindow):
         self.button_yscale_png.clicked.connect(self.png_spect_yscale)
         self.pushButton_keep_png.setCheckable(True)
         self.button_loadFile_png.clicked.connect(self.load_file_png)
+        self.button_reset_png.clicked.connect(self.reset_png)
         self.pushButton_apply_tbins_png.clicked.connect(self.change_tbins_png)
+        self.pushButton_apply_ebins_png.clicked.connect(self.change_ebins_png)
+        self.pushButton_apply_t_png.clicked.connect(self.apply_trange_png)
         self.initialize_plots_png()
 
     def main_info_activate(self):
@@ -2508,8 +2512,12 @@ class NasaGammaApp(QMainWindow):
         else:
             print("Resetting figures")
             self.reset_png_plots()
-        self.plot_png_dt(tbins=tbins_png)
-        self.plot_png_e(ebins=ebins_png)
+        self.plot_png_dt()
+        self.plot_png_e()
+        
+    def reset_png(self):
+        self.initialize_plots_png()
+        self.load_file_png()
 
     def png_spect_yscale(self):
         try:
@@ -2529,13 +2537,16 @@ class NasaGammaApp(QMainWindow):
         self.ax_png_decay.clear()
         self.ax_png_et.clear()
 
-    def plot_png_dt(self, tbins=200):
-        self.png.plot_time_hist(tbins=tbins, ax=self.ax_png_dt)
+    def plot_png_dt(self):
+        self.png.plot_time_hist(ax=self.ax_png_dt)
         self.fig_png_dt.canvas.draw_idle()
 
-    def plot_png_e(self, ebins=4096):
-        x, spe = self.png.hist_erg(ebins=ebins)
+    def plot_png_e(self):
+        if self.pushButton_keep_png.isChecked() == False:
+            self.ax_png_e.clear()
+        x, spe = self.png.hist_erg()
         self.png.plot_spect_erg_all(x, spe, ax=self.ax_png_e)
+        self.ax_png_e.set_yscale(self.png_spect_scale)
         self.fig_png_e.canvas.draw_idle()
 
     def plot_png_decay(self):
@@ -2546,8 +2557,29 @@ class NasaGammaApp(QMainWindow):
 
     def change_tbins_png(self):
         tbins = eval(self.tbins_png.text())
+        self.png.tbins = tbins
         self.ax_png_dt.clear()
-        self.plot_png_dt(tbins=tbins)
+        self.plot_png_dt()
+    
+    def change_ebins_png(self):
+        ebins = eval(self.ebins_png.text())
+        self.png.ebins = ebins
+        self.ax_png_e.clear()
+        self.plot_png_e()
+    
+    def apply_trange_png(self):
+        colors = ["C0", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9"]
+        trange = [eval(self.t0_png.text()), eval(self.t1_png.text())]
+        self.png.filter_tdata(trange=trange)
+        self.plot_png_e()
+        self.png.plot_vlines(ax=self.ax_png_dt, color=random.choice(colors))
+        self.fig_png_dt.canvas.draw_idle()
+        
+    def apply_erange_png(self):
+        pass
+    
+    def apply_die_away(self):
+        pass
 
     ## Peak finder
     def peakFind_info_activate(self):

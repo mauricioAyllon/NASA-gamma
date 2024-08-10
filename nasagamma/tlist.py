@@ -12,11 +12,13 @@ import matplotlib.pyplot as plt
 
 class Tlist:
     def __init__(self, fname, period):
+        max_e_lst = np.array([2**9, 2**10, 2**11, 2**12, 2**13, 2**14, 2**15, 2**16])
         self.fname = fname
         self.period = period
         self.trange = [0, period]
         self.erange = None
         self.data = self.load_data()
+        self.e_max = max_e_lst[max_e_lst > self.data[:,0].max()].min()
         if self.energy_flag:
             self.df = pd.DataFrame(
                 data=self.data, columns=["energy", "channel", "ts", "dt"]
@@ -24,6 +26,8 @@ class Tlist:
         else:
             self.df = pd.DataFrame(data=self.data, columns=["channel", "ts", "dt"])
         self.dt_bins = 100
+        self.tbins = 200
+        self.ebins=4096
         # plt.rc("font", size=14)
         # plt.style.use("seaborn-v0_8-darkgrid")
 
@@ -62,7 +66,6 @@ class Tlist:
         self.restore_df()
         self.df = self.df[(self.df["dt"] > trange[0]) & (self.df["dt"] < trange[1])]
         self.trange = trange
-        self.hist_erg()
 
     def filter_edata(self, erange):
         self.restore_df()
@@ -85,22 +88,22 @@ class Tlist:
         self.restore_df()
         self.period = new_period
 
-    def hist_erg(self, ebins=2**12):
+    def hist_erg(self):
         if self.energy_flag:
             keyword = "energy"
         else:
             keyword = "channel"
-        spect, edg = np.histogram(self.df[keyword], bins=ebins, range=[0, ebins])
+        spect, edg = np.histogram(self.df[keyword], bins=self.ebins, range=[0, self.e_max])
         x = (edg[1:] + edg[:-1]) / 2
         return x, spect
 
-    def plot_time_hist(self, tbins=200, ax=None):
+    def plot_time_hist(self, ax=None):
         if ax is None:
             fig = plt.figure(figsize=(8, 6))
             ax = fig.add_subplot()
         ax.hist(
             self.data[:, 2],
-            bins=tbins,
+            bins=self.tbins,
             edgecolor="black",
             alpha=0.5,
             label=f"Total counts = {self.data.shape[0]}",
@@ -109,8 +112,8 @@ class Tlist:
         ax.set_ylabel("Counts")
         ax.legend()
 
-    def plot_vlines(self, ax=None):
-        ax.axvspan(xmin=self.trange[0], xmax=self.trange[1], alpha=0.1, color="red")
+    def plot_vlines(self, color="red", ax=None):
+        ax.axvspan(xmin=self.trange[0], xmax=self.trange[1], alpha=0.3, color=color)
 
     def plot_spect_erg_all(self, x, y, ax=None):
         if ax is None:

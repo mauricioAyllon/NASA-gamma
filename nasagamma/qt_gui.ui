@@ -564,8 +564,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>795</width>
-                  <height>248</height>
+                  <width>790</width>
+                  <height>231</height>
                  </rect>
                 </property>
                </widget>
@@ -867,8 +867,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>496</width>
-                <height>716</height>
+                <width>481</width>
+                <height>674</height>
                </rect>
               </property>
              </widget>
@@ -1116,8 +1116,8 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>626</width>
-                <height>713</height>
+                <width>622</width>
+                <height>674</height>
                </rect>
               </property>
              </widget>
@@ -2392,6 +2392,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                   <property name="styleSheet">
                    <string notr="true">background-color: rgb(255, 255, 255);</string>
                   </property>
+                  <property name="text">
+                   <string>1000</string>
+                  </property>
                  </widget>
                 </item>
                 <item row="1" column="2">
@@ -2418,6 +2421,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                   </property>
                   <property name="styleSheet">
                    <string notr="true">background-color: rgb(255, 255, 255);</string>
+                  </property>
+                  <property name="text">
+                   <string>C:/Users/mayll/Documents/NASA/NASA-gamma/examples/data/gui_test_data_tlist.txt</string>
                   </property>
                  </widget>
                 </item>
@@ -2482,6 +2488,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <width>350</width>
                <height>16777215</height>
               </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(212, 217, 208);</string>
              </property>
              <property name="frameShape">
               <enum>QFrame::Panel</enum>
@@ -2548,7 +2557,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                      </font>
                     </property>
                     <property name="styleSheet">
-                     <string notr="true">background-color: rgb(170, 255, 255);</string>
+                     <string notr="true">background-color: rgb(255, 170, 127);</string>
                     </property>
                     <property name="text">
                      <string>Apply</string>
@@ -2667,7 +2676,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                      </font>
                     </property>
                     <property name="styleSheet">
-                     <string notr="true">background-color: rgb(170, 255, 255);</string>
+                     <string notr="true">background-color: rgb(255, 170, 127);</string>
                     </property>
                     <property name="text">
                      <string>Apply</string>
@@ -2851,7 +2860,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(170, 255, 255);</string>
+                   <string notr="true">background-color: rgb(255, 170, 127);</string>
                   </property>
                   <property name="text">
                    <string>Apply</string>
@@ -2989,7 +2998,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
      <x>0</x>
      <y>0</y>
      <width>1674</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
