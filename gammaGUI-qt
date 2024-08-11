@@ -57,6 +57,7 @@ from nasagamma import read_parquet_api
 from nasagamma import parse_NIST
 from nasagamma import diagnostics
 from nasagamma import apipandas
+from nasagamma import decay_exponential as decay
 import pkg_resources
 import plotly.graph_objs as go
 import plotly.io as pio
@@ -593,6 +594,9 @@ class NasaGammaApp(QMainWindow):
         self.pushButton_apply_tbins_png.clicked.connect(self.change_tbins_png)
         self.pushButton_apply_ebins_png.clicked.connect(self.change_ebins_png)
         self.pushButton_apply_t_png.clicked.connect(self.apply_trange_png)
+        self.pushButton_apply_e_png.clicked.connect(self.apply_erange_png)
+        self.pushButton_apply_dieaway_png.clicked.connect(self.apply_die_away)
+        self.pushButton_apply_fit_png.clicked.connect(self.apply_die_away_fit)
         self.initialize_plots_png()
 
     def main_info_activate(self):
@@ -2538,6 +2542,8 @@ class NasaGammaApp(QMainWindow):
         self.ax_png_et.clear()
 
     def plot_png_dt(self):
+        if self.pushButton_keep_png.isChecked() == False:
+            self.ax_png_dt.clear()
         self.png.plot_time_hist(ax=self.ax_png_dt)
         self.fig_png_dt.canvas.draw_idle()
 
@@ -2550,21 +2556,35 @@ class NasaGammaApp(QMainWindow):
         self.fig_png_e.canvas.draw_idle()
 
     def plot_png_decay(self):
-        pass
-
+        if self.pushButton_keep_png.isChecked() == False:
+            self.ax_png_decay.clear()
+        self.png.plot_die_away(ax=self.ax_png_decay)
+        self.fig_png_decay.canvas.draw_idle()
+        
+    def plot_png_fit_decay(self):
+        if self.pushButton_keep_png.isChecked() == False:
+            self.ax_png_decay.clear()
+        if self.checkBox_single_png.isChecked():
+            self.exp_png.fit_single_decay()
+        elif self.checkBox_double_png.isChecked():
+            self.exp_png.fit_double_decay()
+        self.exp_png.plot(ax_fit=self.ax_png_decay, show_components=False)
+        self.fig_png_decay.canvas.draw_idle()
+        
     def plot_png_et(self):
-        pass
+        if self.pushButton_keep_png.isChecked() == False:
+            self.ax_png_et.clear()
+        self.png.plot_time_hist(ax=self.ax_png_et)
+        self.fig_png_et.canvas.draw_idle()
 
     def change_tbins_png(self):
         tbins = eval(self.tbins_png.text())
         self.png.tbins = tbins
-        self.ax_png_dt.clear()
         self.plot_png_dt()
     
     def change_ebins_png(self):
         ebins = eval(self.ebins_png.text())
         self.png.ebins = ebins
-        self.ax_png_e.clear()
         self.plot_png_e()
     
     def apply_trange_png(self):
@@ -2572,15 +2592,29 @@ class NasaGammaApp(QMainWindow):
         trange = [eval(self.t0_png.text()), eval(self.t1_png.text())]
         self.png.filter_tdata(trange=trange)
         self.plot_png_e()
-        self.png.plot_vlines(ax=self.ax_png_dt, color=random.choice(colors))
+        self.png.plot_vlines_t(ax=self.ax_png_dt, color=random.choice(colors))
         self.fig_png_dt.canvas.draw_idle()
         
     def apply_erange_png(self):
-        pass
+        colors = ["C0", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9"]
+        erange = [eval(self.e0_png.text()), eval(self.e1_png.text())]
+        self.png.filter_edata(erange=erange)
+        self.plot_png_et()
+        self.png.plot_vlines_e(ax=self.ax_png_e, color=random.choice(colors))
+        self.fig_png_e.canvas.draw_idle()
+        self.fig_png_et.canvas.draw_idle()
     
     def apply_die_away(self):
-        pass
-
+        t_start = eval(self.t_start_png.text())
+        t_end = eval(self.t_end_png.text())
+        self.png.filter_tdata(trange=[t_start, t_end])
+        self.png.hist_time()
+        self.plot_png_decay()
+    
+    def apply_die_away_fit(self):
+        self.exp_png = decay.Decay_exp(x=self.png.xd, y=self.png.yd, yerr=self.png.yerrd)
+        self.plot_png_fit_decay()
+        
     ## Peak finder
     def peakFind_info_activate(self):
         self.w_peak_find_info.activateWindow()

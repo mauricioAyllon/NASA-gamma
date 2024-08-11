@@ -2498,7 +2498,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              <property name="frameShadow">
               <enum>QFrame::Raised</enum>
              </property>
-             <layout class="QGridLayout" name="gridLayout_58">
+             <layout class="QGridLayout" name="gridLayout_59">
               <item row="0" column="0">
                <widget class="QPushButton" name="pushButton_keep_png">
                 <property name="font">
@@ -2510,7 +2510,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <string notr="true">background-color: rgb(255, 243, 206);</string>
                 </property>
                 <property name="text">
-                 <string>Keep</string>
+                 <string>Keep Plots</string>
                 </property>
                </widget>
               </item>
@@ -2795,6 +2795,21 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                   </property>
                  </widget>
                 </item>
+                <item row="0" column="2" rowspan="2">
+                 <widget class="QPushButton" name="pushButton_apply_dieaway_png">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(255, 170, 127);</string>
+                  </property>
+                  <property name="text">
+                   <string>Apply</string>
+                  </property>
+                 </widget>
+                </item>
                 <item row="1" column="0">
                  <widget class="QLabel" name="label_21">
                   <property name="font">
@@ -2819,7 +2834,23 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="0" colspan="2">
+               </layout>
+              </item>
+              <item row="7" column="0">
+               <widget class="QLabel" name="label_22">
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fit decay&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="0">
+               <layout class="QGridLayout" name="gridLayout_58">
+                <item row="0" column="0">
                  <widget class="QCheckBox" name="checkBox_single_png">
                   <property name="font">
                    <font>
@@ -2837,7 +2868,22 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="0" colspan="2">
+                <item row="0" column="1" rowspan="2">
+                 <widget class="QPushButton" name="pushButton_apply_fit_png">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(255, 170, 127);</string>
+                  </property>
+                  <property name="text">
+                   <string>Apply fit</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
                  <widget class="QCheckBox" name="checkBox_double_png">
                   <property name="font">
                    <font>
@@ -2849,21 +2895,6 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                   </property>
                   <property name="autoExclusive">
                    <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="0" colspan="2">
-                 <widget class="QPushButton" name="pushButton_apply_dieaway_png">
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">background-color: rgb(255, 170, 127);</string>
-                  </property>
-                  <property name="text">
-                   <string>Apply</string>
                   </property>
                  </widget>
                 </item>

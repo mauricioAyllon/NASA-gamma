@@ -17,6 +17,9 @@ class Tlist:
         self.period = period
         self.trange = [0, period]
         self.erange = None
+        self.xd = None
+        self.yd = None
+        self.yerrd = None
         self.data = self.load_data()
         self.e_max = max_e_lst[max_e_lst > self.data[:,0].max()].min()
         if self.energy_flag:
@@ -96,24 +99,47 @@ class Tlist:
         spect, edg = np.histogram(self.df[keyword], bins=self.ebins, range=[0, self.e_max])
         x = (edg[1:] + edg[:-1]) / 2
         return x, spect
+    
+    def hist_time(self):
+        y, edg = np.histogram(self.df["dt"], bins=self.tbins)
+        y_err = np.sqrt(y)
+        x = (edg[1:] + edg[:-1]) / 2
+        self.xd = x
+        self.yd = y
+        self.yerrd = y_err
 
     def plot_time_hist(self, ax=None):
         if ax is None:
             fig = plt.figure(figsize=(8, 6))
             ax = fig.add_subplot()
         ax.hist(
-            self.data[:, 2],
+            #self.data[:, 2],
+            self.df["dt"],
             bins=self.tbins,
             edgecolor="black",
             alpha=0.5,
-            label=f"Total counts = {self.data.shape[0]}",
+            label=f"Total counts = {self.df.shape[0]}",
         )
         ax.set_xlabel("dt (us)")
         ax.set_ylabel("Counts")
         ax.legend()
+        
+    def plot_die_away(self, ax=None):
+        if ax is None:
+            fig = plt.figure(figsize=(8, 6))
+            ax = fig.add_subplot()
+        ax.errorbar(self.xd, self.yd, self.yerrd, fmt='o', linewidth=2, capsize=6,
+                    label=f"time range: {self.trange} us")
+        #ax.plot(x, y, label=f"time range: {self.trange} us")
+        ax.set_xlabel("Time (us)")
+        ax.set_ylabel("Counts")
+        ax.legend()
 
-    def plot_vlines(self, color="red", ax=None):
+    def plot_vlines_t(self, color="red", ax=None):
         ax.axvspan(xmin=self.trange[0], xmax=self.trange[1], alpha=0.3, color=color)
+        
+    def plot_vlines_e(self, color="red", ax=None):
+        ax.axvspan(xmin=self.erange[0], xmax=self.erange[1], alpha=0.3, color=color)
 
     def plot_spect_erg_all(self, x, y, ax=None):
         if ax is None:
