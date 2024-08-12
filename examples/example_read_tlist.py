@@ -11,13 +11,14 @@ import lmfit
 
 file = "data/gui_test_data_tlist.txt"
 png = tlist.Tlist(fname=file, period=1000)
+# plt.rcParams.update({'font.size': 22})
 png.plot_time_hist()
-x, spe = png.hist_erg()
-png.plot_spect_erg_all(x=x, y=spe)
+png.hist_erg()
+png.plot_spect_erg_all(x=png.x, y=png.spect)
 
 
 # Die-away
-png.filter_tdata(trange=[210,1000])
+png.filter_tdata(trange=[210, 1000])
 png.hist_time()
 png.plot_die_away()
 

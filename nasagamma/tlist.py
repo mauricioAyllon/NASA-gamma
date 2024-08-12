@@ -21,7 +21,7 @@ class Tlist:
         self.yd = None
         self.yerrd = None
         self.data = self.load_data()
-        self.e_max = max_e_lst[max_e_lst > self.data[:,0].max()].min()
+        self.e_max = max_e_lst[max_e_lst > self.data[:, 0].max()].min()
         if self.energy_flag:
             self.df = pd.DataFrame(
                 data=self.data, columns=["energy", "channel", "ts", "dt"]
@@ -30,7 +30,7 @@ class Tlist:
             self.df = pd.DataFrame(data=self.data, columns=["channel", "ts", "dt"])
         self.dt_bins = 100
         self.tbins = 200
-        self.ebins=4096
+        self.ebins = 4096
         # plt.rc("font", size=14)
         # plt.style.use("seaborn-v0_8-darkgrid")
 
@@ -96,10 +96,13 @@ class Tlist:
             keyword = "energy"
         else:
             keyword = "channel"
-        spect, edg = np.histogram(self.df[keyword], bins=self.ebins, range=[0, self.e_max])
+        spect, edg = np.histogram(
+            self.df[keyword], bins=self.ebins, range=[0, self.e_max]
+        )
         x = (edg[1:] + edg[:-1]) / 2
-        return x, spect
-    
+        self.x = x
+        self.spect = spect
+
     def hist_time(self):
         y, edg = np.histogram(self.df["dt"], bins=self.tbins)
         y_err = np.sqrt(y)
@@ -113,7 +116,7 @@ class Tlist:
             fig = plt.figure(figsize=(8, 6))
             ax = fig.add_subplot()
         ax.hist(
-            #self.data[:, 2],
+            # self.data[:, 2],
             self.df["dt"],
             bins=self.tbins,
             edgecolor="black",
@@ -123,21 +126,28 @@ class Tlist:
         ax.set_xlabel("dt (us)")
         ax.set_ylabel("Counts")
         ax.legend()
-        
+
     def plot_die_away(self, ax=None):
         if ax is None:
             fig = plt.figure(figsize=(8, 6))
             ax = fig.add_subplot()
-        ax.errorbar(self.xd, self.yd, self.yerrd, fmt='o', linewidth=2, capsize=6,
-                    label=f"time range: {self.trange} us")
-        #ax.plot(x, y, label=f"time range: {self.trange} us")
+        ax.errorbar(
+            self.xd,
+            self.yd,
+            self.yerrd,
+            fmt="o",
+            linewidth=2,
+            capsize=6,
+            label=f"time range: {self.trange} us",
+        )
+        # ax.plot(x, y, label=f"time range: {self.trange} us")
         ax.set_xlabel("Time (us)")
         ax.set_ylabel("Counts")
         ax.legend()
 
     def plot_vlines_t(self, color="red", ax=None):
         ax.axvspan(xmin=self.trange[0], xmax=self.trange[1], alpha=0.3, color=color)
-        
+
     def plot_vlines_e(self, color="red", ax=None):
         ax.axvspan(xmin=self.erange[0], xmax=self.erange[1], alpha=0.3, color=color)
 
@@ -164,7 +174,7 @@ class Tlist:
         if self.erange is not None:
             ax.hist(self.df["dt"], bins=self.dt_bins, edgecolor="black")
             ax.set_title(f"Channel range: {self.erange}")
-            ax.set_xlabel("Time [us]")
+            ax.set_xlabel("Time (us)")
             ax.set_ylabel("Counts")
 
             # include square pulse
