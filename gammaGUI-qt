@@ -2542,6 +2542,7 @@ class NasaGammaApp(QMainWindow):
     def reset_png(self):
         self.initialize_plots_png()
         self.load_file_png()
+        self.textBrowser_png.setText("")
 
     def png_spect_yscale(self):
         try:
