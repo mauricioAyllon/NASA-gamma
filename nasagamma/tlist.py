@@ -65,8 +65,9 @@ class Tlist:
 
         return data
 
-    def filter_tdata(self, trange):
-        self.restore_df()
+    def filter_tdata(self, trange, restore_df=True):
+        if restore_df:
+            self.restore_df()
         self.df = self.df[(self.df["dt"] > trange[0]) & (self.df["dt"] < trange[1])]
         self.trange = trange
 

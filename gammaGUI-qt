@@ -2563,13 +2563,13 @@ class NasaGammaApp(QMainWindow):
         self.ax_png_et.clear()
 
     def plot_png_dt(self):
-        if self.pushButton_keep_png.isChecked() == False:
+        if self.pushButton_keep_png.isChecked() is False:
             self.ax_png_dt.clear()
         self.png.plot_time_hist(ax=self.ax_png_dt)
         self.fig_png_dt.canvas.draw_idle()
 
     def plot_png_e(self):
-        if self.pushButton_keep_png.isChecked() == False:
+        if self.pushButton_keep_png.isChecked() is False:
             self.ax_png_e.clear()
         self.png.hist_erg()
         self.png.plot_spect_erg_all(self.png.x, self.png.spect, ax=self.ax_png_e)
@@ -2577,13 +2577,13 @@ class NasaGammaApp(QMainWindow):
         self.fig_png_e.canvas.draw_idle()
 
     def plot_png_decay(self):
-        if self.pushButton_keep_png.isChecked() == False:
+        if self.pushButton_keep_png.isChecked() is False:
             self.ax_png_decay.clear()
         self.png.plot_die_away(ax=self.ax_png_decay)
         self.fig_png_decay.canvas.draw_idle()
 
     def plot_png_fit_decay(self):
-        if self.pushButton_keep_png.isChecked() == False:
+        if self.pushButton_keep_png.isChecked() is False:
             self.ax_png_decay.clear()
         if self.checkBox_single_png.isChecked():
             self.exp_png.fit_single_decay()
@@ -2596,7 +2596,7 @@ class NasaGammaApp(QMainWindow):
         self.fig_png_decay.canvas.draw_idle()
 
     def plot_png_et(self):
-        if self.pushButton_keep_png.isChecked() == False:
+        if self.pushButton_keep_png.isChecked() is False:
             self.ax_png_et.clear()
         self.png.plot_time_hist(ax=self.ax_png_et)
         self.fig_png_et.canvas.draw_idle()
@@ -2644,7 +2644,7 @@ class NasaGammaApp(QMainWindow):
         try:
             t_start = eval(self.t_start_png.text())
             t_end = eval(self.t_end_png.text())
-            self.png.filter_tdata(trange=[t_start, t_end])
+            self.png.filter_tdata(trange=[t_start, t_end], restore_df=False)
             self.png.hist_time()
             self.plot_png_decay()
         except Exception as e:
