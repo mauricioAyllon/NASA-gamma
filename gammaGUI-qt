@@ -56,7 +56,7 @@ from nasagamma import file_reader
 from nasagamma import read_parquet_api
 from nasagamma import parse_NIST
 from nasagamma import diagnostics
-from nasagamma import apipandas
+from nasagamma import apicalc
 from nasagamma import decay_exponential as decay
 import pkg_resources
 import plotly.graph_objs as go
@@ -2083,7 +2083,7 @@ class NasaGammaApp(QMainWindow):
             self.xyplane = (-0.2, 0.2, -0.2, 0.2)
             self.erange_api = [0, self.df_current["energy"].max()]  # in MeV
         elif self.calibrated_flag:
-            self.df_current = apipandas.calc_own_pos(self.df_current)
+            self.df_current = apicalc.calc_own_pos(self.df_current)
             self.api_xkey = "X2"
             self.api_ykey = "Y2"
             self.api_ekey = "energy"
@@ -2091,7 +2091,7 @@ class NasaGammaApp(QMainWindow):
             self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
             self.erange_api = [0, self.df_current["energy"].max()]
         elif self.raw_flag:
-            self.df_current = apipandas.calc_own_pos(self.df_current)
+            self.df_current = apicalc.calc_own_pos(self.df_current)
             self.api_xkey = "X2"
             self.api_ykey = "Y2"
             self.api_ekey = "energy_orig"
@@ -2420,7 +2420,7 @@ class NasaGammaApp(QMainWindow):
         if self.sims_flag:
             X, Y, Z = self.df_current["X"], self.df_current["Y"], self.df_current["Z"]
         else:
-            X, Y, Z = apipandas.api_xyz(
+            X, Y, Z = apicalc.api_xyz(
                 df=self.df_current, det_pos=[0, 22.2, -25.515], use_det=False
             )
 
