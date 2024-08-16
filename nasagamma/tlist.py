@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-Created on Fri May 28 17:39:42 2021
+Tlist (event-by-event) reader for MultiScan, simple 2-column text file, and CAEN
+"""
 
-@author: mauricio
-Tlist reader
-"""
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt

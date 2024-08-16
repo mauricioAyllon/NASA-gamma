@@ -1,6 +1,7 @@
 """
 Classes and functions to read different file types
 """
+
 import numpy as np
 import pandas as pd
 import re
@@ -522,3 +523,60 @@ def read_multiscan(file):
             acq_date=start_time,
         )
         return spect
+
+
+class ReadCaenListMode:
+    def __init__(self, file):
+        """
+        Read CAEN .txt list mode data file.
+
+        Parameters
+        ----------
+        file : string.
+            file path.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.file = file
+        self.header0 = None
+        self.header1 = None
+        self.header2 = None
+        self.header3 = None
+        self.header4 = None
+        self.idx_start = None  # start of data after header
+        self.df = None
+        self.read_file()
+        self.parse_header()
+
+    def read_file(self):
+        with open(self.file, "r") as myfile:
+            self.filelst = [line.rstrip() for line in myfile]
+
+    def parse_header(self):
+        data = []
+        for i, line in enumerate(self.filelst):
+            l = line.lower().split(":")
+            if l[0] == "header0":
+                self.header0 = int(l[1])
+            if l[0] == "header1":
+                self.header1 = int(l[1])
+            if l[0] == "header2":
+                self.header2 = int(l[1])
+            if l[0] == "header3":
+                self.header3 = int(l[1])
+            if l[0] == "header4":
+                self.header4 = int(l[1])
+                self.idx_start = i
+                break
+
+    def parse_data(self):
+        data = []
+        for i, line in enumerate(self.filelst[self.idx_start :]):
+            l = line.split()
+            data.append(l)
+        data = np.array(data[1:], dtype=int)
+        cols = ["ts (ns)", "channel", "flag"]
+        self.df = pd.DataFrame(columns=cols, data=data)
