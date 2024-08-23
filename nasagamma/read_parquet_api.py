@@ -11,7 +11,6 @@ from matplotlib.widgets import SpanSelector, RectangleSelector
 from matplotlib.patches import Rectangle
 from matplotlib.pyplot import cm
 import matplotlib
-from nasagamma import apipandas as api
 import pkg_resources
 from pathlib import Path
 
@@ -89,25 +88,17 @@ def read_parquet_file(date, runnr, ch, flood_field=False, data_path_txt=None):
         for f in files[1:]:
             df0 = pd.read_parquet(f)
             df = pd.concat([df, df0])
-    
-    # if "atom_type" in df.columns: # simulation data
-    #     df["X2"] = df["X"]
-    #     df["Y2"] = df["Y"]
-    #     df["energy_orig"] = df["energy"]
-    # elif "locX" in df.columns: # calibrated experimental data
-    #     df = api.calc_own_pos(df)
-    #     dt_multiplier = 1 # already in ns
-    # else: # raw experimental data
-    #     df = api.calc_own_pos(df)
-    #     dt_multiplier = 1e9
     if flood_field:
         return df
     else:
         #df["dt"] *= dt_multiplier  # to ns
-        if ch == 4 or ch == 3:
-            df = df[df["LaBr[y/n]"] == True]
-        elif ch == 5:
-            df = df[df["LaBr[y/n]"] == False]
+        if "channel" in list(df.columns):
+            df = df[df["channel"] == ch]
+        else:
+            if ch == 4 or ch == 3:
+                df = df[df["LaBr[y/n]"] == True]
+            elif ch == 5:
+                df = df[df["LaBr[y/n]"] == False]
         df.reset_index(drop=True, inplace=True)
         return df
 
@@ -134,7 +125,7 @@ def read_parquet_file_from_path(filepath, ch):
         df = df[df["LaBr[y/n]"] == True]
     elif ch == 5:
         df = df[df["LaBr[y/n]"] == False]
-    df = api.calc_own_pos(df)
+    #df = api.calc_own_pos(df)
     df.reset_index(drop=True, inplace=True)
     return df
 
