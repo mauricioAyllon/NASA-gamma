@@ -2519,7 +2519,17 @@ class NasaGammaApp(QMainWindow):
         try:
             fname = self.filePath_png.text()
             period = eval(self.period_png.text())
-            self.png = tlist.Tlist(fname=fname, period=period)
+            if self.multiscancheck.isChecked():
+                ms = file_reader.ReadMultiScanTlist(fname)
+                ms.read_file()
+                df_raw = ms.df
+            elif self.caencheck.isChecked():
+                caen = file_reader.ReadCaenListMode(fname)
+                caen.parse_data()
+                df_raw = pd.DataFrame()
+                df_raw["channel"] = caen.df["channel"]
+                df_raw["ts"] = caen.df["ts (ns)"]   
+            self.png = tlist.Tlist(df_raw, period=period)
             if self.isevaluable(self.tbins_png.text()):
                 tbins_png = eval(self.tbins_png.text())
             else:

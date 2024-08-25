@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1674</width>
-    <height>944</height>
+    <height>952</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -564,8 +564,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>795</width>
-                  <height>248</height>
+                  <width>790</width>
+                  <height>239</height>
                  </rect>
                 </property>
                </widget>
@@ -867,8 +867,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>496</width>
-                <height>716</height>
+                <width>481</width>
+                <height>682</height>
                </rect>
               </property>
              </widget>
@@ -1116,8 +1116,8 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>626</width>
-                <height>713</height>
+                <width>622</width>
+                <height>682</height>
                </rect>
               </property>
              </widget>
@@ -2315,120 +2315,6 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
               <enum>QFrame::Raised</enum>
              </property>
              <layout class="QGridLayout" name="gridLayout_49">
-              <item row="0" column="4">
-               <widget class="QPushButton" name="button_yscale_png">
-                <property name="font">
-                 <font>
-                  <pointsize>14</pointsize>
-                 </font>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">background-color: rgb(0, 170, 255);</string>
-                </property>
-                <property name="text">
-                 <string>Y-scale</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <spacer name="horizontalSpacer_9">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>413</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="0" column="3">
-               <spacer name="horizontalSpacer_8">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>413</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="0" column="2">
-               <layout class="QGridLayout" name="gridLayout_45">
-                <item row="0" column="0">
-                 <widget class="QLabel" name="label">
-                  <property name="font">
-                   <font>
-                    <pointsize>12</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>File path:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QLabel" name="label_2">
-                  <property name="font">
-                   <font>
-                    <pointsize>12</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Period (us):</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QLineEdit" name="period_png">
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">background-color: rgb(255, 255, 255);</string>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="2">
-                 <widget class="QPushButton" name="button_loadFile_png">
-                  <property name="font">
-                   <font>
-                    <pointsize>14</pointsize>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">background-color: rgb(170, 255, 255);</string>
-                  </property>
-                  <property name="text">
-                   <string>Load File</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1" colspan="2">
-                 <widget class="QLineEdit" name="filePath_png">
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">background-color: rgb(255, 255, 255);</string>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
               <item row="0" column="0">
                <layout class="QGridLayout" name="gridLayout_44">
                 <item row="1" column="1">
@@ -2477,6 +2363,153 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  </widget>
                 </item>
                </layout>
+              </item>
+              <item row="0" column="1">
+               <spacer name="horizontalSpacer_9">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>413</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="2">
+               <layout class="QGridLayout" name="gridLayout_45">
+                <item row="1" column="2">
+                 <widget class="QPushButton" name="button_loadFile_png">
+                  <property name="font">
+                   <font>
+                    <pointsize>14</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(170, 255, 255);</string>
+                  </property>
+                  <property name="text">
+                   <string>Load File</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1" colspan="2">
+                 <widget class="QLineEdit" name="filePath_png">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(255, 255, 255);</string>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_2">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Period (us):</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>File path:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="period_png">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(255, 255, 255);</string>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="3">
+                 <widget class="QCheckBox" name="multiscancheck">
+                  <property name="font">
+                   <font>
+                    <pointsize>10</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>MultiScan</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="4">
+                 <widget class="QCheckBox" name="caencheck">
+                  <property name="font">
+                   <font>
+                    <pointsize>10</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>CAEN</string>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="0" column="3">
+               <spacer name="horizontalSpacer_8">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>413</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="4">
+               <widget class="QPushButton" name="button_yscale_png">
+                <property name="font">
+                 <font>
+                  <pointsize>14</pointsize>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgb(0, 170, 255);</string>
+                </property>
+                <property name="text">
+                 <string>Y-scale</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -3083,7 +3116,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
      <x>0</x>
      <y>0</y>
      <width>1674</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

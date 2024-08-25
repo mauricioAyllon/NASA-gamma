@@ -8,59 +8,32 @@ import matplotlib.pyplot as plt
 
 
 class Tlist:
-    def __init__(self, fname, period):
+    def __init__(self, df_raw, period):
         max_e_lst = np.array([2**9, 2**10, 2**11, 2**12, 2**13, 2**14, 2**15, 2**16])
-        self.fname = fname
+        self.df_raw = df_raw
         self.period = period
         self.trange = [0, period]
+        self.energy_flag = False
         self.erange = None
         self.xd = None
         self.yd = None
         self.yerrd = None
-        self.data = self.load_data()
-        self.e_max = max_e_lst[max_e_lst > self.data[:, 0].max()].min()
-        if self.energy_flag:
-            self.df = pd.DataFrame(
-                data=self.data, columns=["energy", "channel", "ts", "dt"]
-            )
-        else:
-            self.df = pd.DataFrame(data=self.data, columns=["channel", "ts", "dt"])
+        self.data = None
+        self.df = None
+        self.e_max = max_e_lst[max_e_lst > df_raw.channel.max()].min()
         self.dt_bins = 100
         self.tbins = 200
         self.ebins = 4096
+        self.stack_data()
         # plt.rc("font", size=14)
         # plt.style.use("seaborn-v0_8-darkgrid")
 
-    def load_data(self):
-        self.energy_flag = False  # default
-        if self.fname[-3:] == "txt":
-            try:
-                cols = ["channel", "delete", "ts"]
-                df = pd.read_csv(self.fname, sep="\t", names=cols, dtype=np.float64)
-                df.drop(columns="delete", inplace=True)
-            except:
-                cols = ["channel", "ts"]
-                df = pd.read_csv(self.fname, sep="\t", names=cols, dtype=np.float64)
-            data0 = np.array(df)
-            dt0 = np.mod(data0[:, 1], self.period * 10) / 10
-            dt = dt0.reshape((dt0.shape[0], 1))
-            data = np.hstack((data0, dt))
-        elif self.fname[-3:] == "npy":
-            data0 = np.load(self.fname)
-            if data0.shape[1] == 2:
-                dt0 = np.mod(data0[:, 1], self.period * 10) / 10
-                dt = dt0.reshape((dt0.shape[0], 1))
-                data = np.hstack((data0, dt))
-            elif data0.shape[1] == 3:  # assume channel, ts, dt
-                data = data0
-            elif data0.shape[1] == 4:  # assume energy, ch, ts, dt
-                data = data0
-                self.energy_flag = True
-        else:
-            print("Could not open file")
-            pass
-
-        return data
+    def stack_data(self):
+        data0 = np.array(self.df_raw)
+        dt0 = np.mod(data0[:, 1], self.period * 10) / 10
+        dt = dt0.reshape((dt0.shape[0], 1))
+        self.data = np.hstack((data0, dt))
+        self.df = pd.DataFrame(data=self.data, columns=["channel", "ts", "dt"])
 
     def filter_tdata(self, trange, restore_df=True):
         if restore_df:
