@@ -2069,7 +2069,7 @@ class NasaGammaApp(QMainWindow):
                 self.df_api = read_parquet_api.read_parquet_file(date, runnr, ch)
             else:
                 self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
-        self.df_api["dt"] *= 1e9  # to ns
+            self.df_api["dt"] *= 1e9  # to ns
         self.df_current = self.df_api.copy()
         self.df_previous = self.df_api.copy()
         self.initialize_plots_api(FF)
@@ -2209,10 +2209,10 @@ class NasaGammaApp(QMainWindow):
     def api_xylog(self):
         try:
             if self.api_xy_scale == "linear":
-                self.plot_xy_api(self.df_previous, cbar=False, logxy=True)
+                self.plot_xy_api(self.df_current, cbar=False, logxy=True)
                 self.api_xy_scale = "log"
             elif self.api_xy_scale == "log":
-                self.plot_xy_api(self.df_previous, cbar=False, logxy=False)
+                self.plot_xy_api(self.df_current, cbar=False, logxy=False)
                 self.api_xy_scale = "linear"
         except Exception as e:
             print("An unknown error occurred:", str(e))
