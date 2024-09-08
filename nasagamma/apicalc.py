@@ -242,9 +242,7 @@ def get_total_counts(date, runnr, ch):
         cts_tot += cts0
     return cts_tot
 
-
-def calculate_neutron_flux(date, runnr, ch, L=30):
-    # L = neutron source to sample distance in cm
+def calculate_neutron_yield(date, runnr, ch=9):
     alpha_counts = get_total_counts(date, runnr, ch)
     time_total = get_total_time(date, runnr, ch)
     alpha_cr = alpha_counts / time_total
@@ -252,10 +250,14 @@ def calculate_neutron_flux(date, runnr, ch, L=30):
     alpha_area = 4.8 * 4.8  # cm2
     phi_a = alpha_cr / alpha_area  # flux at alpha detector
     Y0 = 4 * np.pi * d**2 * phi_a  # neutron yield (n/s)
+    #alpha_frac = 0.91  # correction factor for true alphas
+    alpha_frac = 1
+    return alpha_frac*Y0
+    
+def calculate_neutron_flux(date, runnr, ch, L=30):
+    Y0 = calculate_neutron_yield(date=date, runnr=runnr, ch=ch)
     phi_s = Y0 / (4 * np.pi * L**2)  # neutron flux on sample
-    alpha_frac = 0.91  # correction factor for true alphas
-    return Y0 * alpha_frac, phi_s * alpha_frac
-
+    return phi_s
 
 def approximate_fa(L=30, S=10):
     """
