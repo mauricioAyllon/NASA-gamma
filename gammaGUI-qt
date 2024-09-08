@@ -2086,7 +2086,7 @@ class NasaGammaApp(QMainWindow):
         tot_alphas = apicalc.get_total_counts(date, runnr, ch)
         neutron_yield = apicalc.calculate_neutron_yield(date, runnr, ch=9)
         alphas_txt = f"Total alphas: {tot_alphas:.3E}"
-        time_txt = f"Total time (HH:MM:SS): {time.strftime('%H:%M:%S', time.gmtime(tot_time))}"
+        time_txt = f"Live time (HH:MM:SS): {time.strftime('%H:%M:%S', time.gmtime(tot_time))}"
         nyield_txt = f"Neutron yield (n/s): {neutron_yield:.3E}"
         self.api_textEdit.setText(f"{alphas_txt}\n{time_txt}\n{nyield_txt}")
 
