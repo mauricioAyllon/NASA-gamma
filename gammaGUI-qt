@@ -35,6 +35,7 @@ import datetime
 from scipy import ndimage
 import re
 import sys
+import time
 from copy import deepcopy
 from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
@@ -2073,6 +2074,21 @@ class NasaGammaApp(QMainWindow):
         self.df_current = self.df_api.copy()
         self.df_previous = self.df_api.copy()
         self.initialize_plots_api(FF)
+        self.api_textEdit.setText("")
+        try:
+            self.read_settings_file(date, runnr, ch)
+        except Exception as e:
+            print("ERROR: Settings file not found")
+            print(e)
+    
+    def read_settings_file(self, date, runnr, ch):
+        tot_time = apicalc.get_total_time(date, runnr, ch)
+        tot_alphas = apicalc.get_total_counts(date, runnr, ch)
+        neutron_yield = apicalc.calculate_neutron_yield(date, runnr, ch=9)
+        alphas_txt = f"Total alphas: {tot_alphas:.3E}"
+        time_txt = f"Total time (HH:MM:SS): {time.strftime('%H:%M:%S', time.gmtime(tot_time))}"
+        nyield_txt = f"Neutron yield (n/s): {neutron_yield:.3E}"
+        self.api_textEdit.setText(f"{alphas_txt}\n{time_txt}\n{nyield_txt}")
 
     def initialize_plots_api(self, flood_field=False):
         if self.sims_flag:

@@ -43,7 +43,7 @@
 </string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -1557,17 +1557,19 @@ File</string>
             </layout>
            </item>
            <item row="0" column="3">
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+            <widget class="QTextEdit" name="api_textEdit">
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
              </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>62</height>
-              </size>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(248, 249, 255);</string>
              </property>
-            </spacer>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
            </item>
            <item row="0" column="4">
             <layout class="QGridLayout" name="gridLayout_9">
