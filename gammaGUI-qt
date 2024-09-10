@@ -2057,9 +2057,10 @@ class NasaGammaApp(QMainWindow):
             self.sims_flag = 1
             print("Loading simulated data")
         if ch_txt == "9":
+            ch = 9
             runnr = int(self.api_run_txt.text())
             self.df_api = read_parquet_api.read_parquet_file(
-                date, runnr, ch=9, flood_field=True
+                date, runnr, ch, flood_field=True
             )
             FF = True
         else:
