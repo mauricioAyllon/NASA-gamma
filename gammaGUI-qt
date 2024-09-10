@@ -2104,7 +2104,7 @@ class NasaGammaApp(QMainWindow):
             self.api_xkey = "X2"
             self.api_ykey = "Y2"
             self.api_ekey = "energy"
-            self.trange = [-40, 120]  # dt range
+            self.trange = [-40, 620]  # dt range
             self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
             self.erange_api = [0, self.df_current["energy"].max()]
         elif self.raw_flag:
