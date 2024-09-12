@@ -153,11 +153,11 @@ def time_cut(df, t_start, t_stop, step, xkey="X", ykey="Y", tkey="dt"):
 
 
 ## helper functions
-def find_data_path(date, runnr):
+def find_data_path(date, runnr, data_path=None):
     RUNNR = runnr
     DATE = dateparser.parse(date)
 
-    path_data = get_data_path()
+    path_data = get_data_path(data_path)
     DATA_DIR = path_data / f"{DATE.year}-{DATE.month:02d}-{DATE.day:02d}"
     fname = f"RUN-{DATE.year}-{DATE.month:02d}-{DATE.day:02d}-{RUNNR:05d}"
     file_path = DATA_DIR / fname
@@ -218,8 +218,8 @@ def read_input_counts_from_settings(settings_file, ch=9):
     return CR
 
 
-def get_total_time(date, runnr, ch, mca=False):
-    file_path = find_data_path(date, runnr)
+def get_total_time(date, runnr, ch, data_path=None, mca=False):
+    file_path = find_data_path(date, runnr, data_path)
     # load data
     if mca:
         files = sorted(list(file_path.glob("MCA-data/*-stats-*")))[1:]
@@ -232,8 +232,8 @@ def get_total_time(date, runnr, ch, mca=False):
     return t_tot
 
 
-def get_total_counts(date, runnr, ch):
-    file_path = find_data_path(date, runnr)
+def get_total_counts(date, runnr, ch, data_path=None):
+    file_path = find_data_path(date, runnr, data_path)
     # load data
     files = list(file_path.glob("settings/*-stats-*"))[1:]
     cts_tot = 0
@@ -242,9 +242,9 @@ def get_total_counts(date, runnr, ch):
         cts_tot += cts0
     return cts_tot
 
-def calculate_neutron_yield(date, runnr, ch=9):
-    alpha_counts = get_total_counts(date, runnr, ch)
-    time_total = get_total_time(date, runnr, ch)
+def calculate_neutron_yield(date, runnr, ch=9, data_path=None):
+    alpha_counts = get_total_counts(date, runnr, ch, data_path)
+    time_total = get_total_time(date, runnr, ch, data_path)
     alpha_cr = alpha_counts / time_total
     d = 6.7  # cm alpha detector-neutron source distance
     alpha_area = 4.8 * 4.8  # cm2

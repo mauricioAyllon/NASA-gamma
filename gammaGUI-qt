@@ -2045,8 +2045,13 @@ class NasaGammaApp(QMainWindow):
         self.calibrated_flag = 0  # time-shifted and calibrated data flag
         self.sims_flag = 0  # simulations data flag
         filepath = self.api_path_txt.text()
+        if filepath == "":
+            data_path = None
+        else:
+            data_path = filepath
         ch_txt = self.api_ch_txt.text()
         date = self.api_date_txt.text()
+        runnr = int(self.api_run_txt.text())
         if self.checkBox_exp_raw.isChecked():
             self.raw_flag = 1
             print("Loading experimental data")
@@ -2060,32 +2065,29 @@ class NasaGammaApp(QMainWindow):
             ch = 9
             runnr = int(self.api_run_txt.text())
             self.df_api = read_parquet_api.read_parquet_file(
-                date, runnr, ch, flood_field=True
-            )
+                date, runnr, ch, flood_field=True, data_path=data_path)
             FF = True
         else:
             FF = False
             ch = int(ch_txt)
-            if filepath == "":
-                runnr = int(self.api_run_txt.text())
-                self.df_api = read_parquet_api.read_parquet_file(date, runnr, ch)
-            else:
-                self.df_api = read_parquet_api.read_parquet_file_from_path(filepath, ch)
+            self.df_api = read_parquet_api.read_parquet_file(date=date, runnr=runnr,
+                                                             ch=ch, flood_field=FF,
+                                                             data_path=data_path)
             self.df_api["dt"] *= 1e9  # to ns
         self.df_current = self.df_api.copy()
         self.df_previous = self.df_api.copy()
         self.initialize_plots_api(FF)
         self.api_textEdit.setText("")
         try:
-            self.read_settings_file(date, runnr, ch)
+            self.read_settings_file(date, runnr, ch, data_path)
         except Exception as e:
             print("ERROR: Settings file not found")
             print(e)
     
-    def read_settings_file(self, date, runnr, ch):
-        tot_time = apicalc.get_total_time(date, runnr, ch)
-        tot_alphas = apicalc.get_total_counts(date, runnr, ch)
-        neutron_yield = apicalc.calculate_neutron_yield(date, runnr, ch=9)
+    def read_settings_file(self, date, runnr, ch, data_path):
+        tot_time = apicalc.get_total_time(date, runnr, ch, data_path)
+        tot_alphas = apicalc.get_total_counts(date, runnr, ch=9, data_path=data_path)
+        neutron_yield = apicalc.calculate_neutron_yield(date, runnr, ch=9, data_path=data_path)
         alphas_txt = f"Total alphas: {tot_alphas:.3E}"
         time_txt = f"Live time (HH:MM:SS): {time.strftime('%H:%M:%S', time.gmtime(tot_time))}"
         nyield_txt = f"Neutron yield (n/s): {neutron_yield:.3E}"
@@ -2104,7 +2106,7 @@ class NasaGammaApp(QMainWindow):
             self.api_xkey = "X2"
             self.api_ykey = "Y2"
             self.api_ekey = "energy"
-            self.trange = [-40, 620]  # dt range
+            self.trange = [-600, 600]  # dt range
             self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
             self.erange_api = [0, self.df_current["energy"].max()]
         elif self.raw_flag:
