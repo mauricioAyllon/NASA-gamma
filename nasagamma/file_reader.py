@@ -524,6 +524,41 @@ def read_multiscan(file):
         )
         return spect
 
+class ReadMultiScanTlist:
+    def __init__(self, file):
+        """
+        Read MultiScan .txt Tlist file.
+        
+        Parameters
+        ----------
+        file : sting
+            file path.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.file = file
+        self.energy_flag = False # default
+        self.df = None
+        
+    def read_file(self):
+        if self.file[-3:] == "txt":
+            with open(self.file, mode="r") as f:
+                file_lst = f.readlines()
+            split_data = []
+            for line in file_lst:
+                l = line.strip().split()
+                split_data.append(l)
+        try:
+            cols = ["channel", "ts"]
+            df = pd.DataFrame(columns=cols, data=split_data, dtype=np.float64)
+            self.df = df
+        except Exception as e:
+            print("ERROR: Could not open file")
+            print("An unknown error occurred:", str(e))
+   
 
 class ReadCaenListMode:
     def __init__(self, file):

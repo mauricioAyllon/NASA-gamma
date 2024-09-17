@@ -3,14 +3,18 @@ Example tlist
 """
 
 from nasagamma import tlist
+from nasagamma import file_reader
 from nasagamma import decay_exponential as decay
 import numpy as np
 import matplotlib.pyplot as plt
 import lmfit
 
-
 file = "data/gui_test_data_tlist.txt"
-png = tlist.Tlist(fname=file, period=1000)
+ms = file_reader.ReadMultiScanTlist(file)
+ms.read_file()
+df_raw = ms.df
+png = tlist.Tlist(df_raw, period=1000)
+
 # plt.rcParams.update({'font.size': 22})
 png.plot_time_hist()
 png.hist_erg()

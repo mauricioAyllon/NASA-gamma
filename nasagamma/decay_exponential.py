@@ -37,9 +37,13 @@ class Decay_exp:
         C_guess = self.y_data.min()
         params = exp_model.make_params(A=A_guess, k=k_guess, C=C_guess)
         # Perform the fit
-        self.fit_result = exp_model.fit(
-            self.y_data, params, t=self.x_data, weights=1.0 / self.yerr
-        )
+        if self.yerr is None:
+            self.fit_result = exp_model.fit(
+                self.y_data, params, t=self.x_data)
+        else:
+            self.fit_result = exp_model.fit(
+                self.y_data, params, t=self.x_data, weights=1.0 / self.yerr
+            )
 
     def fit_double_decay(self):
         self.degree = 2
@@ -53,9 +57,14 @@ class Decay_exp:
             A1=A_guess1, A2=A_guess2, k1=k_guess1, k2=k_guess2, C=C_guess
         )
         # Perform the fit
-        self.fit_result = exp_model.fit(
-            self.y_data, params, t=self.x_data, weights=1.0 / self.yerr
-        )
+        if self.yerr is None:
+            self.fit_result = exp_model.fit(
+                self.y_data, params, t=self.x_data
+            )
+        else:
+            self.fit_result = exp_model.fit(
+                self.y_data, params, t=self.x_data, weights=1.0 / self.yerr
+            )
 
     def plot(self, ax_fit=None, ax_res=None, show_components=False):
         only_fit = False
