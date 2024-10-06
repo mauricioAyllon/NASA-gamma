@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 # from mayavi import mlab
 import pandas as pd
+import os
 
 # import mpl_scatter_density  # adds projection='scatter_density'
 from matplotlib.colors import LinearSegmentedColormap
@@ -232,15 +233,29 @@ def get_total_time(date, runnr, ch, data_path=None, mca=False):
     return t_tot
 
 
-def get_total_counts(date, runnr, ch, data_path=None):
+def get_settings_files(date, runnr, data_path=None):
     file_path = find_data_path(date, runnr, data_path)
-    # load data
-    files = list(file_path.glob("settings/*-stats-*"))[1:]
+    files = list(file_path.glob("settings/*-stats-*"))
+    return files
+
+
+def get_total_counts(date, runnr, ch, data_path=None):
+    files = get_settings_files(date, runnr, data_path)
     cts_tot = 0
     for f in files:
         cts0 = read_input_counts_from_settings(f, ch=ch)
         cts_tot += cts0
     return cts_tot
+
+
+def combine_settings_files(dates, runnrs, data_path=None):
+    all_files = []
+    for d, r in zip(dates, runnrs):
+        files = get_settings_files(date=d, runnr=r, data_path=data_path)
+        all_files.append(files)
+    all_files_flatten = [x for xs in all_files for x in xs]
+    return all_files_flatten
+
 
 def calculate_neutron_yield(date, runnr, ch=9, data_path=None):
     alpha_counts = get_total_counts(date, runnr, ch, data_path)
@@ -250,14 +265,16 @@ def calculate_neutron_yield(date, runnr, ch=9, data_path=None):
     alpha_area = 4.8 * 4.8  # cm2
     phi_a = alpha_cr / alpha_area  # flux at alpha detector
     Y0 = 4 * np.pi * d**2 * phi_a  # neutron yield (n/s)
-    #alpha_frac = 0.91  # correction factor for true alphas
+    # alpha_frac = 0.91  # correction factor for true alphas
     alpha_frac = 1
-    return alpha_frac*Y0
-    
+    return alpha_frac * Y0
+
+
 def calculate_neutron_flux(date, runnr, ch, L=30):
     Y0 = calculate_neutron_yield(date=date, runnr=runnr, ch=ch)
     phi_s = Y0 / (4 * np.pi * L**2)  # neutron flux on sample
     return phi_s
+
 
 def approximate_fa(L=30, S=10):
     """
@@ -284,6 +301,27 @@ def approximate_fa(L=30, S=10):
     sample_area = L_alpha * L_alpha
     fa = sample_area / alpha_area
     return fa
+
+
+def create_directory(directory):
+    """
+    Ensure that the directory exists; if it does not, create it.
+
+    Parameters
+    ----------
+    directory : str
+        Directory path to check/create.
+
+    Returns
+    -------
+    None.
+
+    """
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        print(f"Directory '{directory}' created successfully.")
+    else:
+        print(f"Directory '{directory}' already exists.")
 
 
 def data_cleanup(runs_dict):
@@ -399,6 +437,13 @@ def plot_2Dposition(X, Y, pbins, Vmax=None):
         plt.imshow(result, interpolation="bilinear", cmap="inferno", origin="lower")
     plt.title("Intensity Map")
     plt.show()
+
+
+def plot_2Dposition_hexbins(df, xkey, ykey, ax, colormap="Grays"):
+    if ax is None:
+        fig = plt.figure(figsize=(10, 6))
+        ax = fig.add_subplot()
+    df.plot.hexbin(x=xkey, y=ykey, gridsize=80, cmap=colormap, colorbar=None, ax=ax)
 
 
 def plot_energy(en, ebins, erange=[0, 10], ax=None, log=True, **kwargs):

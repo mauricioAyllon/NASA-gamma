@@ -1,13 +1,14 @@
 """
 Helper functions
 """
+
 import numpy as np
 import dateparser
 from pathlib import Path
 import pkg_resources
 from nasagamma.read_parquet_api import get_data_path
 from nasagamma import read_parquet_api
-from nasagamma import apipandas as api
+from nasagamma import apicalc as api
 import os
 
 
@@ -111,12 +112,13 @@ def calculate_neutron_flux(date, runnr, ch, L=30):
     phi_a = alpha_cr / alpha_area  # flux at alpha detector
     Y0 = 4 * np.pi * d**2 * phi_a  # neutron yield (n/s)
     phi_s = Y0 / (4 * np.pi * L**2)  # neutron flux on sample
-    alpha_frac = 0.91 # correction factor for true alphas
-    return Y0*alpha_frac, phi_s*alpha_frac
+    alpha_frac = 0.91  # correction factor for true alphas
+    return Y0 * alpha_frac, phi_s * alpha_frac
+
 
 def approximate_fa(L=30, S=10):
     """
-    Approximate fraction of alpha particles that intersect a square sample 
+    Approximate fraction of alpha particles that intersect a square sample
     of length S located at a distance L from the neutron source.
 
     Parameters
@@ -133,17 +135,18 @@ def approximate_fa(L=30, S=10):
 
     """
     d = 6.7  # cm alpha detector-neutron source distance
-    xa = 4.8 # cm alpha detector active area
+    xa = 4.8  # cm alpha detector active area
     alpha_area = xa * xa  # cm2
-    L_alpha = (d/L)*(S/2)*2
+    L_alpha = (d / L) * (S / 2) * 2
     sample_area = L_alpha * L_alpha
     fa = sample_area / alpha_area
     return fa
 
+
 def create_directory(directory):
     """
     Ensure that the directory exists; if it does not, create it.
-    
+
     Parameters:
     directory (str): Directory path to check/create.
     """
@@ -152,7 +155,8 @@ def create_directory(directory):
         print(f"Directory '{directory}' created successfully.")
     else:
         print(f"Directory '{directory}' already exists.")
-        
+
+
 def data_reduction(dates, run_numbers, new_date, new_run_number, ch):
     pass
 
@@ -162,31 +166,40 @@ def data_cleanup(runs_dict):
     xrange_labr = [-0.5, 0.5]
     yrange_labr = [-0.62, 0.655]
     trange_labr = [-20, 60]
-    
+
     xrange_cebr = [-0.518, 0.526]
     yrange_cebr = [-0.685, 0.655]
-    trange_cebr = [-20,60]
-    
+    trange_cebr = [-20, 60]
+
     date = runs_dict["date"]
     runnr = runs_dict["run"]
     ch = runs_dict["channel"]
     dfs = read_parquet_api.read_parquet_file(date=date, runnr=runnr, ch=ch)
-    
+
     dfs["dt"] = dfs["dt"] + runs_dict["dt"]
     if ch == 5:
         dfs["energy_orig"] = dfs["energy_orig"] + 5435.24 - runs_dict["erg846"]
-        dfxy = api.dftxy(df=dfs, xrange=xrange_labr, yrange=yrange_labr,
-                         trange=trange_labr, xkey="X2", ykey="Y2", tkey="dt")
+        dfxy = api.dftxy(
+            df=dfs,
+            xrange=xrange_labr,
+            yrange=yrange_labr,
+            trange=trange_labr,
+            xkey="X2",
+            ykey="Y2",
+            tkey="dt",
+        )
     elif ch == 4:
         dfs["energy_orig"] = dfs["energy_orig"] + 6565.2 - runs_dict["erg846"]
-        dfxy = api.dftxy(df=dfs, xrange=xrange_cebr, yrange=yrange_cebr,
-                         trange=trange_cebr, xkey="X2", ykey="Y2", tkey="dt")
-        
+        dfxy = api.dftxy(
+            df=dfs,
+            xrange=xrange_cebr,
+            yrange=yrange_cebr,
+            trange=trange_cebr,
+            xkey="X2",
+            ykey="Y2",
+            tkey="dt",
+        )
+
     df_final = dfxy[["dt", "energy", "energy_orig", "LaBr[y/n]", "X2", "Y2"]]
     df_final["dt"] *= 1e-9
     return df_final
-
-
-
-
-
