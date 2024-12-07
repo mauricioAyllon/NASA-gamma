@@ -191,6 +191,10 @@ class WindowAdvFit(Dialog_from_UI):
         self.ui_name = "win_adv_fit.ui"
         self.window_title = "Advanced Fitting"
 
+class WindowAPImca(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_api_mca.ui"
+        self.window_title = "API MCA"
 
 class WindowAPI3D(Dialog_from_UI):
     def define_ui_vars(self):
@@ -559,6 +563,10 @@ class NasaGammaApp(QMainWindow):
         # API 3D
         self.button_api_3D.clicked.connect(self.open_api_3D)
         # self.button_api_plot3D.clicked.connect(self.create_plot_api3D)
+        
+        # API MCA
+        self.button_api_mca.clicked.connect(self.open_api_mca)
+        #self.w_adv_fit.button_perform_fit.clicked.connect(self.calculate_peak_area)
 
         ## Find peaks
         self.button_find_peaks.setStyleSheet("background-color : mediumaquamarine")
@@ -2424,6 +2432,14 @@ class NasaGammaApp(QMainWindow):
         self.fig_api.canvas.draw_idle()
         # espan.update()
         # tspan.update()
+        
+    def open_api_mca(self):
+        self.w_api_mca = WindowAPImca()
+        self.w_api_mca.activateWindow()
+        self.w_api_mca.show()
+        
+    def create_plot_mca_all(self):
+        pass
 
     def open_api_3D(self):
         self.w_api_3D = WindowAPI3D()
