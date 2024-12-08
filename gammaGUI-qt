@@ -55,6 +55,7 @@ from nasagamma import efficiency
 from nasagamma import resolution
 from nasagamma import file_reader
 from nasagamma import read_parquet_api
+from nasagamma import helper_api
 from nasagamma import parse_NIST
 from nasagamma import diagnostics
 from nasagamma import apicalc
@@ -191,10 +192,12 @@ class WindowAdvFit(Dialog_from_UI):
         self.ui_name = "win_adv_fit.ui"
         self.window_title = "Advanced Fitting"
 
+
 class WindowAPImca(Dialog_from_UI):
     def define_ui_vars(self):
         self.ui_name = "win_api_mca.ui"
         self.window_title = "API MCA"
+
 
 class WindowAPI3D(Dialog_from_UI):
     def define_ui_vars(self):
@@ -563,10 +566,15 @@ class NasaGammaApp(QMainWindow):
         # API 3D
         self.button_api_3D.clicked.connect(self.open_api_3D)
         # self.button_api_plot3D.clicked.connect(self.create_plot_api3D)
-        
+
         # API MCA
+        self.w_api_mca = WindowAPImca()
         self.button_api_mca.clicked.connect(self.open_api_mca)
-        #self.w_adv_fit.button_perform_fit.clicked.connect(self.calculate_peak_area)
+        self.w_api_mca.button_apply_all.clicked.connect(self.activate_api_mca)
+        self.w_api_mca.button_apply_select.clicked.connect(self.activate_api_mca_select)
+        self.w_api_mca.button_reset.clicked.connect(self.reset_mca_plots)
+        self.w_api_mca.button_send_to_spect.clicked.connect(self.send_to_spect_mca)
+        # self.w_adv_fit.button_perform_fit.clicked.connect(self.calculate_peak_area)
 
         ## Find peaks
         self.button_find_peaks.setStyleSheet("background-color : mediumaquamarine")
@@ -2073,14 +2081,15 @@ class NasaGammaApp(QMainWindow):
             ch = 9
             runnr = int(self.api_run_txt.text())
             self.df_api = read_parquet_api.read_parquet_file(
-                date, runnr, ch, flood_field=True, data_path=data_path)
+                date, runnr, ch, flood_field=True, data_path=data_path
+            )
             FF = True
         else:
             FF = False
             ch = int(ch_txt)
-            self.df_api = read_parquet_api.read_parquet_file(date=date, runnr=runnr,
-                                                             ch=ch, flood_field=FF,
-                                                             data_path=data_path)
+            self.df_api = read_parquet_api.read_parquet_file(
+                date=date, runnr=runnr, ch=ch, flood_field=FF, data_path=data_path
+            )
             self.df_api["dt"] *= 1e9  # to ns
         self.df_current = self.df_api.copy()
         self.df_previous = self.df_api.copy()
@@ -2091,13 +2100,17 @@ class NasaGammaApp(QMainWindow):
         except Exception as e:
             print("ERROR: Settings file not found")
             print(e)
-    
+
     def read_settings_file(self, date, runnr, ch, data_path):
         tot_time = apicalc.get_total_time(date, runnr, ch, data_path)
         tot_alphas = apicalc.get_total_counts(date, runnr, ch=9, data_path=data_path)
-        neutron_yield = apicalc.calculate_neutron_yield(date, runnr, ch=9, data_path=data_path)
+        neutron_yield = apicalc.calculate_neutron_yield(
+            date, runnr, ch=9, data_path=data_path
+        )
         alphas_txt = f"Total alphas: {tot_alphas:.3E}"
-        time_txt = f"Live time (HH:MM:SS): {time.strftime('%H:%M:%S', time.gmtime(tot_time))}"
+        time_txt = (
+            f"Live time (HH:MM:SS): {time.strftime('%H:%M:%S', time.gmtime(tot_time))}"
+        )
         nyield_txt = f"Neutron yield (n/s): {neutron_yield:.3E}"
         self.api_textEdit.setText(f"{alphas_txt}\n{time_txt}\n{nyield_txt}")
 
@@ -2207,7 +2220,7 @@ class NasaGammaApp(QMainWindow):
     def plot_time_hist_api(self, df):
         if "channel" in list(df.columns):
             if self.api_ch_txt.text() == "7":
-                self.trange = [200, 600]      
+                self.trange = [200, 600]
         df["dt"].plot.hist(
             bins=self.tbins,
             ax=self.ax_api_dt,
@@ -2432,15 +2445,99 @@ class NasaGammaApp(QMainWindow):
         self.fig_api.canvas.draw_idle()
         # espan.update()
         # tspan.update()
-        
+
+    # API MCA
+    ##TODO
     def open_api_mca(self):
-        self.w_api_mca = WindowAPImca()
         self.w_api_mca.activateWindow()
         self.w_api_mca.show()
-        
-    def create_plot_mca_all(self):
-        pass
 
+    def activate_api_mca(self):
+        try:
+            self.load_api_mca()
+        except Exception as e:
+            print("ERROR: Could not load MCA file")
+            print("An unknown error occurred:", str(e))
+
+    def load_api_mca(self):
+        self.initialize_plot_api_mca_all()
+        date = self.w_api_mca.edit_date.text()
+        runnr = int(self.w_api_mca.edit_run.text())
+        print(date)
+        print(runnr)
+        self.mca_data = helper_api.read_mca(date=date, runnr=runnr)
+        self.create_plot_mca_all()
+
+    def initialize_plot_api_mca_all(self):
+        self.fig_mca_all = self.w_api_mca.plot_mca_all.canvas.figure
+        self.fig_mca_all.clear()
+        self.fig_mca_all.set_constrained_layout(True)
+        self.fig_mca_all.patch.set_alpha(0)
+        self.ax_mca_all = self.fig_mca_all.add_subplot()
+        self.fig_mca_all.canvas.draw_idle()
+        plt.rcParams.update({"font.size": 18})
+
+    def create_plot_mca_all(self):
+        for i, row in enumerate(self.mca_data):
+            self.ax_mca_all.plot(row, label=f"Spectrum #{i}")
+        self.ax_mca_all.legend()
+        self.ax_mca_all.set_xlabel("Channels")
+        self.ax_mca_all.set_yscale("log")
+        self.fig_mca_all.canvas.draw_idle()
+
+    def activate_api_mca_select(self):
+        try:
+            self.load_api_mca_select()
+        except Exception as e:
+            print("ERROR: Could not obtain selected spectrum")
+            print("An unknown error occurred:", str(e))
+
+    def load_api_mca_select(self):
+        self.initialize_plot_api_mca_select()
+        self.spec_no = int(self.w_api_mca.edit_select.text())
+        self.mca_data_select = self.mca_data[self.spec_no]
+        self.create_plot_mca_select()
+
+    def initialize_plot_api_mca_select(self):
+        self.fig_mca_select = self.w_api_mca.plot_mca_select.canvas.figure
+        self.fig_mca_select.clear()
+        self.fig_mca_select.set_constrained_layout(True)
+        self.fig_mca_select.patch.set_alpha(0)
+        self.ax_mca_select = self.fig_mca_select.add_subplot()
+        self.fig_mca_select.canvas.draw_idle()
+        plt.rcParams.update({"font.size": 18})
+
+    def create_plot_mca_select(self):
+        self.ax_mca_select.plot(self.mca_data_select, label=f"Spectrum #{self.spec_no}")
+        self.ax_mca_select.set_xlabel("Channels")
+        self.ax_mca_select.legend()
+        self.ax_mca_select.set_yscale("log")
+        self.fig_mca_select.canvas.draw_idle()
+
+    def reset_mca_plots(self):
+        try:
+            self.ax_mca_all.clear()
+            self.ax_mca_select.clear()
+            self.fig_mca_all.canvas.draw_idle()
+            self.fig_mca_select.canvas.draw_idle()
+        except Exception as e:
+            print("ERROR: Could not reset MCA plots")
+            print("An unknown error occurred:", str(e))
+
+    def send_to_spect_mca(self):
+        try:
+            self.reset_spect_params()
+            self.spect = sp.Spectrum(counts=self.mca_data_select)
+            self.e_units = "channels"
+            self.e_units_orig = deepcopy(self.e_units)
+            self.spect_orig = deepcopy(self.spect)
+            self.create_graph(fit=False, reset=True)
+            self.search = 0
+        except Exception as e:
+            print("ERROR: Could not send to Spectrum tab")
+            print("An unknown error occurred:", str(e))
+
+    # API 3D plot
     def open_api_3D(self):
         self.w_api_3D = WindowAPI3D()
         self.w_api_3D.activateWindow()
@@ -2563,7 +2660,7 @@ class NasaGammaApp(QMainWindow):
                 caen.parse_data()
                 df_raw = pd.DataFrame()
                 df_raw["channel"] = caen.df["channel"]
-                df_raw["ts"] = caen.df["ts (ns)"]   
+                df_raw["ts"] = caen.df["ts (ns)"]
             self.png = tlist.Tlist(df_raw, period=period)
             if self.isevaluable(self.tbins_png.text()):
                 tbins_png = eval(self.tbins_png.text())
