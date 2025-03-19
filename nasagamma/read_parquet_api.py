@@ -14,6 +14,7 @@ import matplotlib
 import pkg_resources
 from pathlib import Path
 
+
 # matplotlib.use('qtagg')
 def get_data_path(data_path=None):
     # directory to monitor
@@ -25,6 +26,7 @@ def get_data_path(data_path=None):
     else:
         data_path_txt = data_path
     return Path(data_path_txt)
+
 
 def get_files_in_path(date, runnr, folder="binary-data", data_path_txt=None):
     # TODO: merge with read_parquet_file
@@ -52,6 +54,7 @@ def get_files_in_path(date, runnr, folder="binary-data", data_path_txt=None):
     # load data
     files = list(FILE.glob(f"{folder}/*"))
     return files
+
 
 def load_parquet_data_files(date, runnr, data_path_txt=None):
     # only channels 4 (LaBr==True) and 5 (LaBr==False)
@@ -83,7 +86,7 @@ def load_parquet_data_files(date, runnr, data_path_txt=None):
     # load data
     files = list(FILE.glob(f"parquet-data/{fname}-*-pandas.parquet"))
     return files
- 
+
 
 def read_parquet_file(date, runnr, ch, flood_field=False, data_path=None):
     files = load_parquet_data_files(date, runnr, data_path)
@@ -96,9 +99,9 @@ def read_parquet_file(date, runnr, ch, flood_field=False, data_path=None):
     if flood_field:
         return df
     else:
-        #df["dt"] *= dt_multiplier  # to ns
+        # df["dt"] *= dt_multiplier  # to ns
         if "channel" in list(df.columns):
-            df = df[df["channel"] == ch]
+            df = df[df["channel"] == f"2-{ch}"]
         else:
             if ch == 4 or ch == 3:
                 df = df[df["LaBr[y/n]"] == True]
@@ -130,7 +133,7 @@ def read_parquet_file_from_path(filepath, ch):
         df = df[df["LaBr[y/n]"] == True]
     elif ch == 5:
         df = df[df["LaBr[y/n]"] == False]
-    #df = api.calc_own_pos(df)
+    # df = api.calc_own_pos(df)
     df.reset_index(drop=True, inplace=True)
     return df
 
