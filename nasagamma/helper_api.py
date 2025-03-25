@@ -36,10 +36,11 @@ def read_mca(date, runnr):
     # load data
     files = list(file_path.glob("MCA-data/*.npy"))
     if len(files) > 1:
-        data = 0
-        for f in files:
-            data0 = np.load(f)
-            data = data + data0
+        pass
+        # data = 0
+        # for f in files:
+        #     data0 = np.load(f)
+        #     data = data + data0
     else:
         data = np.load(files[0])
 
