@@ -2218,9 +2218,9 @@ class NasaGammaApp(QMainWindow):
             self.ax_api_spe.set_xlabel("Channels")
 
     def plot_time_hist_api(self, df):
-        if "channel" in list(df.columns):
-            if self.api_ch_txt.text() == "7":
-                self.trange = [200, 600]
+        # if "channel" in list(df.columns):
+        #     if self.api_ch_txt.text() == "7":
+        #         self.trange = [200, 600]
         df["dt"].plot.hist(
             bins=self.tbins,
             ax=self.ax_api_dt,
