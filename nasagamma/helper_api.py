@@ -9,6 +9,7 @@ import pkg_resources
 from nasagamma.read_parquet_api import get_data_path
 from nasagamma import read_parquet_api
 from nasagamma import apicalc as api
+from nasagamma import list_mode_data_reader
 import os
 import json
 
@@ -30,9 +31,7 @@ def read_json(file):
 
 # Read .npy MCA data, join if more than 1 file
 def read_mca(date, runnr):
-    # only channels 4 (LaBr==True) and 5 (LaBr==False)
     file_path = find_data_path(date, runnr)
-    path_data = get_data_path()
     # load data
     files = list(file_path.glob("MCA-data/*.npy"))
     if len(files) > 1:
@@ -45,6 +44,24 @@ def read_mca(date, runnr):
         data = np.load(files[0])
 
     return data
+
+def read_trace_data(date, runnr):
+    file_path = find_data_path(date, runnr)
+    # load data
+    files = list(file_path.glob("trace-data/*.bin"))
+    if len(files) == 0:
+        print("ERROR: No trace binary files found")
+    df = list_mode_data_reader.read_list_mode_data(files)
+    return df
+
+def read_binary_data(date, runnr):
+    file_path = find_data_path(date, runnr)
+    # load data
+    files = list(file_path.glob("binary-data/*.bin"))
+    if len(files) == 0:
+        print("ERROR: No binary files found")
+    df = list_mode_data_reader.read_list_mode_data(files)
+    return df
 
 def read_mca_time(date, runnr, ch, key="real"): # total combined real or live time
     if key == "real":

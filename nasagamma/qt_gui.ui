@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1674</width>
-    <height>956</height>
+    <width>1857</width>
+    <height>1024</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -564,7 +564,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>795</width>
+                  <width>882</width>
                   <height>248</height>
                  </rect>
                 </property>
@@ -867,8 +867,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>496</width>
-                <height>728</height>
+                <width>492</width>
+                <height>754</height>
                </rect>
               </property>
              </widget>
@@ -1116,8 +1116,8 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>626</width>
-                <height>725</height>
+                <width>622</width>
+                <height>754</height>
                </rect>
               </property>
              </widget>
@@ -1301,24 +1301,9 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <layout class="QGridLayout" name="gridLayout_10">
+          <layout class="QGridLayout" name="gridLayout_60">
            <item row="0" column="0">
             <layout class="QGridLayout" name="gridLayout_8">
-             <item row="2" column="0">
-              <widget class="QPushButton" name="api_yscale">
-               <property name="font">
-                <font>
-                 <pointsize>14</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: rgb(0, 170, 255);</string>
-               </property>
-               <property name="text">
-                <string>Y-scale</string>
-               </property>
-              </widget>
-             </item>
              <item row="0" column="0" colspan="2">
               <widget class="QPushButton" name="api_send_to_spect">
                <property name="font">
@@ -1334,7 +1319,22 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
+             <item row="1" column="0">
+              <widget class="QPushButton" name="api_yscale">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(0, 170, 255);</string>
+               </property>
+               <property name="text">
+                <string>Y-scale</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
               <widget class="QPushButton" name="api_reset">
                <property name="font">
                 <font>
@@ -1346,21 +1346,6 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                </property>
                <property name="text">
                 <string>Reset</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0" colspan="2">
-              <widget class="QPushButton" name="button_api_mca">
-               <property name="font">
-                <font>
-                 <pointsize>14</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: rgb(170, 170, 255);</string>
-               </property>
-               <property name="text">
-                <string>MCA</string>
                </property>
               </widget>
              </item>
@@ -1380,6 +1365,68 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
             </spacer>
            </item>
            <item row="0" column="2">
+            <layout class="QGridLayout" name="gridLayout_10">
+             <item row="0" column="0">
+              <widget class="QPushButton" name="button_api_mca">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(170, 170, 255);</string>
+               </property>
+               <property name="text">
+                <string>MCA</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QPushButton" name="button_api_stats">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(170, 255, 0);</string>
+               </property>
+               <property name="text">
+                <string>Stats</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QPushButton" name="button_api_binary">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(170, 255, 255);</string>
+               </property>
+               <property name="text">
+                <string>Binary</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="0" column="3">
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>100</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="4">
             <layout class="QGridLayout" name="gridLayout">
              <item row="0" column="3">
               <widget class="QLineEdit" name="api_run_txt">
@@ -1571,7 +1618,7 @@ File</string>
              </item>
             </layout>
            </item>
-           <item row="0" column="3">
+           <item row="0" column="5">
             <widget class="QTextEdit" name="api_textEdit">
              <property name="font">
               <font>
@@ -1586,7 +1633,7 @@ File</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="4">
+           <item row="0" column="6">
             <layout class="QGridLayout" name="gridLayout_9">
              <item row="0" column="0">
               <widget class="QPushButton" name="button_api_3D">
@@ -3132,8 +3179,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1674</width>
-     <height>22</height>
+     <width>1857</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
