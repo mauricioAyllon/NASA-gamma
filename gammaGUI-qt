@@ -587,7 +587,15 @@ class NasaGammaApp(QMainWindow):
         self.button_api_binary.clicked.connect(self.open_api_bin)
         self.w_api_bin.button_load.clicked.connect(self.activate_api_bin)
         self.w_api_bin.button_select.clicked.connect(self.select_ch_api_bin)
+        self.w_api_bin.button_norm_baseline.clicked.connect(
+            self.normalize_baseline_api_bin
+        )
         self.w_api_bin.button_apply.clicked.connect(self.apply_rand_traces_api_bin)
+        self.w_api_bin.button_calc_erg.clicked.connect(self.cal_own_erg_api_bin)
+        self.w_api_bin.button_send_spec_1.clicked.connect(self.send_to_spect_api_bin1)
+        self.w_api_bin.button_send_spec_2.clicked.connect(self.send_to_spect_api_bin2)
+        self.w_api_bin.button_yscale.clicked.connect(self.update_yscale_api_bin)
+        self.yscale_api_bin = "log"
         # Add individual toolbars
         self.toolbar_apibin1 = NavigationToolbar(self.w_api_bin.plot_energy.canvas, self)
         self.w_api_bin.layout_erg.addWidget(self.toolbar_apibin1)
@@ -2581,6 +2589,8 @@ class NasaGammaApp(QMainWindow):
     def load_api_bin(self):
         self.initialize_plot_api_bin_erg()
         self.initialize_plot_api_bin_rand_traces()
+        self.initialize_plot_api_bin_own_erg()
+        self.initialize_plot_api_bin_erg_tr()
         date = self.w_api_bin.edit_date.text()
         runnr = int(self.w_api_bin.edit_run.text())
         print(date)
@@ -2595,6 +2605,43 @@ class NasaGammaApp(QMainWindow):
         self.df_apibin_ch = self.df_apibin
         self.plot_apibin_energy()
 
+    def send_to_spect_api_bin1(self):
+        try:
+            self.reset_spect_params()
+            self.spect = sp.Spectrum(
+                energies=self.api_gam_x_bin, counts=self.spect_api_bin1
+            )
+            self.e_units = "channels"
+            self.e_units_orig = deepcopy(self.e_units)
+            self.spect_orig = deepcopy(self.spect)
+            self.create_graph(fit=False, reset=True)
+            self.search = 0
+        except Exception as e:
+            print("ERROR: Could not send spectrum")
+            print("An unknown error occurred:", str(e))
+
+    def send_to_spect_api_bin2(self):
+        try:
+            self.reset_spect_params()
+            self.spect = sp.Spectrum(counts=self.spect_api_bin2)
+            self.e_units = "channels"
+            self.e_units_orig = deepcopy(self.e_units)
+            self.spect_orig = deepcopy(self.spect)
+            self.create_graph(fit=False, reset=True)
+            self.search = 0
+        except Exception as e:
+            print("ERROR: Could not send spectrum")
+            print("An unknown error occurred:", str(e))
+
+    def update_yscale_api_bin(self):
+        if self.yscale_api_bin == "log":
+            self.ax_bin_erg.set_yscale("linear")
+            self.yscale_api_bin = "linear"
+        elif self.yscale_api_bin == "linear":
+            self.ax_bin_erg.set_yscale("log")
+            self.yscale_api_bin = "log"
+        self.fig_bin_erg.canvas.draw_idle()
+
     def select_ch_api_bin(self):
         try:
             print(self.w_api_bin.edit_ch.text())
@@ -2605,12 +2652,36 @@ class NasaGammaApp(QMainWindow):
         except Exception as e:
             print("ERROR: Could not read channel")
             print("An unknown error occurred:", str(e))
-    
+
+    def normalize_baseline_api_bin(self):
+        self.ax_bin_erg_tr.clear()
+        baseline = self.w_api_bin.edit_baseline_erg_tr.text()
+        if baseline == "":
+            baseline = 100
+            self.w_api_bin.edit_baseline_erg_tr.setText(str(baseline))
+        traces = self.df_bin_tr.trace.to_numpy()
+        traces = np.vstack(traces)
+        baseline_pts = int(int(baseline) / 2)  # in ns
+        traces_norm = traces - traces[:, 0:baseline_pts].mean(axis=1).reshape(-1, 1)
+        t = np.arange(0, self.df_bin_tr.trace.iloc[0].shape[0], 1) * 2
+        for tr in traces_norm:
+            self.ax_bin_erg_tr.plot(t, tr)
+        self.ax_bin_erg_tr.set_xlabel("Time (ns)")
+        self.ax_bin_erg_tr.set_ylabel("Amplitude (a.u)")
+        self.fig_bin_erg_tr.canvas.draw_idle()
+
     def apply_rand_traces_api_bin(self):
         try:
             self.plot_apibin_rand_traces()
         except Exception as e:
             print("ERROR: Could not plot random traces")
+            print("An unknown error occurred:", str(e))
+
+    def cal_own_erg_api_bin(self):
+        try:
+            self.plot_apibin_energy_from_traces()
+        except Exception as e:
+            print("ERROR: Could not calculate own energy")
             print("An unknown error occurred:", str(e))
 
     def initialize_plot_api_bin_erg(self):
@@ -2621,7 +2692,7 @@ class NasaGammaApp(QMainWindow):
         self.ax_bin_erg = self.fig_bin_erg.add_subplot()
         self.fig_bin_erg.canvas.draw_idle()
         plt.rcParams.update({"font.size": 18})
-    
+
     def initialize_plot_api_bin_rand_traces(self):
         self.fig_bin_rand_traces = self.w_api_bin.plot_random_traces.canvas.figure
         self.fig_bin_rand_traces.clear()
@@ -2629,6 +2700,24 @@ class NasaGammaApp(QMainWindow):
         self.fig_bin_rand_traces.patch.set_alpha(0)
         self.ax_bin_rand_traces = self.fig_bin_rand_traces.add_subplot()
         self.fig_bin_rand_traces.canvas.draw_idle()
+        plt.rcParams.update({"font.size": 18})
+
+    def initialize_plot_api_bin_own_erg(self):
+        self.fig_bin_own_erg = self.w_api_bin.plot_own_energy.canvas.figure
+        self.fig_bin_own_erg.clear()
+        self.fig_bin_own_erg.set_constrained_layout(True)
+        self.fig_bin_own_erg.patch.set_alpha(0)
+        self.ax_bin_own_erg = self.fig_bin_own_erg.add_subplot()
+        self.fig_bin_own_erg.canvas.draw_idle()
+        plt.rcParams.update({"font.size": 18})
+
+    def initialize_plot_api_bin_erg_tr(self):
+        self.fig_bin_erg_tr = self.w_api_bin.plot_energy_traces.canvas.figure
+        self.fig_bin_erg_tr.clear()
+        self.fig_bin_erg_tr.set_constrained_layout(True)
+        self.fig_bin_erg_tr.patch.set_alpha(0)
+        self.ax_bin_erg_tr = self.fig_bin_erg_tr.add_subplot()
+        self.fig_bin_erg_tr.canvas.draw_idle()
         plt.rcParams.update({"font.size": 18})
 
     def plot_apibin_energy(self):
@@ -2641,18 +2730,72 @@ class NasaGammaApp(QMainWindow):
             self.w_api_bin.edit_bins.setText("4098")
         else:
             no_bins = int(no_bins_txt)
-            
+
         for c in channels:
             df_tmp = self.df_apibin_ch[self.df_apibin_ch.channel == c]
             cts, ed = np.histogram(df_tmp.energy, bins=no_bins)
             sum_cts = cts.sum()
-            self.ax_bin_erg.plot(cts, label=f"Channel: {c}, counts: {sum_cts}")
+            self.api_gam_x_bin = (ed[1:] + ed[:-1]) / 2
+            self.ax_bin_erg.plot(
+                self.api_gam_x_bin, cts, label=f"Channel: {c}, counts: {sum_cts}"
+            )
+        self.spect_api_bin1 = cts
         self.ax_bin_erg.legend()
-        self.ax_bin_erg.set_yscale("log")
+        self.ax_bin_erg.set_yscale(self.yscale_api_bin)
         self.ax_bin_erg.set_xlabel("Channels")
         self.ax_bin_erg.set_ylabel("Counts")
+        self.espan_api_bin()
         self.fig_bin_erg.canvas.draw_idle()
-        
+
+    def espan_api_bin(self):
+        self.span_api_bin = SpanSelector(
+            self.ax_bin_erg,
+            self.enselect_api_bin,
+            "horizontal",
+            useblit=True,
+            interactive=True,
+            props=dict(alpha=0.3, facecolor="green"),
+        )
+
+    def enselect_api_bin(self, xmin, xmax):
+        xmin = round(xmin, 4)
+        xmax = round(xmax, 4)
+        print("xmin: ", xmin)
+        print("xmax: ", xmax)
+        self.apply_energy_filter_bin(xmin, xmax)
+
+    def apply_energy_filter_bin(self, xmin, xmax):
+        self.ax_bin_erg_tr.clear()
+        elim = (self.df_apibin_ch["energy"] > xmin) & (self.df_apibin_ch["energy"] < xmax)
+        self.df_bin_tr = self.df_apibin_ch[elim]
+        self.df_bin_tr.reset_index(drop=True, inplace=True)
+        no_traces = self.df_bin_tr.shape[0]
+        self.w_api_bin.edit_no_events_erg_tr.setText(str(no_traces))
+        self.plot_apibin_erg_tr()
+
+    def plot_apibin_erg_tr(self):
+        self.ax_bin_erg_tr.clear()
+        t = np.arange(0, self.df_bin_tr.trace.iloc[0].shape[0], 1) * 2
+        for i in self.df_bin_tr.index:
+            erg = self.df_bin_tr.loc[i].energy
+            pileup = self.df_bin_tr.loc[i].pileup
+            tf = self.df_bin_tr.loc[i].trace_flag
+            cfderr = self.df_bin_tr.loc[i].CFD_error
+            lab = f"i:{i}; erg: {erg}; pu:{pileup}, flag:{tf}, CFDerr:{cfderr}"
+            self.ax_bin_erg_tr.plot(t, self.df_bin_tr.loc[i].trace, label=lab)
+        self.ax_bin_erg_tr.set_xlabel("Time (ns)")
+        self.ax_bin_erg_tr.set_ylabel("Amplitude (a.u)")
+        self.legend_api_erg_tr = self.ax_bin_erg_tr.legend()
+        self.legend_api_erg_tr.set_visible(False)
+        if self.w_api_bin.chk_legend_erg_tr.isChecked():
+            self.legend_api_erg_tr.set_visible(True)
+        self.w_api_bin.chk_legend_erg_tr.toggled.connect(self.toggle_legend_apibin_erg_tr)
+        self.fig_bin_erg_tr.canvas.draw_idle()
+
+    def toggle_legend_apibin_erg_tr(self, checked: bool):
+        self.legend_api_erg_tr.set_visible(checked)
+        self.fig_bin_erg_tr.canvas.draw_idle()
+
     def plot_apibin_rand_traces(self):
         self.ax_bin_rand_traces.clear()
         n_txt = self.w_api_bin.edit_no_traces.text()
@@ -2660,9 +2803,25 @@ class NasaGammaApp(QMainWindow):
             n = 10
         else:
             n = int(n_txt)
-        df_rand = self.df_apibin_ch.sample(n)
-        df_rand = df_rand.sort_index()
-        t = np.arange(0, df_rand.trace.iloc[0].shape[0], 1)*2
+        if self.w_api_bin.chk_pileup_rand.isChecked():
+            dfx = self.df_apibin_ch[self.df_apibin_ch.pileup == True]
+            if dfx.shape[0] < n:
+                n = dfx.shape[0]
+            df_rand = dfx.sample(n)
+        elif self.w_api_bin.chk_cfderr_rand.isChecked():
+            dfx = self.df_apibin_ch[self.df_apibin_ch.CFD_error == True]
+            if dfx.shape[0] < n:
+                n = dfx.shape[0]
+            df_rand = dfx.sample(n)
+        elif self.w_api_bin.chk_flag_rand.isChecked():
+            dfx = self.df_apibin_ch[self.df_apibin_ch.trace_flag == True]
+            if dfx.shape[0] < n:
+                n = dfx.shape[0]
+            df_rand = dfx.sample(n)
+        else:
+            df_rand = self.df_apibin_ch.sample(n)
+            df_rand = df_rand.sort_index()
+        t = np.arange(0, df_rand.trace.iloc[0].shape[0], 1) * 2
         for i in df_rand.index:
             erg = df_rand.loc[i].energy
             pileup = df_rand.loc[i].pileup
@@ -2670,12 +2829,53 @@ class NasaGammaApp(QMainWindow):
             cfderr = df_rand.loc[i].CFD_error
             lab = f"i:{i}; erg: {erg}; pu:{pileup}, flag:{tf}, CFDerr:{cfderr}"
             self.ax_bin_rand_traces.plot(t, df_rand.loc[i].trace, label=lab)
-        #plt.title(f"Random samples n={n}")
+        # plt.title(f"Random samples n={n}")
         self.ax_bin_rand_traces.set_xlabel("Time (ns)")
         self.ax_bin_rand_traces.set_ylabel("Amplitude (a.u)")
-        self.ax_bin_rand_traces.legend()
+        self.legend_api_rand_traces = self.ax_bin_rand_traces.legend()
+        self.legend_api_rand_traces.set_visible(False)
+        if self.w_api_bin.chk_legend_rand.isChecked():
+            self.legend_api_rand_traces.set_visible(True)
+        self.w_api_bin.chk_legend_rand.toggled.connect(self.toggle_legend_apibin)
         self.fig_bin_rand_traces.canvas.draw_idle()
-        
+
+    def toggle_legend_apibin(self, checked: bool):
+        self.legend_api_rand_traces.set_visible(checked)
+        self.fig_bin_rand_traces.canvas.draw_idle()
+
+    def plot_apibin_energy_from_traces(self):
+        self.ax_bin_own_erg.clear()
+        a = self.w_api_bin.edit_a.text()
+        b = self.w_api_bin.edit_b.text()
+        baseline = self.w_api_bin.edit_baseline.text()
+        no_bins_txt = self.w_api_bin.edit_bins.text()
+        if no_bins_txt == "":
+            no_bins = 4098
+            self.w_api_bin.edit_bins.setText("4098")
+        else:
+            no_bins = int(no_bins_txt)
+
+        traces = self.df_apibin_ch.trace.to_numpy()
+        traces = np.vstack(traces)
+        baseline_pts = int(int(baseline) / 2)  # in ns
+        traces_norm = traces - traces[:, 0:baseline_pts].mean(axis=1).reshape(-1, 1)
+        if a == "" or b == "":  # use the entire trace
+            a = 0
+            b = int(traces.shape[1])
+        else:
+            a = int(int(a) / 2)  # in ns
+            b = int(int(b) / 2)  # in ns
+        erg_norm = traces_norm[:, a:b].sum(axis=1)
+        cts, edg = np.histogram(erg_norm, bins=no_bins)
+        self.spect_api_bin2 = cts
+
+        self.ax_bin_own_erg.plot(cts)
+        # self.ax_bin_erg.legend()
+        self.ax_bin_own_erg.set_yscale("log")
+        self.ax_bin_own_erg.set_xlabel("Channels")
+        self.ax_bin_own_erg.set_ylabel("Counts")
+        self.fig_bin_own_erg.canvas.draw_idle()
+
     # API 3D plot
     def open_api_3D(self):
         self.w_api_3D = WindowAPI3D()

@@ -116,6 +116,9 @@
              <property name="styleSheet">
               <string notr="true">background-color: rgb(255, 255, 255);</string>
              </property>
+             <property name="text">
+              <string>2025-04-18</string>
+             </property>
             </widget>
            </item>
            <item row="0" column="2">
@@ -139,6 +142,9 @@
              </property>
              <property name="styleSheet">
               <string notr="true">background-color: rgb(255, 255, 255);</string>
+             </property>
+             <property name="text">
+              <string>8</string>
              </property>
             </widget>
            </item>
@@ -380,6 +386,12 @@
       </item>
       <item row="2" column="1">
        <widget class="QFrame" name="frame_8">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>110</height>
+         </size>
+        </property>
         <property name="styleSheet">
          <string notr="true">background-color: rgb(188, 196, 200);</string>
         </property>
@@ -392,19 +404,7 @@
         <layout class="QGridLayout" name="gridLayout_13">
          <item row="0" column="0">
           <layout class="QGridLayout" name="gridLayout_4">
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="edit_a">
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(255, 255, 255);</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
+           <item row="1" column="4">
             <widget class="QLineEdit" name="edit_b">
              <property name="font">
               <font>
@@ -416,7 +416,19 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="4">
+           <item row="1" column="3">
+            <widget class="QLineEdit" name="edit_a">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 255, 255);</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="6">
             <widget class="QPushButton" name="button_calc_erg">
              <property name="font">
               <font>
@@ -431,19 +443,7 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_2">
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Trace integration bounds:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="5">
+           <item row="1" column="7">
             <widget class="QPushButton" name="button_send_spec_2">
              <property name="font">
               <font>
@@ -455,6 +455,45 @@
              </property>
              <property name="text">
               <string>Send to Spectrum</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="label_2">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Trace integration bounds (ns):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Baseline points (ns):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="edit_baseline">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 255, 255);</string>
+             </property>
+             <property name="text">
+              <string>100</string>
              </property>
             </widget>
            </item>
@@ -474,9 +513,9 @@
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QGridLayout" name="gridLayout_11">
+        <layout class="QGridLayout" name="gridLayout_18">
          <item row="0" column="0">
-          <widget class="QCheckBox" name="checkBox_apibin_legend1">
+          <widget class="QCheckBox" name="chk_legend_erg_tr">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -500,6 +539,105 @@
            </property>
           </spacer>
          </item>
+         <item row="0" column="2">
+          <layout class="QGridLayout" name="gridLayout_11">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_8">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Total traces:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="edit_no_events_erg_tr">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 255, 255);</string>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="0" column="3">
+          <spacer name="horizontalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>28</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="0" column="4">
+          <layout class="QGridLayout" name="gridLayout_17">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_9">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Baseline points (ns):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="edit_baseline_erg_tr">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 255, 255);</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="0" column="5">
+          <widget class="QPushButton" name="button_norm_baseline">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(137, 170, 149);</string>
+           </property>
+           <property name="text">
+            <string>Normalize baseline</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -508,7 +646,7 @@
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>90</height>
+          <height>110</height>
          </size>
         </property>
         <property name="font">
@@ -585,7 +723,7 @@
          <item row="0" column="2">
           <layout class="QGridLayout" name="gridLayout_5">
            <item row="0" column="0">
-            <widget class="QCheckBox" name="checkBox_apibin_pileup">
+            <widget class="QCheckBox" name="chk_pileup_rand">
              <property name="font">
               <font>
                <pointsize>10</pointsize>
@@ -594,10 +732,13 @@
              <property name="text">
               <string>Pileup</string>
              </property>
+             <property name="autoExclusive">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QCheckBox" name="checkBox_apibin_cfderr">
+            <widget class="QCheckBox" name="chk_cfderr_rand">
              <property name="font">
               <font>
                <pointsize>10</pointsize>
@@ -606,10 +747,13 @@
              <property name="text">
               <string>CFD Error</string>
              </property>
+             <property name="autoExclusive">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QCheckBox" name="checkBox_apibin_flagged">
+            <widget class="QCheckBox" name="chk_flag_rand">
              <property name="font">
               <font>
                <pointsize>10</pointsize>
@@ -618,10 +762,13 @@
              <property name="text">
               <string>Flagged</string>
              </property>
+             <property name="autoExclusive">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QCheckBox" name="checkBox_apibin_legend2">
+            <widget class="QCheckBox" name="chk_legend_rand">
              <property name="font">
               <font>
                <pointsize>10</pointsize>
