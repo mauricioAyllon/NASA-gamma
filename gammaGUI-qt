@@ -199,6 +199,12 @@ class WindowAPImca(Dialog_from_UI):
         self.window_title = "API MCA"
 
 
+class WindowAPIbin(Dialog_from_UI):
+    def define_ui_vars(self):
+        self.ui_name = "win_api_binary.ui"
+        self.window_title = "API Binary File"
+
+
 class WindowAPI3D(Dialog_from_UI):
     def define_ui_vars(self):
         self.ui_name = "win_api_3D.ui"
@@ -575,6 +581,27 @@ class NasaGammaApp(QMainWindow):
         self.w_api_mca.button_reset.clicked.connect(self.reset_mca_plots)
         self.w_api_mca.button_send_to_spect.clicked.connect(self.send_to_spect_mca)
         # self.w_adv_fit.button_perform_fit.clicked.connect(self.calculate_peak_area)
+
+        # API Binary
+        self.w_api_bin = WindowAPIbin()
+        self.button_api_binary.clicked.connect(self.open_api_bin)
+        self.w_api_bin.button_load.clicked.connect(self.activate_api_bin)
+        self.w_api_bin.button_select.clicked.connect(self.select_ch_api_bin)
+        # Add individual toolbars
+        self.toolbar_apibin1 = NavigationToolbar(self.w_api_bin.plot_energy.canvas, self)
+        self.w_api_bin.layout_erg.addWidget(self.toolbar_apibin1)
+        self.toolbar_apibin2 = NavigationToolbar(
+            self.w_api_bin.plot_energy_traces.canvas, self
+        )
+        self.w_api_bin.layout_erg_traces.addWidget(self.toolbar_apibin2)
+        self.toolbar_apibin3 = NavigationToolbar(
+            self.w_api_bin.plot_random_traces.canvas, self
+        )
+        self.w_api_bin.layout_rand_traces.addWidget(self.toolbar_apibin3)
+        self.toolbar_apibin4 = NavigationToolbar(
+            self.w_api_bin.plot_own_energy.canvas, self
+        )
+        self.w_api_bin.layout_own_erg.addWidget(self.toolbar_apibin4)
 
         ## Find peaks
         self.button_find_peaks.setStyleSheet("background-color : mediumaquamarine")
@@ -2536,6 +2563,67 @@ class NasaGammaApp(QMainWindow):
         except Exception as e:
             print("ERROR: Could not send to Spectrum tab")
             print("An unknown error occurred:", str(e))
+
+    # API Binary
+    # TODO
+    def open_api_bin(self):
+        self.w_api_bin.activateWindow()
+        self.w_api_bin.show()
+
+    def activate_api_bin(self):
+        try:
+            self.load_api_bin()
+        except Exception as e:
+            print("ERROR: Could not load file")
+            print("An unknown error occurred:", str(e))
+
+    def load_api_bin(self):
+        self.initialize_plot_api_bin_erg()
+        date = self.w_api_bin.edit_date.text()
+        runnr = int(self.w_api_bin.edit_run.text())
+        print(date)
+        print(runnr)
+        if self.w_api_bin.checkBox_trace_data.isChecked():
+            self.df_apibin = helper_api.read_trace_data(date=date, runnr=runnr)
+        elif self.w_api_bin.checkBox_bin_data.isChecked():
+            self.df_apibin = helper_api.read_binary_data(date=date, runnr=runnr)
+        else:
+            self.df_apibin = read_parquet_api.read_parquet_file(date=date, runnr=runnr)
+        print(self.df_apibin.shape)
+        self.df_apibin_ch = self.df_apibin
+        self.plot_apibin_energy()
+
+    def select_ch_api_bin(self):
+        try:
+            print(self.w_api_bin.edit_ch.text())
+            ch = int(self.w_api_bin.edit_ch.text())
+            self.df_apibin_ch = self.df_apibin[self.df_apibin["channel"] == ch]
+            print(self.df_apibin_ch.shape)
+        except Exception as e:
+            print("ERROR: Could not read channel")
+            print("An unknown error occurred:", str(e))
+
+    def initialize_plot_api_bin_erg(self):
+        self.fig_bin_erg = self.w_api_bin.plot_energy.canvas.figure
+        self.fig_bin_erg.clear()
+        self.fig_bin_erg.set_constrained_layout(True)
+        self.fig_bin_erg.patch.set_alpha(0)
+        self.ax_bin_erg = self.fig_bin_erg.add_subplot()
+        self.fig_bin_erg.canvas.draw_idle()
+        plt.rcParams.update({"font.size": 18})
+
+    def plot_apibin_energy(self):
+        channels = self.df_apibin_ch.channel.unique()
+        channels.sort()
+        for c in channels:
+            df_tmp = self.df_apibin_ch[self.df_apibin_ch.channel == c]
+            cts, ed = np.histogram(df_tmp.energy, bins=2**12)
+            self.ax_bin_erg.plot(cts, label=f"Channel: {c}")
+        self.ax_bin_erg.legend()
+        self.ax_bin_erg.set_yscale("log")
+        self.ax_bin_erg.set_xlabel("Channels")
+        self.ax_bin_erg.set_ylabel("Counts")
+        self.fig_bin_erg.canvas.draw_idle()
 
     # API 3D plot
     def open_api_3D(self):

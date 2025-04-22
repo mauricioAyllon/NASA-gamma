@@ -88,7 +88,7 @@ def load_parquet_data_files(date, runnr, data_path_txt=None):
     return files
 
 
-def read_parquet_file(date, runnr, ch, flood_field=False, data_path=None):
+def read_parquet_file(date, runnr, ch=None, flood_field=False, data_path=None):
     files = load_parquet_data_files(date, runnr, data_path)
     df = pd.read_parquet(files[0])
 
@@ -98,10 +98,12 @@ def read_parquet_file(date, runnr, ch, flood_field=False, data_path=None):
             df = pd.concat([df, df0])
     if flood_field:
         return df
+    if ch is None:
+        return df
     else:
         # df["dt"] *= dt_multiplier  # to ns
         if "channel" in list(df.columns):
-            df["channel"] = df["channel"].str.extract(r'(\d+)$').astype(int)
+            df["channel"] = df["channel"].str.extract(r"(\d+)$").astype(int)
             df = df[df["channel"] == ch]
         else:
             if ch == 4 or ch == 3:
