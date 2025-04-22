@@ -587,6 +587,7 @@ class NasaGammaApp(QMainWindow):
         self.button_api_binary.clicked.connect(self.open_api_bin)
         self.w_api_bin.button_load.clicked.connect(self.activate_api_bin)
         self.w_api_bin.button_select.clicked.connect(self.select_ch_api_bin)
+        self.w_api_bin.button_apply.clicked.connect(self.apply_rand_traces_api_bin)
         # Add individual toolbars
         self.toolbar_apibin1 = NavigationToolbar(self.w_api_bin.plot_energy.canvas, self)
         self.w_api_bin.layout_erg.addWidget(self.toolbar_apibin1)
@@ -2579,6 +2580,7 @@ class NasaGammaApp(QMainWindow):
 
     def load_api_bin(self):
         self.initialize_plot_api_bin_erg()
+        self.initialize_plot_api_bin_rand_traces()
         date = self.w_api_bin.edit_date.text()
         runnr = int(self.w_api_bin.edit_run.text())
         print(date)
@@ -2603,6 +2605,13 @@ class NasaGammaApp(QMainWindow):
         except Exception as e:
             print("ERROR: Could not read channel")
             print("An unknown error occurred:", str(e))
+    
+    def apply_rand_traces_api_bin(self):
+        try:
+            self.plot_apibin_rand_traces()
+        except Exception as e:
+            print("ERROR: Could not plot random traces")
+            print("An unknown error occurred:", str(e))
 
     def initialize_plot_api_bin_erg(self):
         self.fig_bin_erg = self.w_api_bin.plot_energy.canvas.figure
@@ -2611,6 +2620,15 @@ class NasaGammaApp(QMainWindow):
         self.fig_bin_erg.patch.set_alpha(0)
         self.ax_bin_erg = self.fig_bin_erg.add_subplot()
         self.fig_bin_erg.canvas.draw_idle()
+        plt.rcParams.update({"font.size": 18})
+    
+    def initialize_plot_api_bin_rand_traces(self):
+        self.fig_bin_rand_traces = self.w_api_bin.plot_random_traces.canvas.figure
+        self.fig_bin_rand_traces.clear()
+        self.fig_bin_rand_traces.set_constrained_layout(True)
+        self.fig_bin_rand_traces.patch.set_alpha(0)
+        self.ax_bin_rand_traces = self.fig_bin_rand_traces.add_subplot()
+        self.fig_bin_rand_traces.canvas.draw_idle()
         plt.rcParams.update({"font.size": 18})
 
     def plot_apibin_energy(self):
@@ -2634,7 +2652,30 @@ class NasaGammaApp(QMainWindow):
         self.ax_bin_erg.set_xlabel("Channels")
         self.ax_bin_erg.set_ylabel("Counts")
         self.fig_bin_erg.canvas.draw_idle()
-
+        
+    def plot_apibin_rand_traces(self):
+        self.ax_bin_rand_traces.clear()
+        n_txt = self.w_api_bin.edit_no_traces.text()
+        if n_txt == "":
+            n = 10
+        else:
+            n = int(n_txt)
+        df_rand = self.df_apibin_ch.sample(n)
+        df_rand = df_rand.sort_index()
+        t = np.arange(0, df_rand.trace.iloc[0].shape[0], 1)*2
+        for i in df_rand.index:
+            erg = df_rand.loc[i].energy
+            pileup = df_rand.loc[i].pileup
+            tf = df_rand.loc[i].trace_flag
+            cfderr = df_rand.loc[i].CFD_error
+            lab = f"i:{i}; erg: {erg}; pu:{pileup}, flag:{tf}, CFDerr:{cfderr}"
+            self.ax_bin_rand_traces.plot(t, df_rand.loc[i].trace, label=lab)
+        #plt.title(f"Random samples n={n}")
+        self.ax_bin_rand_traces.set_xlabel("Time (ns)")
+        self.ax_bin_rand_traces.set_ylabel("Amplitude (a.u)")
+        self.ax_bin_rand_traces.legend()
+        self.fig_bin_rand_traces.canvas.draw_idle()
+        
     # API 3D plot
     def open_api_3D(self):
         self.w_api_3D = WindowAPI3D()

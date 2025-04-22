@@ -542,6 +542,11 @@
            </item>
            <item row="0" column="1">
             <widget class="QLineEdit" name="edit_no_traces">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
              <property name="styleSheet">
               <string notr="true">background-color: rgb(255, 255, 255);</string>
              </property>
