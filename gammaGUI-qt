@@ -2599,6 +2599,7 @@ class NasaGammaApp(QMainWindow):
             ch = int(self.w_api_bin.edit_ch.text())
             self.df_apibin_ch = self.df_apibin[self.df_apibin["channel"] == ch]
             print(self.df_apibin_ch.shape)
+            self.plot_apibin_energy()
         except Exception as e:
             print("ERROR: Could not read channel")
             print("An unknown error occurred:", str(e))
@@ -2613,12 +2614,21 @@ class NasaGammaApp(QMainWindow):
         plt.rcParams.update({"font.size": 18})
 
     def plot_apibin_energy(self):
+        self.ax_bin_erg.clear()
         channels = self.df_apibin_ch.channel.unique()
         channels.sort()
+        no_bins_txt = self.w_api_bin.edit_bins.text()
+        if no_bins_txt == "":
+            no_bins = 4098
+            self.w_api_bin.edit_bins.setText("4098")
+        else:
+            no_bins = int(no_bins_txt)
+            
         for c in channels:
             df_tmp = self.df_apibin_ch[self.df_apibin_ch.channel == c]
-            cts, ed = np.histogram(df_tmp.energy, bins=2**12)
-            self.ax_bin_erg.plot(cts, label=f"Channel: {c}")
+            cts, ed = np.histogram(df_tmp.energy, bins=no_bins)
+            sum_cts = cts.sum()
+            self.ax_bin_erg.plot(cts, label=f"Channel: {c}, counts: {sum_cts}")
         self.ax_bin_erg.legend()
         self.ax_bin_erg.set_yscale("log")
         self.ax_bin_erg.set_xlabel("Channels")
