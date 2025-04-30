@@ -103,7 +103,7 @@ def read_parquet_file(date, runnr, ch=None, flood_field=False, data_path=None):
     else:
         # df["dt"] *= dt_multiplier  # to ns
         if "channel" in list(df.columns):
-            df["channel"] = df["channel"].str.extract(r"(\d+)$").astype(int)
+            # df["channel"] = df["channel"].str.extract(r"(\d+)$").astype(int)
             df = df[df["channel"] == ch]
         else:
             if ch == 4 or ch == 3:

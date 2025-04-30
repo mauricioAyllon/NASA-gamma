@@ -452,20 +452,22 @@
            </item>
           </layout>
          </item>
-         <item row="0" column="1">
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
          <item row="0" column="2">
+          <widget class="QPushButton" name="button_FFT">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(255, 170, 127);</string>
+           </property>
+           <property name="text">
+            <string>FFT</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="4">
           <layout class="QGridLayout" name="gridLayout_5">
            <item row="0" column="0">
             <widget class="QCheckBox" name="chk_pileup_rand">
@@ -476,6 +478,33 @@
              </property>
              <property name="text">
               <string>Pileup</string>
+             </property>
+             <property name="autoExclusive">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QCheckBox" name="chk_legend_rand">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Legend</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QCheckBox" name="chk_flag_rand">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Flagged</string>
              </property>
              <property name="autoExclusive">
               <bool>false</bool>
@@ -497,34 +526,33 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QCheckBox" name="chk_flag_rand">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Flagged</string>
-             </property>
-             <property name="autoExclusive">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QCheckBox" name="chk_legend_rand">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Legend</string>
-             </property>
-            </widget>
-           </item>
           </layout>
+         </item>
+         <item row="0" column="1">
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="0" column="3">
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </widget>
