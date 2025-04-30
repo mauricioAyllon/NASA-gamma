@@ -152,6 +152,26 @@ def time_cut(df, t_start, t_stop, step, xkey="X", ykey="Y", tkey="dt"):
         plt.title(f"time cut {k,k+step} ns")
         plt.show()
 
+def compute_fft(signal, sampling_rate):
+    """
+    Compute the FFT of a signal.
+
+    Parameters:
+        signal (numpy.ndarray): The input signal.
+        sampling_rate (float): Sampling rate in Hz.
+
+    Returns:
+        freqs (numpy.ndarray): Frequencies corresponding to FFT components.
+        fft_magnitude (numpy.ndarray): Magnitude of the FFT.
+    """
+    n = len(signal)
+    fft_values = np.fft.fft(signal)
+    fft_magnitude = np.abs(fft_values) / n  # Normalize
+    freqs = np.fft.fftfreq(n, d=1/sampling_rate)
+
+    # Only keep the positive frequencies
+    pos_mask = freqs >= 0
+    return freqs[pos_mask], fft_magnitude[pos_mask]
 
 ## helper functions
 def find_data_path(date, runnr, data_path=None):

@@ -2669,6 +2669,15 @@ class NasaGammaApp(QMainWindow):
         self.ax_bin_erg_tr.set_xlabel("Time (ns)")
         self.ax_bin_erg_tr.set_ylabel("Amplitude (a.u)")
         self.fig_bin_erg_tr.canvas.draw_idle()
+        
+    def apply_fft(self):
+        self.ffts = []
+        for tr in self.df_rand.trace:
+            freqs, magnitude = apicalc.compute_fft(signal=tr, sampling_rate=500e6)
+            self.ffts.append(magnitude)
+        self.freqs = freqs
+        self.plot_fft(self)
+        
 
     def apply_rand_traces_api_bin(self):
         try:
@@ -2701,6 +2710,7 @@ class NasaGammaApp(QMainWindow):
         self.ax_bin_rand_traces = self.fig_bin_rand_traces.add_subplot()
         self.fig_bin_rand_traces.canvas.draw_idle()
         plt.rcParams.update({"font.size": 18})
+        
 
     def initialize_plot_api_bin_own_erg(self):
         self.fig_bin_own_erg = self.w_api_bin.plot_own_energy.canvas.figure
@@ -2822,6 +2832,7 @@ class NasaGammaApp(QMainWindow):
             df_rand = self.df_apibin_ch.sample(n)
             df_rand = df_rand.sort_index()
         t = np.arange(0, df_rand.trace.iloc[0].shape[0], 1) * 2
+        self.df_rand = df_rand
         for i in df_rand.index:
             erg = df_rand.loc[i].energy
             pileup = df_rand.loc[i].pileup
@@ -2837,6 +2848,15 @@ class NasaGammaApp(QMainWindow):
         if self.w_api_bin.chk_legend_rand.isChecked():
             self.legend_api_rand_traces.set_visible(True)
         self.w_api_bin.chk_legend_rand.toggled.connect(self.toggle_legend_apibin)
+        self.fig_bin_rand_traces.canvas.draw_idle()
+    
+    def plot_fft(self):
+        self.ax_bin_rand_traces.clear()
+        for fft in self.ffts:
+            self.ax_bin_rand_traces.plot(self.freqs/1e6, fft)
+        self.ax_bin_rand_traces.set_xlabel("Frequency (MHz)")
+        self.ax_bin_rand_traces.set_ylabel("Amplitude (a.u)")
+        self.ax_bin_rand_traces.set_yscale("log")
         self.fig_bin_rand_traces.canvas.draw_idle()
 
     def toggle_legend_apibin(self, checked: bool):
