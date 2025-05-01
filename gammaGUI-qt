@@ -591,6 +591,7 @@ class NasaGammaApp(QMainWindow):
             self.normalize_baseline_api_bin
         )
         self.w_api_bin.button_apply.clicked.connect(self.apply_rand_traces_api_bin)
+        self.w_api_bin.button_FFT.clicked.connect(self.apply_fft)
         self.w_api_bin.button_calc_erg.clicked.connect(self.cal_own_erg_api_bin)
         self.w_api_bin.button_send_spec_1.clicked.connect(self.send_to_spect_api_bin1)
         self.w_api_bin.button_send_spec_2.clicked.connect(self.send_to_spect_api_bin2)
@@ -2669,8 +2670,15 @@ class NasaGammaApp(QMainWindow):
         self.ax_bin_erg_tr.set_xlabel("Time (ns)")
         self.ax_bin_erg_tr.set_ylabel("Amplitude (a.u)")
         self.fig_bin_erg_tr.canvas.draw_idle()
-        
+    
     def apply_fft(self):
+        try:
+            self.calculate_fft()
+        except Exception as e:
+            print("ERROR: Could not calculate FFT")
+            print("An unknown error occurred:", str(e))
+        
+    def calculate_fft(self):
         self.ffts = []
         for tr in self.df_rand.trace:
             freqs, magnitude = apicalc.compute_fft(signal=tr, sampling_rate=500e6)
