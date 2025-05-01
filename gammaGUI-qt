@@ -2684,7 +2684,7 @@ class NasaGammaApp(QMainWindow):
             freqs, magnitude = apicalc.compute_fft(signal=tr, sampling_rate=500e6)
             self.ffts.append(magnitude)
         self.freqs = freqs
-        self.plot_fft(self)
+        self.plot_fft()
         
 
     def apply_rand_traces_api_bin(self):
