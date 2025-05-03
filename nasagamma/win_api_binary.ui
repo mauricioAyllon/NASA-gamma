@@ -465,6 +465,9 @@
            <property name="text">
             <string>FFT</string>
            </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
          <item row="0" column="4">

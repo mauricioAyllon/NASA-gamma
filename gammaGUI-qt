@@ -2672,11 +2672,15 @@ class NasaGammaApp(QMainWindow):
         self.fig_bin_erg_tr.canvas.draw_idle()
     
     def apply_fft(self):
-        try:
-            self.calculate_fft()
-        except Exception as e:
-            print("ERROR: Could not calculate FFT")
-            print("An unknown error occurred:", str(e))
+        if self.w_api_bin.button_FFT.isChecked():
+            try:
+                self.calculate_fft()
+                self.plot_fft()
+            except Exception as e:
+                print("ERROR: Could not calculate FFT")
+                print("An unknown error occurred:", str(e))
+        else:
+            self.plot_apibin_rand_traces()
         
     def calculate_fft(self):
         self.ffts = []
@@ -2684,15 +2688,43 @@ class NasaGammaApp(QMainWindow):
             freqs, magnitude = apicalc.compute_fft(signal=tr, sampling_rate=500e6)
             self.ffts.append(magnitude)
         self.freqs = freqs
-        self.plot_fft()
         
 
     def apply_rand_traces_api_bin(self):
+        self.w_api_bin.button_FFT.setChecked(False)
         try:
+            self.sample_rand_traces()
             self.plot_apibin_rand_traces()
         except Exception as e:
             print("ERROR: Could not plot random traces")
             print("An unknown error occurred:", str(e))
+            
+    def sample_rand_traces(self):
+        n_txt = self.w_api_bin.edit_no_traces.text()
+        if n_txt == "":
+            n = 10
+        else:
+            n = int(n_txt)
+        if self.w_api_bin.chk_pileup_rand.isChecked():
+            dfx = self.df_apibin_ch[self.df_apibin_ch.pileup == True]
+            if dfx.shape[0] < n:
+                n = dfx.shape[0]
+            df_rand = dfx.sample(n)
+        elif self.w_api_bin.chk_cfderr_rand.isChecked():
+            dfx = self.df_apibin_ch[self.df_apibin_ch.CFD_error == True]
+            if dfx.shape[0] < n:
+                n = dfx.shape[0]
+            df_rand = dfx.sample(n)
+        elif self.w_api_bin.chk_flag_rand.isChecked():
+            dfx = self.df_apibin_ch[self.df_apibin_ch.trace_flag == True]
+            if dfx.shape[0] < n:
+                n = dfx.shape[0]
+            df_rand = dfx.sample(n)
+        else:
+            df_rand = self.df_apibin_ch.sample(n)
+            df_rand = df_rand.sort_index()
+        self.df_rand = df_rand
+        
 
     def cal_own_erg_api_bin(self):
         try:
@@ -2816,38 +2848,14 @@ class NasaGammaApp(QMainWindow):
 
     def plot_apibin_rand_traces(self):
         self.ax_bin_rand_traces.clear()
-        n_txt = self.w_api_bin.edit_no_traces.text()
-        if n_txt == "":
-            n = 10
-        else:
-            n = int(n_txt)
-        if self.w_api_bin.chk_pileup_rand.isChecked():
-            dfx = self.df_apibin_ch[self.df_apibin_ch.pileup == True]
-            if dfx.shape[0] < n:
-                n = dfx.shape[0]
-            df_rand = dfx.sample(n)
-        elif self.w_api_bin.chk_cfderr_rand.isChecked():
-            dfx = self.df_apibin_ch[self.df_apibin_ch.CFD_error == True]
-            if dfx.shape[0] < n:
-                n = dfx.shape[0]
-            df_rand = dfx.sample(n)
-        elif self.w_api_bin.chk_flag_rand.isChecked():
-            dfx = self.df_apibin_ch[self.df_apibin_ch.trace_flag == True]
-            if dfx.shape[0] < n:
-                n = dfx.shape[0]
-            df_rand = dfx.sample(n)
-        else:
-            df_rand = self.df_apibin_ch.sample(n)
-            df_rand = df_rand.sort_index()
-        t = np.arange(0, df_rand.trace.iloc[0].shape[0], 1) * 2
-        self.df_rand = df_rand
-        for i in df_rand.index:
-            erg = df_rand.loc[i].energy
-            pileup = df_rand.loc[i].pileup
-            tf = df_rand.loc[i].trace_flag
-            cfderr = df_rand.loc[i].CFD_error
+        t = np.arange(0, self.df_rand.trace.iloc[0].shape[0], 1) * 2
+        for i in self.df_rand.index:
+            erg = self.df_rand.loc[i].energy
+            pileup = self.df_rand.loc[i].pileup
+            tf = self.df_rand.loc[i].trace_flag
+            cfderr = self.df_rand.loc[i].CFD_error
             lab = f"i:{i}; erg: {erg}; pu:{pileup}, flag:{tf}, CFDerr:{cfderr}"
-            self.ax_bin_rand_traces.plot(t, df_rand.loc[i].trace, label=lab)
+            self.ax_bin_rand_traces.plot(t, self.df_rand.loc[i].trace, label=lab)
         # plt.title(f"Random samples n={n}")
         self.ax_bin_rand_traces.set_xlabel("Time (ns)")
         self.ax_bin_rand_traces.set_ylabel("Amplitude (a.u)")
