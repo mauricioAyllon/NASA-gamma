@@ -2703,6 +2703,7 @@ class NasaGammaApp(QMainWindow):
         n_txt = self.w_api_bin.edit_no_traces.text()
         if n_txt == "":
             n = 10
+            self.w_api_bin.edit_no_traces.setText("10")
         else:
             n = int(n_txt)
         if self.w_api_bin.chk_pileup_rand.isChecked():
