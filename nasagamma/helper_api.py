@@ -24,10 +24,12 @@ def find_data_path(date, runnr):
     file_path = DATA_DIR / fname
     return file_path
 
+
 def read_json(file):
-    with open(file, 'r') as f:
+    with open(file, "r") as f:
         data = json.load(f)  # Parse the JSON file, store as a list
-    return data[0] # a dictionary
+    return data[0]  # a dictionary
+
 
 # Read .npy MCA data, join if more than 1 file
 def read_mca(date, runnr):
@@ -45,6 +47,7 @@ def read_mca(date, runnr):
 
     return data
 
+
 def read_trace_data(date, runnr):
     file_path = find_data_path(date, runnr)
     # load data
@@ -54,16 +57,19 @@ def read_trace_data(date, runnr):
     df = list_mode_data_reader.read_list_mode_data(files)
     return df
 
+
 def read_binary_data(date, runnr):
     file_path = find_data_path(date, runnr)
     # load data
     files = list(file_path.glob("binary-data/*.bin"))
     if len(files) == 0:
         print("ERROR: No binary files found")
-    df = list_mode_data_reader.read_list_mode_data(files)
+    files_sorted = sorted(files, key=lambda x: int(x.name[-9:-4]))
+    df = list_mode_data_reader.read_list_mode_data(files_sorted)
     return df
 
-def read_mca_time(date, runnr, ch, key="real"): # total combined real or live time
+
+def read_mca_time(date, runnr, ch, key="real"):  # total combined real or live time
     if key == "real":
         k = "real_time"
     elif key == "live":
@@ -78,7 +84,8 @@ def read_mca_time(date, runnr, ch, key="real"): # total combined real or live ti
         time += dic[k][ch]
     return time
 
-def read_mca_live_time(date, runnr, ch): # total combined time
+
+def read_mca_live_time(date, runnr, ch):  # total combined time
     file_path = find_data_path(date, runnr)
     files = sorted(list(file_path.glob("MCA-data/*-stats-*")))
     real_time = 0
@@ -86,7 +93,7 @@ def read_mca_live_time(date, runnr, ch): # total combined time
         dic = read_json(f)
         real_time += dic["live_time"]
     return real_time
-        
+
 
 def read_time_from_settings(settings_file, ch):
     with open(settings_file, mode="r") as myfile:
