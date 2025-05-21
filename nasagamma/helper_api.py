@@ -64,7 +64,11 @@ def read_binary_data(date, runnr):
     files = list(file_path.glob("binary-data/*.bin"))
     if len(files) == 0:
         print("ERROR: No binary files found")
-    files_sorted = sorted(files, key=lambda x: int(x.name[-9:-4]))
+    try:
+        files_sorted = sorted(files, key=lambda x: int(x.name[-9:-4]))
+    except:
+        files_sorted = files
+        print("WARNING: Could not sort binary files")
     df = list_mode_data_reader.read_list_mode_data(files_sorted)
     return df
 
