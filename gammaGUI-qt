@@ -2156,7 +2156,6 @@ class NasaGammaApp(QMainWindow):
             self.api_xkey = "X"
             self.api_ykey = "Y"
             self.api_ekey = "energy"
-            self.trange = [0, 60]
             self.xyplane = (-0.2, 0.2, -0.2, 0.2)
             self.erange_api = [0, self.df_current["energy"].max()]  # in MeV
         elif self.calibrated_flag:
@@ -2164,7 +2163,6 @@ class NasaGammaApp(QMainWindow):
             self.api_xkey = "X2"
             self.api_ykey = "Y2"
             self.api_ekey = "energy"
-            self.trange = [-600, 600]  # dt range
             self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
             self.erange_api = [0, self.df_current["energy"].max()]
         elif self.raw_flag:
@@ -2172,7 +2170,6 @@ class NasaGammaApp(QMainWindow):
             self.api_xkey = "X2"
             self.api_ykey = "Y2"
             self.api_ekey = "energy_orig"
-            self.trange = [-40, 120]  # dt range
             self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
             self.erange_api = [0, 2**16]  # [0,8]
         else:
@@ -2255,13 +2252,11 @@ class NasaGammaApp(QMainWindow):
             self.ax_api_spe.set_xlabel("Channels")
 
     def plot_time_hist_api(self, df):
-        # if "channel" in list(df.columns):
-        #     if self.api_ch_txt.text() == "7":
-        #         self.trange = [200, 600]
+        low, high = np.percentile(df["dt"], [0.2, 99.5])
         df["dt"].plot.hist(
             bins=self.tbins,
             ax=self.ax_api_dt,
-            range=self.trange,
+            range=[low, high],
             alpha=0.7,
             edgecolor="black",
         )
