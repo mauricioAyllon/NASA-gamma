@@ -2114,6 +2114,10 @@ class NasaGammaApp(QMainWindow):
         elif self.checkBox_sims.isChecked():
             self.sims_flag = 1
             print("Loading simulated data")
+        if ch_txt == "6" or ch_txt == "7" or ch_txt == "10" or ch_txt == "11":
+            self.ebins = 2**14
+        else:
+            self.ebins = 2**12
         if ch_txt == "9":
             ch = 9
             runnr = int(self.api_run_txt.text())
@@ -2125,7 +2129,7 @@ class NasaGammaApp(QMainWindow):
             FF = False
             ch = int(ch_txt)
             self.df_api = read_parquet_api.read_parquet_file(
-                date=date, runnr=runnr, ch=ch, flood_field=FF, data_path=data_path
+                date=date, runnr=runnr, ch=ch, flood_field=False, data_path=data_path
             )
             self.df_api["dt"] *= 1e9  # to ns
         self.df_current = self.df_api.copy()
@@ -2175,7 +2179,6 @@ class NasaGammaApp(QMainWindow):
         else:
             print("ERROR: Cannot determine the data type (raw, calibrated, or simulated)")
 
-        self.ebins = 2**12  # energy bins
         self.hexbins = 80  # x-y bins
         self.tbins = 512  # time bins
         self.colormap = "plasma"

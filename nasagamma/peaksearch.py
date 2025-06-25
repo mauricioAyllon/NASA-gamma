@@ -334,7 +334,7 @@ class PeakSearch:
             else:
                 x0 = self.spectrum.energies[xc]
             ax.axvline(x=x0, color="red", linestyle="--", alpha=0.2)
-        self.spectrum.plot(ax=ax)
+        self.spectrum.plot(ax=ax, scale=yscale)
         ax.legend(loc=1)
         ax.set_title(f"SNR > {self.min_snr}")
         # ax.set_ylim(1e-1)

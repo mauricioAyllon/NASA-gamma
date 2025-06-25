@@ -97,8 +97,10 @@ def read_parquet_file(date, runnr, ch=None, flood_field=False, data_path=None):
             df0 = pd.read_parquet(f)
             df = pd.concat([df, df0])
     if flood_field:
+        df.reset_index(drop=True, inplace=True)
         return df
     if ch is None:
+        df.reset_index(drop=True, inplace=True)
         return df
     else:
         # df["dt"] *= dt_multiplier  # to ns
