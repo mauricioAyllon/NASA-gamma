@@ -90,6 +90,9 @@ def load_parquet_data_files(date, runnr, data_path_txt=None):
 
 def read_parquet_file(date, runnr, ch=None, flood_field=False, data_path=None):
     files = load_parquet_data_files(date, runnr, data_path)
+    if not files:
+        print(f"ERROR: No parquet file available for run {date}-{runnr}")
+        return None
     df = pd.read_parquet(files[0])
 
     if len(files) > 1:

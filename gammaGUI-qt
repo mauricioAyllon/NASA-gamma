@@ -2132,6 +2132,12 @@ class NasaGammaApp(QMainWindow):
                 date=date, runnr=runnr, ch=ch, flood_field=False, data_path=data_path
             )
             self.df_api["dt"] *= 1e9  # to ns
+        if self.df_api is None:
+            QMessageBox.critical(
+                None,  # parent (None = top-level window)
+                "Error while opening parquet data",  # dialog title
+                f"No parquet file available for run {date}-{runnr}.",  # main text
+            )
         self.df_current = self.df_api.copy()
         self.df_previous = self.df_api.copy()
         self.initialize_plots_api(FF)
