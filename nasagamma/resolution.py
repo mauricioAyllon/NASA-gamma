@@ -17,7 +17,7 @@ def fwhm2(E, a, b, c):
 
 def fwhm_vs_erg(energies, fwhms, x_units, e_units, order=2, fig=None, ax=None):
     plt.rc("font", size=14)
-    plt.style.use("seaborn-darkgrid")
+    plt.style.use("seaborn-v0_8-darkgrid")
     if fig is None:
         fig = plt.figure(constrained_layout=True, figsize=(16, 8))
     if ax is None:
