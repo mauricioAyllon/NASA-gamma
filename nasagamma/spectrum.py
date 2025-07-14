@@ -175,7 +175,69 @@ class Spectrum:
         y0_min = np.amin(self.counts[self.counts > 0.0])
         # replace negative values and zeros by 1/10th of the minimum
         self.counts[self.counts < 0.0] = y0_min * 1e-1
+        
+    def gaussian_energy_broadening(self, fwhm_func, nsigmas=3, random_seed=None):
+        """
+        Apply Gaussian energy broadening with preserved Poisson noise characteristics.
 
+        Parameters
+        ----------
+        fwhm_func : callable 
+            Function taking energy and returning FWHM at that energy.
+        nsigmas : int, optional
+            Number of sigma to span in the Gaussian kernel. The default is 3.
+        random_seed: int or None
+            Optional seed for reproducibility.
+
+        Returns
+        -------
+        None.
+
+        """
+        if random_seed is not None:
+            np.random.seed(random_seed)
+        counts = self.counts
+        x = self.x
+        broadened_counts = np.zeros_like(counts, dtype=float)
+        for i, count in enumerate(counts):
+            if count <= 0:
+                continue
+
+            # Poisson sample the counts (simulate noise)
+            sampled_count = np.random.poisson(count)
+
+            if sampled_count == 0:
+                continue
+
+            E_i = x[i]
+            fwhm = fwhm_func(E_i)
+            sigma = fwhm / 2.355
+
+            # Energy window around E_i
+            E_min = E_i - nsigmas * sigma
+            E_max = E_i + nsigmas * sigma
+            mask = (x >= E_min) & (x <= E_max)
+            E_window = x[mask]
+            idx_window = np.where(mask)[0]
+
+            # Gaussian kernel
+            kernel = np.exp(-0.5 * ((E_window - E_i) / sigma) ** 2)
+            kernel /= kernel.sum()
+
+            # Redistribute sampled counts with multinomial draw
+            redistributed = np.random.multinomial(sampled_count, kernel)
+
+            broadened_counts[idx_window] += redistributed
+        self.counts = broadened_counts
+        
+    @staticmethod    
+    def fwhm_HPGe_example(E):
+        return 0.05*np.sqrt(E) + 0.001*E
+    
+    @staticmethod
+    def fwhm_LaBr_example(E):
+        return 1*np.sqrt(E)
+            
     def remove_calibration(self):
         """
         Remove energy calibration and reinitialize Spectrum object
