@@ -5,6 +5,7 @@ import lmfit
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from itertools import combinations
 
 
 def ecalibration(
@@ -157,3 +158,51 @@ def cal_table(
     t.auto_set_font_size(False)
     t.set_fontsize(14)
     ax.axis("off")
+
+def is_within_epsilon(a, b, epsilon=0.5):
+    if epsilon < 0:
+        raise ValueError("epsilon must be non-negative")
+    return abs(a - b) <= epsilon
+
+def smart_calibration(channels, set_ergs=[197.32, 511, 661.657, 846.78]):
+    red_chi = []
+    epsilon = []
+    res = []
+    fit = []
+    # Generate all combinations of channels out of all energies
+    # You may need to have more selected peaks (channels) than set energies
+    channel_groups = list(combinations(channels, len(set_ergs)))
+    for group in channel_groups:
+        mean_vals = group
+        ch = channels
+        pred_erg, efit = ecalibration(
+            mean_vals=mean_vals, erg=set_ergs, channels=ch, n=1,
+            plot=False, residual=True
+        )
+        epsilon.append(is_within_epsilon(efit.best_fit, set_ergs, epsilon=2))
+        red_chi.append(efit.redchi)
+        res.append(efit.residual)
+        fit.append(efit)
+    
+    epsilon = np.array(epsilon)
+    red_chi = np.array(red_chi)
+    res = np.array(res)
+     
+    min1 = red_chi.argmin() # minimum reduced chi-squared
+    min2 = np.abs(res).sum(axis=1).argmin() # smallest residual
+    min3 = epsilon.sum(axis=1).argmax() # smallest energy difference
+    
+    print(min1, min2, min3)
+    
+    efit = fit[min1]
+    return efit
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
