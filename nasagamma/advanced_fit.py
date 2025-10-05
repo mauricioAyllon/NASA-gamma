@@ -60,7 +60,7 @@ class PeakAreaLinearBkg:
 
     def plot(self, ax=None, areas=False):
         plt.rc("font", size=14)
-        plt.style.use("seaborn-darkgrid")
+        plt.style.use("seaborn-v0_8-darkgrid")
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
             fig.patch.set_alpha(0.3)  # set background transparent
