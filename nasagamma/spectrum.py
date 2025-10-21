@@ -236,7 +236,10 @@ class Spectrum:
     
     @staticmethod
     def fwhm_LaBr_example(E):
-        return 1*np.sqrt(E)
+        a = -0.02
+        b = 0.044
+        c = 0.117 
+        return a + b*np.sqrt(E+c*E**2)
             
     def remove_calibration(self):
         """
