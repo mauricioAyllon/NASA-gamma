@@ -1,0 +1,343 @@
+<?xml-model href="https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1B00.sch" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<?xml-model href="https://pds.nasa.gov/pds4/proc/v1/PDS4_PROC_1900.sch" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<?xml-model href="https://pds.nasa.gov/pds4/geom/v1/PDS4_GEOM_1900_1510.sch" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<?xml-model href="https://pds.nasa.gov/pds4/nucspec/v1/PDS4_NUCSPEC_1B00_1000.sch" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<?xml-model href="https://pds.nasa.gov/pds4/mission/dawn/v1/PDS4_DAWN_1B00_1100.sch" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<?xml-model href="https://pds.nasa.gov/pds4/msn/v1/PDS4_MSN_1B00_1100.sch" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<Product_Observational xmlns="http://pds.nasa.gov/pds4/pds/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:msn="http://pds.nasa.gov/pds4/msn/v1" xmlns:proc="http://pds.nasa.gov/pds4/proc/v1" xmlns:geom="http://pds.nasa.gov/pds4/geom/v1" xmlns:nucspec="http://pds.nasa.gov/pds4/nucspec/v1" xmlns:dawn="http://pds.nasa.gov/pds4/mission/dawn/v1" xsi:schemaLocation="http://pds.nasa.gov/pds4/pds/v1 https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1B00.xsd http://pds.nasa.gov/pds4/proc/v1 https://pds.nasa.gov/pds4/proc/v1/PDS4_PROC_1900.xsd http://pds.nasa.gov/pds4/msn/v1 https://pds.nasa.gov/pds4/msn/v1/PDS4_MSN_1B00_1100.xsd http://pds.nasa.gov/pds4/geom/v1 https://pds.nasa.gov/pds4/geom/v1/PDS4_GEOM_1900_1510.xsd http://pds.nasa.gov/pds4/nucspec/v1 https://pds.nasa.gov/pds4/nucspec/v1/PDS4_NUCSPEC_1B00_1000.xsd http://pds.nasa.gov/pds4/mission/dawn/v1 https://pds.nasa.gov/pds4/mission/dawn/v1/PDS4_DAWN_1B00_1100.xsd ">
+<Identification_Area>
+<logical_identifier>urn:nasa:pds:dawn-grand-ceres:data_calibrated:grd-l1b-150316-150423_160121-csa-bgoc</logical_identifier>
+<version_id>1.0</version_id>
+<title>GRD-L1B-150316-150423_160121-CSA-BGOC</title>
+<information_model_version>1.11.0.0</information_model_version>
+<product_class>Product_Observational</product_class>
+<Citation_Information>
+<author_list>Prettyman, T. H.</author_list>
+<publication_year>2020</publication_year>
+<description>GRaND level 1a BGO calibrated histograms</description>
+</Citation_Information>
+<Modification_History>
+<Modification_Detail>
+<modification_date>2020-12-08</modification_date>
+<version_id>1.0</version_id>
+<description>PDS4 migration of GRD-L1B-150316-150423_160121-CSA-BGOC.TAB from PDS3 dataset DAWN-A-GRAND-3-RDR-CERES-COUNTS-V1.0</description>
+</Modification_Detail>
+</Modification_History>
+</Identification_Area>
+<Observation_Area>
+<Time_Coordinates>
+<start_date_time>2015-03-16T23:59:03Z</start_date_time>
+<stop_date_time>2015-04-23T23:58:03Z</stop_date_time>
+</Time_Coordinates>
+<Primary_Result_Summary>
+<purpose>Science</purpose>
+<processing_level>Calibrated</processing_level>
+</Primary_Result_Summary>
+<Investigation_Area>
+<name>DAWN MISSION TO VESTA AND CERES</name>
+<type>Mission</type>
+<Internal_Reference>
+<lid_reference>urn:nasa:pds:context:investigation:mission.dawn_mission_to_vesta_and_ceres</lid_reference>
+<reference_type>data_to_investigation</reference_type>
+</Internal_Reference>
+</Investigation_Area>
+<Observing_System>
+<name>Dawn Spacecraft + GRaND</name>
+<Observing_System_Component>
+<name>DAWN</name>
+<type>Spacecraft</type>
+<Internal_Reference>
+<lid_reference>urn:nasa:pds:context:instrument_host:spacecraft.dawn</lid_reference>
+<reference_type>is_instrument_host</reference_type>
+</Internal_Reference>
+</Observing_System_Component>
+<Observing_System_Component>
+<name>GAMMA-RAY AND NEUTRON DETECTOR</name>
+<type>Instrument</type>
+<Internal_Reference>
+<lid_reference>urn:nasa:pds:context:instrument:dawn.grand</lid_reference>
+<reference_type>is_instrument</reference_type>
+</Internal_Reference>
+</Observing_System_Component>
+</Observing_System>
+<Target_Identification>
+<name>(1) Ceres</name>
+<type>Dwarf Planet</type>
+<Internal_Reference>
+<lid_reference>urn:nasa:pds:context:target:dwarf_planet.1_ceres</lid_reference>
+<reference_type>data_to_target</reference_type>
+</Internal_Reference>
+</Target_Identification>
+<Discipline_Area>
+<msn:Mission_Information>
+<msn:mission_phase_name>CERES SCIENCE APPROACH</msn:mission_phase_name>
+<msn:mission_phase_identifier>CSA</msn:mission_phase_identifier>
+<msn:spacecraft_clock_start>0479822515.000</msn:spacecraft_clock_start>
+<msn:spacecraft_clock_stop>0483105655.000</msn:spacecraft_clock_stop>
+</msn:Mission_Information>
+<geom:Geometry>
+<geom:SPICE_Kernel_Files>
+<geom:SPICE_Kernel_Identification>
+<geom:spice_kernel_file_name>naif0011.tls</geom:spice_kernel_file_name>
+</geom:SPICE_Kernel_Identification>
+<geom:SPICE_Kernel_Identification>
+<geom:spice_kernel_file_name>dawn_203_sclkscet.00063.tsc</geom:spice_kernel_file_name>
+</geom:SPICE_Kernel_Identification>
+</geom:SPICE_Kernel_Files>
+</geom:Geometry>
+<proc:Processing_Information>
+<Local_Internal_Reference>
+<local_identifier_reference>table</local_identifier_reference>
+<local_reference_type>processing_information_to_data_object</local_reference_type>
+</Local_Internal_Reference>
+<proc:Process>
+<proc:Software>
+<proc:name>GRD_L1B_PIPELINE</proc:name>
+<proc:software_version_id>Version 1.0</proc:software_version_id>
+</proc:Software>
+</proc:Process>
+</proc:Processing_Information>
+<nucspec:NucSpec_Observation_Properties>
+<nucspec:Instrument_Settings>
+<nucspec:State_Table>
+<Internal_Reference>
+<lid_reference>urn:nasa:pds:dawn-grand-ancillary:miscellaneous:grd_state_table</lid_reference>
+<reference_type>nucspec_product_to_state_table</reference_type>
+</Internal_Reference>
+<Local_Internal_Reference>
+<local_identifier_reference>table</local_identifier_reference>
+<local_reference_type>state_table_to_data_table</local_reference_type>
+</Local_Internal_Reference>
+<nucspec:State_Table_Entry>
+<nucspec:state_index>11</nucspec:state_index>
+<nucspec:State_Time>
+<nucspec:state_time_field_name>SCLK</nucspec:state_time_field_name>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>479822515</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>483105445</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:State_Time>
+</nucspec:State_Table_Entry>
+</nucspec:State_Table>
+</nucspec:Instrument_Settings>
+<nucspec:Observing_Conditions>
+<nucspec:condition_type>SEP</nucspec:condition_type>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>false</nucspec:condition_active>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>479822515</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>482889565</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>true</nucspec:condition_active>
+<nucspec:comment>SEP</nucspec:comment>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>482889775</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>483105655</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+</nucspec:Observing_Conditions>
+<nucspec:Observing_Conditions>
+<nucspec:condition_type>Solar Flare</nucspec:condition_type>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>false</nucspec:condition_active>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>479822515</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>482903005</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>true</nucspec:condition_active>
+<nucspec:comment>Description: Solar flare - M4.0</nucspec:comment>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>482903215</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>482904685</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>false</nucspec:condition_active>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>482904895</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>482908045</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>true</nucspec:condition_active>
+<nucspec:comment>Description: Solar flare - M2.1</nucspec:comment>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>482908255</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>482909305</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>false</nucspec:condition_active>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>482909515</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>483105655</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+</nucspec:Observing_Conditions>
+<nucspec:Observing_Conditions>
+<nucspec:condition_type>Gamma-ray Burst</nucspec:condition_type>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>false</nucspec:condition_active>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>479822515</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>483105655</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+</nucspec:Observing_Conditions>
+<nucspec:Observing_Conditions>
+<nucspec:condition_type>Data Glitch</nucspec:condition_type>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>false</nucspec:condition_active>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>479822515</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>479873545</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>true</nucspec:condition_active>
+<nucspec:comment>Description: Manual removal of blip /\</nucspec:comment>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>479873755</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>479875225</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>false</nucspec:condition_active>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>479875435</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>482051665</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>true</nucspec:condition_active>
+<nucspec:comment>Description: Manual removal of blip \/</nucspec:comment>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>482051875</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>482053135</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>false</nucspec:condition_active>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>482053345</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>482108155</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>true</nucspec:condition_active>
+<nucspec:comment>Description: Manual removal of blip /\</nucspec:comment>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>482108365</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>482109625</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+<nucspec:Observing_Condition>
+<nucspec:condition_active>false</nucspec:condition_active>
+<nucspec:Time_Range_SCLK>
+<nucspec:sclk_start_time>482109835</nucspec:sclk_start_time>
+<nucspec:sclk_stop_time>483105655</nucspec:sclk_stop_time>
+</nucspec:Time_Range_SCLK>
+</nucspec:Observing_Condition>
+</nucspec:Observing_Conditions>
+</nucspec:NucSpec_Observation_Properties>
+<dawn:grand>
+<Local_Internal_Reference>
+<local_identifier_reference>table</local_identifier_reference>
+<local_reference_type>grand_parameters_to_table</local_reference_type>
+</Local_Internal_Reference>
+<dawn:TELREADOUT_List>
+<dawn:TELREADOUT>
+<dawn:grand_start_sclk>479822515</dawn:grand_start_sclk>
+<dawn:grand_stop_sclk>483105445</dawn:grand_stop_sclk>
+<dawn:grand_interval unit="s">210</dawn:grand_interval>
+</dawn:TELREADOUT>
+</dawn:TELREADOUT_List>
+<dawn:TELSOH_List>
+<dawn:TELSOH>
+<dawn:grand_start_sclk>479822515</dawn:grand_start_sclk>
+<dawn:grand_stop_sclk>483105445</dawn:grand_stop_sclk>
+<dawn:grand_interval unit="s">35</dawn:grand_interval>
+</dawn:TELSOH>
+</dawn:TELSOH_List>
+</dawn:grand>
+</Discipline_Area>
+</Observation_Area>
+<Reference_List>
+<Internal_Reference>
+<lid_reference>urn:nasa:pds:dawn-grand-ancillary:document:dawn_grand_bgo_calibrated_data_processing.pdf</lid_reference>
+<reference_type>data_to_document</reference_type>
+<comment>Dawn's gamma ray and neutron detector: BGO data processing</comment>
+</Internal_Reference>
+</Reference_List>
+<File_Area_Observational>
+<File>
+<file_name>GRD-L1B-150316-150423_160121-CSA-BGOC.TAB</file_name>
+<creation_date_time>2016-01-21T16:55:52Z</creation_date_time>
+<records>8023</records>
+<md5_checksum>b74a5eb282181d02e7660e6a98dc08ff</md5_checksum>
+</File>
+<Table_Character>
+<local_identifier>table</local_identifier>
+<offset unit="byte">0</offset>
+<records>8023</records>
+<description> This data file contains a time series of corrected and calibrated pulse height spectra measured by GRaND's bismuth germanate (BGO) scintillator during Vesta encounter. Each row contains the spacecraft clock (SCLK) ticks and spacecraft event UTC time (SCET_UTC) corresponding to the end of the science accumulation interval (accurate to 1s). The ephemeris time for the midpoint of the science interval is also included. Each row also contains the corresponding 1024-channel BGO spectrum accumulated. Each spectrum has been subjected to the following corrections: - Removal of analog-to-digital (ADC) differential nonlinearity artifacts - Gain and offset correction to put each spectrum on the same pulse height For each channel, the corresponding mid-point pulse height can be determined by multiplying channel index (0-1023) by 8.9 keV/channel. The processing steps, including criteria for including spectra in the time series, are described by Yamashita and Prettyman, ''Dawn's Gamma Ray and Neutron Detector: BGO Data Processing,'' which can be found in in the document collection of this bundle. </description>
+<record_delimiter>Carriage-Return Line-Feed</record_delimiter>
+<Record_Character>
+<fields>3</fields>
+<groups>1</groups>
+<record_length unit="byte">6188</record_length>
+<Field_Character>
+<name>SCLK</name>
+<field_number>1</field_number>
+<field_location unit="byte">1</field_location>
+<data_type>ASCII_Integer</data_type>
+<field_length unit="byte">10</field_length>
+<field_format>%10d</field_format>
+<unit>Seconds</unit>
+<description> SCLK ticks at the end of the science accumulation interval (s) Each science data record has a unique SCLK value, which can be used as an identifier. </description>
+</Field_Character>
+<Field_Character>
+<name>SCET_UTC</name>
+<field_number>2</field_number>
+<field_location unit="byte">11</field_location>
+<data_type>ASCII_Date_Time_YMD</data_type>
+<field_length unit="byte">20</field_length>
+<field_format>%20s</field_format>
+<description> UTC S/C event time (SCET) at the midpoint of the science accumulation interval. </description>
+</Field_Character>
+<Field_Character>
+<name>ET_MID</name>
+<field_number>3</field_number>
+<field_location unit="byte">31</field_location>
+<data_type>ASCII_Real</data_type>
+<field_length unit="byte">12</field_length>
+<field_format>%12.1f</field_format>
+<unit>Seconds</unit>
+<description> Ephemeris time at the midpoint of the science accumulation interval (s). </description>
+</Field_Character>
+<Group_Field_Character>
+<name>BGOC</name>
+<group_number>1</group_number>
+<repetitions>1024</repetitions>
+<fields>1</fields>
+<groups>0</groups>
+<description> 1024-channel, calibrated BGO spectrum. The pulse height of each channel I=0,1023 is given by 8.9 x I with units of keV. </description>
+<group_location unit="byte">43</group_location>
+<group_length unit="byte">6144</group_length>
+<Field_Character>
+<name>BGOC_element</name>
+<field_location unit="byte">1</field_location>
+<data_type>ASCII_Integer</data_type>
+<field_length unit="byte">6</field_length>
+<field_format>%6d</field_format>
+<unit>Counts</unit>
+</Field_Character>
+</Group_Field_Character>
+</Record_Character>
+</Table_Character>
+</File_Area_Observational>
+</Product_Observational>

@@ -1,0 +1,141 @@
+PDS_VERSION_ID                 = PDS3
+ 
+/* File characteristics */
+RECORD_TYPE                    = FIXED_LENGTH
+RECORD_BYTES                   = 4124
+FILE_RECORDS                   = 2636
+ 
+/* Pointers to data objects */
+^TABLE                         = "1998_016_GRS.DAT"
+ 
+/* Data identification */
+DATA_SET_NAME                  = "LP MOON GAMMA RAY SPECTROMETER 3 RDR V1.0"
+DATA_SET_ID                    = "LP-L-GRS-3-RDR-V1.0"
+PRODUCT_ID                     = "1998_016_GRS"
+PRODUCT_TYPE                   = "GAMMA_RAY_SPECTRA"
+PRODUCT_VERSION_ID             = "1.0"
+SPACECRAFT_NAME                = "LUNAR PROSPECTOR"
+INSTRUMENT_NAME                = "GAMMA RAY SPECTROMETER"
+TARGET_NAME                    = "MOON"
+START_TIME                     = 1998-016T00:00:00
+STOP_TIME                      = 1998-016T23:59:59
+SPACECRAFT_CLOCK_START_COUNT   = "N/A"
+SPACECRAFT_CLOCK_STOP_COUNT    = "N/A"
+PRODUCT_CREATION_TIME          = 2004-04-28T22:19:46
+ 
+OBJECT                         = TABLE
+  INTERCHANGE_FORMAT           = BINARY
+  ROWS                         = 2636
+  ROW_BYTES                    = 4124
+  COLUMNS                      = 9
+  DESCRIPTION                  = "This table contains one day of
+    LP GRS samples. There is one row for each sample."
+ 
+  OBJECT                       = COLUMN
+    COLUMN_NUMBER              = 1
+    NAME                       = "ACCEPTED SPECTRUM"
+    UNIT                       = COUNTS
+    DATA_TYPE                  = PC_REAL
+    START_BYTE                 = 1
+    BYTES                      = 2048
+    ITEMS                      = 512
+    ITEM_BYTES                 = 4
+    DESCRIPTION                = "The total number of accepted
+    gamma-ray counts per 32 seconds."
+  END_OBJECT                   = COLUMN
+ 
+  OBJECT                       = COLUMN
+    COLUMN_NUMBER              = 2
+    NAME                       = "REJECTED SPECTRUM"
+    UNIT                       = COUNTS
+    DATA_TYPE                  = PC_REAL
+    START_BYTE                 = 2049
+    BYTES                      = 2048
+    ITEMS                      = 512
+    ITEM_BYTES                 = 4
+    DESCRIPTION                = "The total number of rejected
+    gamma-ray counts per 32 seconds."
+  END_OBJECT                   = COLUMN
+ 
+  OBJECT                       = COLUMN
+    COLUMN_NUMBER              = 3
+    NAME                       = "DEADTIME"
+    DATA_TYPE                  = PC_REAL
+    START_BYTE                 = 4097
+    BYTES                      = 4
+    DESCRIPTION                = "The fractional deadtime is the
+    fractional amount of time per 32 seconds that the LP-GRS
+    instrument is busy processing data."
+  END_OBJECT                   = COLUMN
+ 
+  OBJECT                       = COLUMN
+    COLUMN_NUMBER              = 4
+    NAME                       = "OVERLOAD"
+    UNIT                       = COUNTS
+    DATA_TYPE                  = PC_REAL
+    START_BYTE                 = 4101
+    BYTES                      = 4
+    DESCRIPTION                = "The total number of counts per 32
+    seconds for events that deposit more than 2.55 MeV in the
+    anticoincidence shield scintillator."
+  END_OBJECT                   = COLUMN
+ 
+  OBJECT                       = COLUMN
+    COLUMN_NUMBER              = 5
+    NAME                       = "GRS TEMPERATURE"
+    UNIT                       = CELSIUS
+    DATA_TYPE                  = PC_REAL
+    START_BYTE                 = 4105
+    BYTES                      = 4
+    DESCRIPTION                = "LP-GRS Housing Temperature."
+  END_OBJECT                   = COLUMN
+ 
+  OBJECT                       = COLUMN
+    COLUMN_NUMBER              = 6
+    NAME                       = "EARTH RECEIVED TIME"
+    DATA_TYPE                  = PC_REAL
+    START_BYTE                 = 4109
+    BYTES                      = 4
+    DESCRIPTION                = "The time that the collected data is
+    received at Earth, or in the case of delayed data, the time when
+    the data would have been received at Earth had it been delivered
+    in real time.  The units are day of year since 1 January 1998.
+    To determine the spacecraft acquisition time from the ERT,
+    a 2 second spacecraft buffering time and 1.28 second Moon
+    to Earth travel time needs to be subtracted from the ERT."
+  END_OBJECT                   = COLUMN
+ 
+  OBJECT                       = COLUMN
+    COLUMN_NUMBER              = 7
+    NAME                       = "SPACECRAFT ALTITUDE"
+    UNIT                       = KILOMETER
+    DATA_TYPE                  = PC_REAL
+    START_BYTE                 = 4113
+    BYTES                      = 4
+    DESCRIPTION                = "Spacecraft height above the lunar
+    surface."
+  END_OBJECT                   = COLUMN
+ 
+  OBJECT                       = COLUMN
+    COLUMN_NUMBER              = 8
+    NAME                       = "SUBSPACECRAFT LATITUDE"
+    UNIT                       = DEGREE
+    DATA_TYPE                  = PC_REAL
+    START_BYTE                 = 4117
+    BYTES                      = 4
+    DESCRIPTION                = "The latitude of the subspacecraft
+    point at the time of data collection."
+  END_OBJECT                   = COLUMN
+ 
+  OBJECT                       = COLUMN
+    COLUMN_NUMBER              = 9
+    NAME                       = "SUBSPACECRAFT LONGITUDE"
+    UNIT                       = DEGREE
+    DATA_TYPE                  = PC_REAL
+    START_BYTE                 = 4121
+    BYTES                      = 4
+    DESCRIPTION                = "The longitude of the subspacecraft
+    point at the time of data collection."
+  END_OBJECT                   = COLUMN
+END_OBJECT                     = TABLE
+END

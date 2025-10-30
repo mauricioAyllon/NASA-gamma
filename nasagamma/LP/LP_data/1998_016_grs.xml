@@ -1,0 +1,173 @@
+<?xml-model href="https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1E00.sch" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<Product_Observational xmlns="http://pds.nasa.gov/pds4/pds/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pds.nasa.gov/pds4/pds/v1 https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1E00.xsd">
+<Identification_Area>
+<logical_identifier>urn:nasa:pds:lp_grsns_calibrated:data_grs:1998_016_grs</logical_identifier>
+<version_id>1.0</version_id>
+<title>Lunar Prospector GRS Spectra Product: 1998_016_grs</title>
+<information_model_version>1.14.0.0</information_model_version>
+<product_class>Product_Observational</product_class>
+<Modification_History>
+<Modification_Detail>
+<modification_date>2020-12-07</modification_date>
+<version_id>1.0</version_id>
+<description>Initial PDS4 version</description>
+</Modification_Detail>
+</Modification_History>
+</Identification_Area>
+<Observation_Area>
+<Time_Coordinates>
+<start_date_time>1998-01-16T00:00:00Z</start_date_time>
+<stop_date_time>1998-01-16T23:59:59Z</stop_date_time>
+</Time_Coordinates>
+<Investigation_Area>
+<name>Lunar Prospector</name>
+<type>Mission</type>
+<Internal_Reference>
+<lid_reference>urn:nasa:pds:context:investigation:mission.lunar_prospector</lid_reference>
+<reference_type>data_to_investigation</reference_type>
+</Internal_Reference>
+</Investigation_Area>
+<Observing_System>
+<Observing_System_Component>
+<name>Lunar Prospector</name>
+<type>Host</type>
+<Internal_Reference>
+<lid_reference>urn:nasa:pds:context:instrument_host:spacecraft.lp</lid_reference>
+<reference_type>is_instrument_host</reference_type>
+</Internal_Reference>
+</Observing_System_Component>
+<Observing_System_Component>
+<name>Gamma Ray Spectrometer for LP</name>
+<type>Instrument</type>
+<Internal_Reference>
+<lid_reference>urn:nasa:pds:context:instrument:lp.grs</lid_reference>
+<reference_type>is_instrument</reference_type>
+</Internal_Reference>
+</Observing_System_Component>
+</Observing_System>
+<Target_Identification>
+<name>Moon</name>
+<type>Satellite</type>
+<Internal_Reference>
+<lid_reference>urn:nasa:pds:context:target:satellite.earth.moon</lid_reference>
+<reference_type>data_to_target</reference_type>
+</Internal_Reference>
+</Target_Identification>
+</Observation_Area>
+<File_Area_Observational>
+<File>
+<file_name>1998_016_grs.dat</file_name>
+<creation_date_time>2004-04-28T22:19:46</creation_date_time>
+</File>
+<Table_Binary>
+<name>GRS Spectra</name>
+<offset unit="byte">0</offset>
+<records>2636</records>
+<description>This table contains one day of LP GRS samples. There is one row for each sample.</description>
+<Record_Binary>
+<fields>7</fields>
+<groups>2</groups>
+<record_length unit="byte">4124</record_length>
+<Group_Field_Binary>
+<repetitions>512</repetitions>
+<fields>1</fields>
+<groups>0</groups>
+<group_location unit="byte">1</group_location>
+<group_length unit="byte">2048</group_length>
+<Field_Binary>
+<name>Accepted Spectrum</name>
+<field_location unit="byte">1</field_location>
+<data_type>IEEE754LSBSingle</data_type>
+<field_length unit="byte">4</field_length>
+<description>The total number of accepted gamma-ray counts per 32 seconds.</description>
+</Field_Binary>
+</Group_Field_Binary>
+<Group_Field_Binary>
+<repetitions>512</repetitions>
+<fields>1</fields>
+<groups>0</groups>
+<group_location unit="byte">2049</group_location>
+<group_length unit="byte">2048</group_length>
+<Field_Binary>
+<name>Rejected Spectrum</name>
+<field_location unit="byte">1</field_location>
+<data_type>IEEE754LSBSingle</data_type>
+<field_length unit="byte">4</field_length>
+<description>The total number of rejected gamma-ray counts per 32 seconds.</description>
+</Field_Binary>
+</Group_Field_Binary>
+<Field_Binary>
+<name>Deadtime</name>
+<field_number>1</field_number>
+<field_location unit="byte">4097</field_location>
+<data_type>IEEE754LSBSingle</data_type>
+<field_length unit="byte">4</field_length>
+<description>The fractional deadtime is the fractional amount of time per 32 seconds that the LP-GRS instrument is busy processing data.</description>
+</Field_Binary>
+<Field_Binary>
+<name>Overload</name>
+<field_number>2</field_number>
+<field_location unit="byte">4101</field_location>
+<data_type>IEEE754LSBSingle</data_type>
+<field_length unit="byte">4</field_length>
+<description>The total number of counts per 32 seconds for events that deposit more than 2.55 MeV in the anticoincidence shield scintillator.</description>
+</Field_Binary>
+<Field_Binary>
+<name>GRS_Tempature</name>
+<field_number>3</field_number>
+<field_location unit="byte">4105</field_location>
+<data_type>IEEE754LSBSingle</data_type>
+<field_length unit="byte">4</field_length>
+<unit>Celsius</unit>
+<description>LP-GRS Housing Temperature.</description>
+</Field_Binary>
+<Field_Binary>
+<name>Earth_Received_Time</name>
+<field_number>4</field_number>
+<field_location unit="byte">4109</field_location>
+<data_type>IEEE754LSBSingle</data_type>
+<field_length unit="byte">4</field_length>
+<description>The time that the collected data is received at Earth, or in the case of delayed data, the time when the data would have been received at Earth had it been delivered in real time. The units are day of year since 1 January 1998. To determine the spacecraft acquisition time from the ERT, a 2 second spacecraft buffering time and 1.28 second Moon to Earth travel time needs to be subtracted from the ERT. </description>
+</Field_Binary>
+<Field_Binary>
+<name>Spacecraft_Altitude</name>
+<field_number>5</field_number>
+<field_location unit="byte">4113</field_location>
+<data_type>IEEE754LSBSingle</data_type>
+<field_length unit="byte">4</field_length>
+<unit>km</unit>
+<description>Spacecraft height above the lunar surface.</description>
+</Field_Binary>
+<Field_Binary>
+<name>Subspacecraft_Latitude</name>
+<field_number>6</field_number>
+<field_location unit="byte">4117</field_location>
+<data_type>IEEE754LSBSingle</data_type>
+<field_length unit="byte">4</field_length>
+<unit>degree</unit>
+<description>The latitude of the subspacecraft point at the time of data collection.</description>
+</Field_Binary>
+<Field_Binary>
+<name>Subspacecraft_Longitude</name>
+<field_number>7</field_number>
+<field_location unit="byte">4121</field_location>
+<data_type>IEEE754LSBSingle</data_type>
+<field_length unit="byte">4</field_length>
+<unit>degree</unit>
+<description>The longitude of the subspacecraft point at the time of data collection.</description>
+</Field_Binary>
+</Record_Binary>
+</Table_Binary>
+</File_Area_Observational>
+<File_Area_Observational_Supplemental>
+<File>
+<file_name>1998_016_grs.lbl</file_name>
+</File>
+<Stream_Text>
+<offset unit="byte">0</offset>
+<parsing_standard_id>PDS3</parsing_standard_id>
+<description>Original PDS3 label</description>
+<record_delimiter>Carriage-Return Line-Feed</record_delimiter>
+</Stream_Text>
+</File_Area_Observational_Supplemental>
+</Product_Observational>
