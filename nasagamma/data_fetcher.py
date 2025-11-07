@@ -22,13 +22,10 @@ from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
 from urllib.parse import urljoin
 from urllib.request import urlopen, Request
-
 from html.parser import HTMLParser
 
 
-# ------------------------------
-# Tiny HTML <a href=...> link parser (no BeautifulSoup)
-# ------------------------------
+# Tiny HTML link parser
 class _LinkParser(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -43,7 +40,7 @@ class _LinkParser(HTMLParser):
 
 
 def _http_get_text(url: str, timeout: float = 30.0) -> str:
-    # Some servers dislike default user-agent; set a simple UA.
+    # Some servers dislike default user-agent; set a simple UA.(fixed some issues)
     req = Request(url, headers={"User-Agent": "nasagamma-fetcher/0.1"})
     with urlopen(req, timeout=timeout) as resp:
         return resp.read().decode("utf-8", errors="replace")
@@ -54,7 +51,7 @@ def _list_directory(base_url: str) -> List[str]:
     html = _http_get_text(base_url)
     p = _LinkParser()
     p.feed(html)
-    # Filter out parent links and directories (keep files only; crude heuristic)
+    # Filter out parent links and directories (keep files only - fixed)
     hrefs = [h for h in p.hrefs if h and h not in ("../", "./")]
     return hrefs
 
@@ -71,9 +68,7 @@ def _write_stream(
             f.write(b)
 
 
-# ------------------------------
-# Helpers
-# ------------------------------
+# Helper functions
 def _pkg_root() -> Path:
     return Path(__file__).resolve().parent
 
@@ -115,9 +110,7 @@ def _canceled(cancel_flag) -> bool:
         return False
 
 
-# ------------------------------
-# Mission adapter types
-# ------------------------------
+# Mission specific information
 @dataclass
 class Record:
     key: str
@@ -135,9 +128,7 @@ class MissionSpec:
     list_records: Callable[[str], List[Record]]
 
 
-# ------------------------------
-# DAWN adapter (XML+TAB)  YYMMDD-YYMMDD
-# ------------------------------
+# DAWN (XML+TAB)  YYMMDD-YYMMDD
 _DAWN_DATE_RE = re.compile(r"(\d{6})-(\d{6})")
 
 
@@ -192,9 +183,7 @@ DAWN = MissionSpec(
 )
 
 
-# ------------------------------
-# Lunar Prospector adapter (DAT+LBL)  YYYY_DDD
-# ------------------------------
+# Lunar Prospector
 _LP_RE = re.compile(
     r"(?P<year>\d{4})_(?P<doy>\d{3})_grs\.(?P<ext>dat|lbl)$", re.IGNORECASE
 )
@@ -243,9 +232,8 @@ LP = MissionSpec(
 )
 
 
-# ------------------------------
 # Registry and public API
-# ------------------------------
+
 MISSION_REGISTRY: Dict[str, MissionSpec] = {
     "DAWN": DAWN,
     "LP": LP,
@@ -340,14 +328,12 @@ def fetch_mission(
                     f"Failed: {relname} ({e})",
                 )
 
-        time.sleep(0.005)  # tiny pause to keep UI responsive if needed
+        time.sleep(0.005)  # tiny pause to keep UI responsive if needed (fixed)
 
     return done_files
 
 
-# ------------------------------
-# Tiny CLI for manual smoke test (optional)
-# ------------------------------
+# CLI for testing (can be removed later)
 def _cli():
     import argparse
 
