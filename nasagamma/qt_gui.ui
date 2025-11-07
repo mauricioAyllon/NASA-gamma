@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1857</width>
-    <height>1024</height>
+    <width>1621</width>
+    <height>808</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -24,7 +24,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="0">
+    <item row="0" column="1">
      <widget class="QTabWidget" name="tabWidget">
       <property name="enabled">
        <bool>true</bool>
@@ -33,6 +33,12 @@
        <font>
         <pointsize>12</pointsize>
        </font>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;PDS&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="whatsThis">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;PDS&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="autoFillBackground">
        <bool>false</bool>
@@ -43,7 +49,7 @@
 </string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>7</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -62,10 +68,7 @@
            <string notr="true">background-color: rgb(244, 244, 183);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::WinPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_19">
            <item row="0" column="0">
@@ -119,7 +122,7 @@
              <item row="0" column="4">
               <spacer name="horizontalSpacer_6">
                <property name="orientation">
-                <enum>Qt::Horizontal</enum>
+                <enum>Qt::Vertical</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
@@ -232,7 +235,7 @@
              <item row="0" column="1">
               <spacer name="horizontalSpacer_24">
                <property name="orientation">
-                <enum>Qt::Horizontal</enum>
+                <enum>Qt::Vertical</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
@@ -358,10 +361,7 @@
            <string notr="true">background-color: rgb(212, 217, 208);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_18">
            <property name="leftMargin">
@@ -415,10 +415,7 @@
            <string notr="true">background-color: rgb(212, 217, 208);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_20">
            <property name="leftMargin">
@@ -551,10 +548,10 @@
 font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                </property>
                <property name="verticalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
+                <enum>Qt::ScrollBarAsNeeded</enum>
                </property>
                <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
+                <enum>Qt::ScrollBarAsNeeded</enum>
                </property>
                <property name="widgetResizable">
                 <bool>true</bool>
@@ -564,8 +561,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>886</width>
-                  <height>248</height>
+                  <width>98</width>
+                  <height>148</height>
                  </rect>
                 </property>
                </widget>
@@ -598,10 +595,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <string notr="true">background-color: rgb(244, 244, 183);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::WinPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_4">
            <item row="0" column="0">
@@ -634,7 +628,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <item row="0" column="2">
             <spacer name="horizontalSpacer_12">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -695,7 +689,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <item row="0" column="7">
             <spacer name="horizontalSpacer_18">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -720,7 +714,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <item row="0" column="9">
             <spacer name="horizontalSpacer_14">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -745,7 +739,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <item row="0" column="11">
             <spacer name="horizontalSpacer_15">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -770,7 +764,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <item row="0" column="13">
             <spacer name="horizontalSpacer_13">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -801,10 +795,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <string notr="true">background-color: rgb(212, 217, 208);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_23">
            <item row="0" column="0">
@@ -832,10 +823,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <string notr="true">background-color: rgb(212, 217, 208);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_24">
            <item row="1" column="0">
@@ -867,8 +855,8 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>98</width>
-                <height>28</height>
+                <width>500</width>
+                <height>557</height>
                </rect>
               </property>
              </widget>
@@ -911,10 +899,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <string notr="true">background-color: rgb(244, 244, 183);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::WinPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_6">
            <item row="0" column="6">
@@ -953,7 +938,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <item row="0" column="5">
             <spacer name="horizontalSpacer_7">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -996,7 +981,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <item row="0" column="2">
             <spacer name="horizontalSpacer_21">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -1036,10 +1021,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <string notr="true">background-color: rgb(212, 217, 208);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_28">
            <item row="0" column="0">
@@ -1072,10 +1054,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <string notr="true">background-color: rgb(212, 217, 208);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_40">
            <item row="1" column="0">
@@ -1145,10 +1124,7 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
            <string notr="true">background-color: rgb(244, 244, 183);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Panel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_42">
            <item row="0" column="1">
@@ -1218,7 +1194,7 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
            <item row="0" column="5">
             <spacer name="horizontalSpacer_4">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -1252,10 +1228,7 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
            <string notr="true">background-color: rgb(212, 217, 208);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_5">
            <item row="0" column="0">
@@ -1296,16 +1269,13 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
            <string notr="true">background-color: rgb(244, 244, 183);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::WinPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_60">
            <item row="0" column="1">
             <spacer name="horizontalSpacer_2">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -1352,7 +1322,7 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                <item row="0" column="3">
                 <spacer name="horizontalSpacer">
                  <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+                  <enum>Qt::Vertical</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -1371,9 +1341,6 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                  </property>
                  <property name="text">
                   <string>Vmax:</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
                  </property>
                 </widget>
                </item>
@@ -1401,7 +1368,7 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
                <item row="0" column="0">
                 <spacer name="horizontalSpacer_5">
                  <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+                  <enum>Qt::Vertical</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -1761,10 +1728,7 @@ File</string>
            <string notr="true">background-color: rgb(212, 217, 208);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <property name="lineWidth">
            <number>1</number>
@@ -1811,10 +1775,7 @@ File</string>
            </size>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
@@ -1996,9 +1957,6 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  <property name="text">
                   <string>Mean</string>
                  </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
                 </widget>
                </item>
                <item row="1" column="1">
@@ -2010,9 +1968,6 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
                  </property>
                  <property name="text">
                   <string>+/-</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
                  </property>
                 </widget>
                </item>
@@ -2059,10 +2014,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            </font>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Panel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_29">
            <item row="1" column="0">
@@ -2096,9 +2048,6 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              <property name="text">
               <string>Spectra</string>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
             </widget>
            </item>
           </layout>
@@ -2107,10 +2056,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
         <item row="0" column="2">
          <widget class="QFrame" name="frame_10">
           <property name="frameShape">
-           <enum>QFrame::Panel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_31">
            <item row="1" column="0">
@@ -2137,10 +2083,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
         <item row="0" column="3">
          <widget class="QFrame" name="frame_11">
           <property name="frameShape">
-           <enum>QFrame::Panel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_32">
            <item row="1" column="0">
@@ -2162,9 +2105,6 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              <property name="text">
               <string>Measurement Times</string>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
             </widget>
            </item>
           </layout>
@@ -2173,10 +2113,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
         <item row="0" column="4">
          <widget class="QFrame" name="frame_13">
           <property name="frameShape">
-           <enum>QFrame::Panel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_33">
            <item row="1" column="0">
@@ -2198,9 +2135,6 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              <property name="text">
               <string>Live Time (%)</string>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
             </widget>
            </item>
           </layout>
@@ -2209,10 +2143,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
         <item row="1" column="1">
          <widget class="QFrame" name="frame_14">
           <property name="frameShape">
-           <enum>QFrame::Panel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_34">
            <item row="1" column="0">
@@ -2234,9 +2165,6 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              <property name="text">
               <string>Peak in X-Range</string>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
             </widget>
            </item>
           </layout>
@@ -2245,10 +2173,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
         <item row="1" column="2">
          <widget class="QFrame" name="frame_15">
           <property name="frameShape">
-           <enum>QFrame::Panel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_35">
            <item row="1" column="0">
@@ -2275,10 +2200,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
         <item row="1" column="3">
          <widget class="QFrame" name="frame_16">
           <property name="frameShape">
-           <enum>QFrame::Panel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_36">
            <item row="1" column="0">
@@ -2305,10 +2227,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
         <item row="1" column="4">
          <widget class="QFrame" name="frame_17">
           <property name="frameShape">
-           <enum>QFrame::Panel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_37">
            <item row="1" column="0">
@@ -2330,9 +2249,6 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              <property name="text">
               <string>FWHM (%)</string>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
             </widget>
            </item>
           </layout>
@@ -2348,10 +2264,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
         <item row="0" column="0">
          <widget class="QFrame" name="frame_23">
           <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_50">
            <item row="0" column="0" colspan="3">
@@ -2366,10 +2279,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
               <string notr="true">background-color: rgb(244, 244, 183);</string>
              </property>
              <property name="frameShape">
-              <enum>QFrame::WinPanel</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
+              <enum>QFrame::NoFrame</enum>
              </property>
              <layout class="QGridLayout" name="gridLayout_49">
               <item row="0" column="0">
@@ -2424,7 +2334,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
               <item row="0" column="1">
                <spacer name="horizontalSpacer_9">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Vertical</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -2543,7 +2453,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
               <item row="0" column="3">
                <spacer name="horizontalSpacer_8">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Vertical</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -2583,10 +2493,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
               <string notr="true">background-color: rgb(212, 217, 208);</string>
              </property>
              <property name="frameShape">
-              <enum>QFrame::Panel</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
+              <enum>QFrame::NoFrame</enum>
              </property>
              <layout class="QGridLayout" name="gridLayout_59">
               <item row="0" column="0">
@@ -3041,10 +2948,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
               <string notr="true">background-color: rgb(212, 217, 208);</string>
              </property>
              <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
+              <enum>QFrame::NoFrame</enum>
              </property>
              <layout class="QGridLayout" name="gridLayout_46">
               <property name="leftMargin">
@@ -3074,10 +2978,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
               <string notr="true">background-color: rgb(212, 217, 208);</string>
              </property>
              <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
+              <enum>QFrame::NoFrame</enum>
              </property>
              <layout class="QGridLayout" name="gridLayout_47">
               <property name="leftMargin">
@@ -3104,10 +3005,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
               <string notr="true">background-color: rgb(212, 217, 208);</string>
              </property>
              <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
+              <enum>QFrame::NoFrame</enum>
              </property>
              <layout class="QGridLayout" name="gridLayout_27">
               <property name="leftMargin">
@@ -3134,10 +3032,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
               <string notr="true">background-color: rgb(212, 217, 208);</string>
              </property>
              <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
+              <enum>QFrame::NoFrame</enum>
              </property>
              <layout class="QGridLayout" name="gridLayout_48">
               <property name="leftMargin">
@@ -3163,6 +3058,353 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="PDS">
+       <property name="accessibleName">
+        <string>PDS</string>
+       </property>
+       <attribute name="title">
+        <string>PDS</string>
+       </attribute>
+       <widget class="QFrame" name="frame_31">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>300</width>
+          <height>281</height>
+         </rect>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>300</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(244, 244, 183);background-color: rgb(244, 244, 183);</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QLineEdit" name="lineEdit_3">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>450</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(188, 200, 190);</string>
+             </property>
+             <property name="text">
+              <string>Data Selection</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="pds_ComboMission">
+             <property name="minimumSize">
+              <size>
+               <width>150</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>450</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 170, 127);</string>
+             </property>
+             <property name="editable">
+              <bool>false</bool>
+             </property>
+             <property name="currentText">
+              <string>DAWN</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>DAWN</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Lunar Prospector</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>5</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QGridLayout" name="gridLayout_62">
+           <item row="0" column="1">
+            <widget class="QDateEdit" name="pds_dtStart">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 170, 127);</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLineEdit" name="lineEdit">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>300</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(188, 200, 190);</string>
+             </property>
+             <property name="text">
+              <string>Start Date</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLineEdit" name="lineEdit_2">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>300</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(188, 200, 190);</string>
+             </property>
+             <property name="text">
+              <string>End Date</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDateEdit" name="pds_dtEnd">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 170, 127);</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QCheckBox" name="pds_chkDT">
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 170, 127);</string>
+             </property>
+             <property name="text">
+              <string>Use Date Range</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>5</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QGridLayout" name="gridLayout_63">
+           <item row="0" column="1">
+            <widget class="QPushButton" name="pds_btnCancel">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>300</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 170, 127);</string>
+             </property>
+             <property name="text">
+              <string>Cancel</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QProgressBar" name="pds_progress">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>300</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="value">
+              <number>0</number>
+             </property>
+             <property name="textVisible">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="pds_status">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>300</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>8</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="pds_btnFetch">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 170, 127);</string>
+             </property>
+             <property name="text">
+              <string>Fetch Data</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -3172,7 +3414,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1857</width>
+     <width>1621</width>
      <height>22</height>
     </rect>
    </property>

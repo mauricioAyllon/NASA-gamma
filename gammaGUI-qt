@@ -40,6 +40,16 @@ from copy import deepcopy
 from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
 from PyQt5 import QtCore, QtWidgets, QtGui, QtWebEngineWidgets
+from PyQt5.QtWidgets import (
+    QMessageBox,
+    QComboBox,
+    QCheckBox,
+    QDateEdit,
+    QDateTimeEdit,
+    QProgressBar,
+    QLabel,
+    QPushButton,
+)
 from PyQt5.QtCore import Qt, QUrl
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -64,6 +74,10 @@ import pkg_resources
 import plotly.graph_objs as go
 import plotly.io as pio
 import tempfile
+from PyQt5.QtCore import QThread, pyqtSignal
+from datetime import datetime
+from nasagamma import data_fetcher
+from nasagamma.data_fetcher import fetch_mission
 
 
 class Dialog_from_UI(QDialog):
@@ -270,6 +284,61 @@ class TableModel(QtCore.QAbstractTableModel):
             self.layoutChanged.emit()
         except Exception as e:
             print(e)
+
+
+class PDSFetchWorker(QThread):
+    """Background downloader for PDS missions with simple progress reporting."""
+
+    progress = pyqtSignal(int, int)  # (n, total)
+    message = pyqtSignal(str)  # status text
+    done = pyqtSignal(str)  # summary string
+    failed = pyqtSignal(str)  # error text
+    canceled = pyqtSignal()  # user canceled
+
+    def __init__(self, mission: str, start_dt, end_dt, use_dates: bool, parent=None):
+        super().__init__(parent)
+        self.mission = mission
+        self.start_dt = start_dt
+        self.end_dt = end_dt
+        self.use_dates = use_dates
+        self._cancel = False
+
+    def cancel(self):
+        self._cancel = True
+        self.requestInterruption()  # nudge Qt’s flag too
+
+    def run(self):
+        try:
+            from nasagamma import data_fetcher
+
+            def cb(n, total=None, note=None):
+                # Honor both flags everywhere progress is reported
+                if self._cancel or self.isInterruptionRequested():
+                    raise KeyboardInterrupt()
+                if total is not None:
+                    self.progress.emit(n, total)
+                if note:
+                    self.message.emit(note)
+
+            # Single cancel lambda we pass to the fetcher
+            cancel = lambda: (self._cancel or self.isInterruptionRequested())
+
+            sdt = self.start_dt if self.use_dates else None
+            edt = self.end_dt if self.use_dates else None
+
+            count = data_fetcher.fetch_mission(
+                mission=self.mission,
+                start_dt=sdt,
+                end_dt=edt,
+                progress_callback=cb,
+                cancel_flag=cancel,  # <-- fetcher should consult this in loops
+                dest_dir=None,
+            )
+            self.done.emit(f"Fetched {count} files for {self.mission}.")
+        except KeyboardInterrupt:
+            self.canceled.emit()
+        except Exception as e:
+            self.failed.emit(str(e))
 
 
 class NasaGammaApp(QMainWindow):
@@ -598,7 +667,9 @@ class NasaGammaApp(QMainWindow):
         self.w_api_bin.button_yscale.clicked.connect(self.update_yscale_api_bin)
         self.yscale_api_bin = "log"
         # Add individual toolbars
-        self.toolbar_apibin1 = NavigationToolbar(self.w_api_bin.plot_energy.canvas, self)
+        self.toolbar_apibin1 = NavigationToolbar(
+            self.w_api_bin.plot_energy.canvas, self
+        )
         self.w_api_bin.layout_erg.addWidget(self.toolbar_apibin1)
         self.toolbar_apibin2 = NavigationToolbar(
             self.w_api_bin.plot_energy_traces.canvas, self
@@ -622,7 +693,9 @@ class NasaGammaApp(QMainWindow):
         self.w_peak_find.radioButton_hpge.clicked.connect(self.peakFind_check_hpge)
         self.w_peak_find.radioButton_labr.clicked.connect(self.peakFind_check_labr)
         self.w_peak_find.radioButton_nai.clicked.connect(self.peakFind_check_nai)
-        self.w_peak_find.radioButton_plastic.clicked.connect(self.peakFind_check_plastic)
+        self.w_peak_find.radioButton_plastic.clicked.connect(
+            self.peakFind_check_plastic
+        )
         self.w_peak_find_info = WindowPeakFinderInfo()
         self.w_peak_find.button_info.clicked.connect(self.peakFind_info_activate)
 
@@ -634,10 +707,14 @@ class NasaGammaApp(QMainWindow):
         self.button_identify_peaks.clicked.connect(self.activate_isotope_id)
         self.w_isot_id = WindowIsotID()
         self.w_isot_id.isotID_button_apply.setStyleSheet("background-color : lightblue")
-        self.w_isot_id.isotID_button_clear.setStyleSheet("background-color : lightcoral")
+        self.w_isot_id.isotID_button_clear.setStyleSheet(
+            "background-color : lightcoral"
+        )
         self.w_isot_id.isotID_button_apply.clicked.connect(self.isotID_apply)
         self.w_isot_id.isotID_button_clear.clicked.connect(self.isotID_clear)
-        self.w_isot_id.button_remove_vlines.setStyleSheet("background-color : lightcoral")
+        self.w_isot_id.button_remove_vlines.setStyleSheet(
+            "background-color : lightcoral"
+        )
         self.w_isot_id.button_plot_vlines.clicked.connect(self.isotID_plot_vlines)
         self.w_isot_id.button_remove_vlines.clicked.connect(self.isotID_remove_vlines)
         self.w_isot_id.edit_element_search.returnPressed.connect(self.isotID_textSearch)
@@ -660,6 +737,33 @@ class NasaGammaApp(QMainWindow):
         self.pushButton_apply_fit_png.clicked.connect(self.apply_die_away_fit)
         self.button_send_to_spec_png.clicked.connect(self.send_to_spect_png)
         self.initialize_plots_png()
+
+        ## PDS
+        # Enable/disable date fields when the checkbox changes
+        def _pds_toggle_dates(checked: bool):
+            for w in (self.pds_dtStart, self.pds_dtEnd):
+                if w:
+                    w.setEnabled(checked)
+
+        if self.pds_chkDT:
+            self.pds_chkDT.toggled.connect(_pds_toggle_dates)
+            _pds_toggle_dates(self.pds_chkDT.isChecked())
+
+        # Populate the mission dropdown with exact keys the fetcher expects
+        if self.pds_ComboMission:
+            self.pds_ComboMission.clear()
+            self.pds_ComboMission.addItem("DAWN", "DAWN")
+            self.pds_ComboMission.addItem("Lunar Prospector", "Lunar Prospector")
+            self.pds_ComboMission.setEditable(False)
+            self.pds_ComboMission.setCurrentIndex(0)
+
+        # Button signals
+        if self.pds_btnFetch:
+            self.pds_btnFetch.clicked.connect(self._pds_on_fetch_clicked)
+
+        if self.pds_btnCancel:
+            self.pds_btnCancel.clicked.connect(self._pds_on_cancel_clicked)
+        self._pds_worker = None
 
     def main_info_activate(self):
         self.w_info_main.activateWindow()
@@ -771,7 +875,9 @@ class NasaGammaApp(QMainWindow):
         x_idx = np.searchsorted(self.search.peaks_idx, xnew)
         self.search.peaks_idx = np.insert(self.search.peaks_idx, x_idx, xnew)
         fwhm_guess_new = self.search.fwhm(xnew)
-        self.search.fwhm_guess = np.insert(self.search.fwhm_guess, x_idx, fwhm_guess_new)
+        self.search.fwhm_guess = np.insert(
+            self.search.fwhm_guess, x_idx, fwhm_guess_new
+        )
         if self.spect.energies is not None:
             self.ax_main.axvline(
                 x=self.spect.energies[xnew], color="red", linestyle="--", alpha=0.2
@@ -1885,7 +1991,9 @@ class NasaGammaApp(QMainWindow):
     def update_gauss_fwhm(self):
         self.ax_fwhm_gauss.clear()
         gauss_comp = pf.GaussianComponents(fit_obj_lst=self.fit_lst)
-        gauss_comp.plot_gauss(plot_type="fwhm", fig=self.fig_fwhm, ax=self.ax_fwhm_gauss)
+        gauss_comp.plot_gauss(
+            plot_type="fwhm", fig=self.fig_fwhm, ax=self.ax_fwhm_gauss
+        )
 
     def add_fwhm(self):
         try:
@@ -2183,7 +2291,9 @@ class NasaGammaApp(QMainWindow):
             self.xyplane = (-0.9, 0.9, -0.9, 0.9)  # x and y limits
             self.erange_api = [0, 2**16]  # [0,8]
         else:
-            print("ERROR: Cannot determine the data type (raw, calibrated, or simulated)")
+            print(
+                "ERROR: Cannot determine the data type (raw, calibrated, or simulated)"
+            )
 
         self.hexbins = 80  # x-y bins
         self.tbins = 512  # time bins
@@ -2820,7 +2930,9 @@ class NasaGammaApp(QMainWindow):
 
     def apply_energy_filter_bin(self, xmin, xmax):
         self.ax_bin_erg_tr.clear()
-        elim = (self.df_apibin_ch["energy"] > xmin) & (self.df_apibin_ch["energy"] < xmax)
+        elim = (self.df_apibin_ch["energy"] > xmin) & (
+            self.df_apibin_ch["energy"] < xmax
+        )
         self.df_bin_tr = self.df_apibin_ch[elim]
         self.df_bin_tr.reset_index(drop=True, inplace=True)
         no_traces = self.df_bin_tr.shape[0]
@@ -2843,7 +2955,9 @@ class NasaGammaApp(QMainWindow):
         self.legend_api_erg_tr.set_visible(False)
         if self.w_api_bin.chk_legend_erg_tr.isChecked():
             self.legend_api_erg_tr.set_visible(True)
-        self.w_api_bin.chk_legend_erg_tr.toggled.connect(self.toggle_legend_apibin_erg_tr)
+        self.w_api_bin.chk_legend_erg_tr.toggled.connect(
+            self.toggle_legend_apibin_erg_tr
+        )
         self.fig_bin_erg_tr.canvas.draw_idle()
 
     def toggle_legend_apibin_erg_tr(self, checked: bool):
@@ -3332,7 +3446,9 @@ class NasaGammaApp(QMainWindow):
             for f in files[1:]:
                 df0 = pd.read_csv(f)
                 data = pd.concat([data, df0], ignore_index=True)
-            data["sort"] = data["Isotope"].str.extract(r"(\d+)", expand=False).astype(int)
+            data["sort"] = (
+                data["Isotope"].str.extract(r"(\d+)", expand=False).astype(int)
+            )
             print(data.columns)
             data.sort_values("sort", inplace=True, ascending=True)
             data = data.drop("sort", axis=1)
@@ -3355,7 +3471,9 @@ class NasaGammaApp(QMainWindow):
         capt_IAEA_file = pkg_resources.resource_filename(
             "nasagamma", "data/Capture_IAEA.csv"
         )
-        talys_file = pkg_resources.resource_filename("nasagamma", "data/Talys-14MeV.csv")
+        talys_file = pkg_resources.resource_filename(
+            "nasagamma", "data/Talys-14MeV.csv"
+        )
         inl_baghdad_file = pkg_resources.resource_filename(
             "nasagamma", "data/Inelastic_Baghdad.csv"
         )
@@ -3760,6 +3878,154 @@ class NasaGammaApp(QMainWindow):
                 print("Could not open file")
                 print("An unknown error occurred:", str(e))
         return fileName, e_units, spect
+
+    ## PDS Functions
+    def _pds_on_fetch_clicked(self):
+        from datetime import datetime
+
+        # 1) Read inputs
+        mission = (
+            self.pds_ComboMission.currentData()
+            or self.pds_ComboMission.currentText()
+            or ""
+        ).strip()
+        use_dates = self.pds_chkDT.isChecked() if self.pds_chkDT else False
+        if not mission:
+            QMessageBox.warning(self, "PDS", "Please select a mission.")
+            return
+
+        # 2) Convert dates -> datetime (midnight)
+        def _to_dt(w):
+            if not w:
+                return None
+            if hasattr(w, "dateTime"):  # QDateTimeEdit
+                dt = w.dateTime().toPyDateTime()
+                return datetime(dt.year, dt.month, dt.day)
+            d = w.date().toPyDate()  # QDateEdit
+            return datetime(d.year, d.month, d.day)
+
+        start_dt = _to_dt(self.pds_dtStart) if use_dates else None
+        end_dt = _to_dt(self.pds_dtEnd) if use_dates else None
+        if use_dates and start_dt and end_dt and end_dt < start_dt:
+            QMessageBox.warning(self, "PDS", "End date must be after Start date.")
+            return
+
+        # 3) Lock UI & show progress
+        for w in (
+            self.pds_ComboMission,
+            self.pds_chkDT,
+            self.pds_dtStart,
+            self.pds_dtEnd,
+            self.pds_btnFetch,
+        ):
+            if w:
+                w.setEnabled(False)
+        if self.pds_progress:
+            self.pds_progress.setVisible(True)
+            self.pds_progress.setRange(0, 0)  # indeterminate spinner
+        if self.pds_status:
+            self.pds_status.setText("Preparing fetch...")
+        if self.pds_btnCancel:
+            self.pds_btnCancel.setVisible(True)
+            self.pds_btnCancel.setEnabled(True)
+
+        # 4) Start worker
+        # Clean up any previous worker
+        if self._pds_worker:
+            try:
+                self._pds_worker.finished.disconnect(self._pds_finish_ui)
+            except TypeError:
+                pass
+            self._pds_worker.deleteLater()
+            self._pds_worker = None
+
+        # Create a fresh worker for this run
+        self._pds_worker = PDSFetchWorker(
+            mission=mission,
+            start_dt=start_dt,
+            end_dt=end_dt,
+            use_dates=use_dates,
+            parent=self,
+        )
+
+        # Connect per-instance signals
+        self._pds_worker.progress.connect(self._pds_on_progress)
+        self._pds_worker.message.connect(self._pds_on_message)
+        self._pds_worker.done.connect(self._pds_on_done)
+        self._pds_worker.failed.connect(self._pds_on_failed)
+        self._pds_worker.canceled.connect(self._pds_on_canceled)
+
+        # Always restore UI even if no custom signal fires
+        self._pds_worker.finished.connect(self._pds_finish_ui)
+
+        # Go!
+        self._pds_worker.start()
+
+    def _pds_on_progress(self, n: int, total: int):
+        if self.pds_progress:
+            if self.pds_progress.maximum() == 0 and total and total > 0:
+                self.pds_progress.setRange(0, total)
+                self.pds_progress.setValue(0)
+            if total and total > 0:
+                self.pds_progress.setValue(min(n, total))
+        if self.pds_status and total and total > 0:
+            pct = int(n * 100 / total)
+            self.pds_status.setText(f"Fetched {n}/{total} files ({pct}%).")
+
+    def _pds_on_message(self, text: str):
+        if self.pds_status:
+            self.pds_status.setText(text or "")
+
+    def _pds_finish_ui(self):
+        # Unlock controls and hide progress UI
+        for w in (
+            self.pds_ComboMission,
+            self.pds_chkDT,
+            self.pds_dtStart,
+            self.pds_dtEnd,
+            self.pds_btnFetch,
+        ):
+            if w:
+                w.setEnabled(True)
+        if self.pds_btnCancel:
+            self.pds_btnCancel.setVisible(False)
+        if self.pds_progress:
+            self.pds_progress.setRange(0, 100)
+            self.pds_progress.setVisible(False)
+
+    def _pds_on_done(self, summary: str):
+        self._pds_finish_ui()
+        if self.pds_status:
+            self.pds_status.setText("Fetch completed.")
+        QMessageBox.information(self, "PDS", summary or "Fetch completed.")
+
+    def _pds_on_failed(self, err: str):
+        self._pds_finish_ui()
+        if self.pds_status:
+            self.pds_status.setText("Fetch failed.")
+        QMessageBox.critical(self, "PDS", err or "Fetch failed.")
+
+    def _pds_on_canceled(self):
+        self._pds_finish_ui()
+        if self.pds_status:
+            self.pds_status.setText("Canceled.")
+
+    def _pds_on_cancel_clicked(self):
+        if getattr(self, "_pds_worker", None):
+            self._pds_worker.cancel()
+            if self.pds_btnCancel:
+                self.pds_btnCancel.setEnabled(False)
+            if self.pds_status:
+                self.pds_status.setText("Canceling...")
+
+            # If it’s still not finished after ~2s, ask the thread to quit
+            from PyQt5.QtCore import QTimer
+
+            def _nudge_quit():
+                if self._pds_worker and self._pds_worker.isRunning():
+                    self._pds_worker.quit()  # returns when event loop ends
+
+            QTimer.singleShot(2000, _nudge_quit)
 
 
 if __name__ == "__main__":
