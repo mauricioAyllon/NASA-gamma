@@ -1,0 +1,154 @@
+OBJECT = COLUMN
+   COLUMN_NUMBER = 1
+   NAME = DAN_TIME
+   DATA_TYPE = MSB_UNSIGNED_INTEGER
+   BYTES = 4
+   START_BYTE = 1
+   UNIT = MILLISECONDS
+   DESCRIPTION = "DAN time at beginning of interval."
+END_OBJECT = COLUMN
+
+OBJECT = COLUMN
+   COLUMN_NUMBER = 2
+   NAME = UTC_TIMESTAMP
+   DATA_TYPE = CHARACTER
+   BYTES = 23
+   START_BYTE = 5
+   DESCRIPTION = "UTC time at the start of the collection interval,
+   stored as yyyy-mm-ddThh:mm:ss.sss."
+END_OBJECT = COLUMN
+
+OBJECT = COLUMN
+   COLUMN_NUMBER = 3
+   NAME = LATITUDE
+   DATA_TYPE = IEEE_REAL
+   BYTES = 4
+   START_BYTE = 28
+   UNIT = DEGREE
+   DESCRIPTION = "Latitude in Mars fixed coordinates."
+END_OBJECT = COLUMN
+
+OBJECT = COLUMN
+   COLUMN_NUMBER = 4
+   NAME = LONGITUDE
+   DATA_TYPE = IEEE_REAL
+   BYTES = 4
+   START_BYTE = 32
+   UNIT = DEGREE
+   DESCRIPTION = "Easting Longitude in Mars fixed coordinates."
+END_OBJECT = COLUMN
+
+OBJECT = COLUMN
+   COLUMN_NUMBER = 5
+   NAME = COLLECTION_DURATION
+   DATA_TYPE = MSB_UNSIGNED_INTEGER
+   BYTES = 4
+   START_BYTE = 36
+   UNIT = SECOND
+   DESCRIPTION = "Value of collection time register, length of time
+   in seconds."
+END_OBJECT = COLUMN
+
+OBJECT = COLUMN
+   COLUMN_NUMBER = 6
+   NAME = NUM_PNG_PULSES
+   DATA_TYPE = MSB_UNSIGNED_INTEGER
+   BYTES = 4
+   START_BYTE = 40
+   UNIT = COUNT
+   DESCRIPTION = "number of PNG pulses during data collection interval."
+END_OBJECT = COLUMN
+
+OBJECT = COLUMN
+   COLUMN_NUMBER = 7
+   NAME = PNG_FREQUENCY
+   DATA_TYPE = MSB_UNSIGNED_INTEGER
+   BYTES = 1
+   START_BYTE = 44
+   UNIT = COUNT
+   DESCRIPTION = "Pulsing Neutron Generator frequency of pulsing."
+END_OBJECT = COLUMN
+
+OBJECT = COLUMN
+   COLUMN_NUMBER = 8
+   NAME = TIME_BIN_DURATION
+   DATA_TYPE = MSB_UNSIGNED_INTEGER
+   BYTES = 4
+   START_BYTE = 45
+   UNIT = MICROSECOND
+   DESCRIPTION = "duration in microseconds for each time bin."
+END_OBJECT = COLUMN
+
+OBJECT = COLUMN
+   COLUMN_NUMBER = 9
+   NAME = TIME_BIN_START
+   DATA_TYPE = IEEE_REAL
+   BYTES = 256
+   START_BYTE = 49
+   ITEMS = 64
+   ITEM_BYTES = 4
+   UNIT = MICROSECOND
+   DESCRIPTION = "start time in microseconds for each time bin."
+END_OBJECT = COLUMN
+
+OBJECT = COLUMN
+   COLUMN_NUMBER = 10
+   NAME = CTN_BKGD
+   DATA_TYPE = IEEE_REAL
+   BYTES = 256
+   START_BYTE = 305
+   ITEMS = 64
+   ITEM_BYTES = 4
+   UNIT = COUNTS
+   DESCRIPTION = "Background counts for each of 64 CTN detector spectra
+   (counts)."
+END_OBJECT = COLUMN
+
+OBJECT = COLUMN
+   COLUMN_NUMBER = 11
+   NAME = CTN_COUNTS
+   DATA_TYPE = IEEE_REAL
+   BYTES = 256
+   START_BYTE = 561
+   ITEMS = 64
+   ITEM_BYTES = 4
+   UNIT = COUNTS
+   DESCRIPTION = "Counts gathered in CTN detector for each of the 64
+   spectra during frame interval."
+END_OBJECT = COLUMN
+
+OBJECT = COLUMN
+   COLUMN_NUMBER = 12
+   NAME = CETN_BKGD
+   DATA_TYPE = IEEE_REAL
+   BYTES = 256
+   ITEMS = 64
+   ITEM_BYTES = 4
+   START_BYTE = 817
+   UNIT = COUNTS
+   DESCRIPTION = "Background counts for each of the 64 CETN detector
+   (counts)."
+END_OBJECT = COLUMN
+
+OBJECT = COLUMN
+   COLUMN_NUMBER = 13
+   NAME = CETN_COUNTS
+   DATA_TYPE = IEEE_REAL
+   BYTES = 256
+   ITEMS = 64
+   ITEM_BYTES = 4
+   START_BYTE = 1073
+   UNIT = COUNTS
+   DESCRIPTION = "Counts gathered in CETN detector for each of the 64
+   specta during frame interval."
+END_OBJECT = COLUMN
+
+OBJECT = COLUMN
+   NAME = LST
+   COLUMN_NUMBER = 14
+   BYTES = 8
+   DATA_TYPE = CHARACTER
+   START_BYTE = 1329
+   DESCRIPTION = "Local solar time at the start of interval, 'hh:mm:ss'."
+END_OBJECT = COLUMN
+
