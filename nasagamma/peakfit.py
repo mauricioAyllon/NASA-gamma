@@ -214,10 +214,10 @@ class PeakFit:
             # TODO
             if self.search.spectrum.livetime is None:
                 #area_err = np.sqrt(area0)
-                area_err = epar[f"g{i+1}_amplitude"].stderr
+                area_err = epar[f"g{i+1}_amplitude"].stderr / correct_f
             else:
                 #area_err = np.sqrt(area0 / self.search.spectrum.livetime)
-                area_err = epar[f"g{i+1}_amplitude"].stderr / self.search.spectrum.livetime
+                area_err = epar[f"g{i+1}_amplitude"].stderr / correct_f / self.search.spectrum.livetime
             # fwhm_err = epar[f"g{i+1}_fwhm"].stderr
             fwhm_err = epar[f"g{i+1}_sigma"].stderr * 2.355
             dict_peak_err = {
