@@ -58,9 +58,9 @@ class Spectrum:
 
         """
         self.e_units = e_units
-        channels = np.arange(0, len(counts), 1)
         if counts is None:
-            print("ERROR: Must specify counts")
+            raise ValueError("counts must be specified and cannot be None")
+        channels = np.arange(0, len(counts), 1)
         if energies is not None:
             self.energies = np.asarray(energies, dtype=float)
             self.x = self.energies
@@ -87,6 +87,28 @@ class Spectrum:
         else:
             self.y_label = "Cts"
         self.label = label
+        
+    def copy(self):
+        """
+        Return a deep copy of the Spectrum object.
+    
+        Returns
+        -------
+        Spectrum
+            A new Spectrum object with copied data and metadata.
+        """
+        return Spectrum(
+            counts=self.counts.copy(),
+            energies=self.energies.copy() if self.energies is not None else None,
+            e_units=self.e_units,
+            realtime=self.realtime,
+            livetime=self.livetime,
+            cps=self.cps,
+            acq_date=self.acq_date,
+            energy_cal=self.energy_cal,
+            description=self.description,
+            label=self.label,
+        )
 
     def smooth(self, num=4):
         """
@@ -98,13 +120,13 @@ class Spectrum:
         Returns
         -------
         numpy array
-            moving average of counts.
+            moving average of counts. Modifies spectrum in place
 
         """
         df = pd.DataFrame(data=self.counts, columns=["cts"])
         mav = df.cts.rolling(window=num, center=True).mean()
-        mav.fillna(method="bfill", inplace=True)
-        mav.fillna(method="pad", inplace=True)
+        mav.bfill(inplace=True)
+        mav.ffill(inplace=True)
         mav.fillna(0, inplace=True)
         counts_mav = np.array(mav)
         counts_mav_scaled = counts_mav / counts_mav.sum() * self.counts.sum()
@@ -160,7 +182,7 @@ class Spectrum:
             self.counts = np.roll(self.counts, shift=by)
             self.counts[by:] = self.counts[by - 1]
         else:
-            print(f"Cannot roll by {by} units")
+            print(f"No shift applied")
 
     def replace_neg_vals(self):
         """
@@ -232,10 +254,16 @@ class Spectrum:
         
     @staticmethod    
     def fwhm_HPGe_example(E):
+        """
+        FWHM example for HPGe in keV
+        """
         return 0.05*np.sqrt(E) + 0.001*E
     
     @staticmethod
     def fwhm_LaBr_example(E):
+        """
+        FWHM example for LaBr in MeV
+        """
         a = -0.02
         b = 0.044
         c = 0.117 
@@ -330,7 +358,7 @@ class Spectrum:
                 for cts, erg in zip(self.counts, self.energies):
                     f.write(f"{cts},{erg}\n")
 
-    def plot(self, ax=None, scale="log"):
+    def plot(self, ax=None, scale="log", fontsize=14):
         """
         Plot spectrum object using channels and energies (if not None)
 
@@ -344,7 +372,7 @@ class Spectrum:
         None.
 
         """
-        plt.rc("font", size=14)
+        plt.rc("font", size=fontsize)
         plt.style.use("seaborn-v0_8-darkgrid")
 
         if ax is None:
@@ -363,7 +391,7 @@ class Spectrum:
         ax.fill_between(self.x, 0, self.counts, alpha=0.2, color="C1", step="pre")
         ax.plot(self.x, self.counts, drawstyle="steps", alpha=0.7, label=self.label)
         ax.set_yscale(scale)
-        ax.set_xlabel(self.x_units, fontsize=14)
-        ax.set_ylabel(self.y_label, fontsize=14)
+        ax.set_xlabel(self.x_units, fontsize=fontsize)
+        ax.set_ylabel(self.y_label, fontsize=fontsize)
         ax.legend()
         plt.show()
