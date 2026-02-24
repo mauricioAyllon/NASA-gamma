@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-Created on Sat Dec  4 14:16:49 2021
-
-@author: mauricio
-Example Spectrum smoothing/rebinning
+Example Spectrum smoothing
 """
 
 from nasagamma import spectrum as sp
@@ -12,7 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # dataset 1
-file = "data/gui_test_data_labr_uncalibrated.csv"
+file = "../examples/data/gui_test_data_cebr.csv"
 df = pd.read_csv(file)
 
 cts_np = df.counts.to_numpy()
@@ -22,13 +18,8 @@ spect = sp.Spectrum(counts=cts_np)
 
 fig = plt.figure(figsize=(10, 6))
 ax = fig.add_subplot()
-spect.plot(fig=fig, ax=ax)
-
-# # test smoothing by rebinning
-# for i in range(2):
-#     spect.rebin()
-# spect.plot(fig=fig, ax=ax)
+spect.plot(ax=ax)
 
 # test smoothing by moving average
-spect.smooth(num=4)
-spect.plot(fig=fig, ax=ax)
+spect.smooth(num=8)
+spect.plot(ax=ax)
