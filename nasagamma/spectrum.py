@@ -125,9 +125,7 @@ class Spectrum:
         """
         df = pd.DataFrame(data=self.counts, columns=["cts"])
         mav = df.cts.rolling(window=num, center=True).mean()
-        mav.bfill(inplace=True)
-        mav.ffill(inplace=True)
-        mav.fillna(0, inplace=True)
+        mav = mav.bfill().ffill().fillna(0)
         counts_mav = np.array(mav)
         counts_mav_scaled = counts_mav / counts_mav.sum() * self.counts.sum()
         self.counts = counts_mav_scaled
@@ -290,6 +288,96 @@ class Spectrum:
             description=self.description,
             label=self.label,
         )
+    
+    def _check_compatible(self, other):
+        """
+        Check that two spectra are compatible for arithmetic operations.
+    
+        Raises
+        ------
+        ValueError
+            If spectra have different number of bins or mismatched x-axes.
+        """
+        if len(self.counts) != len(other.counts):
+            raise ValueError(
+                f"Spectra have different number of bins: {len(self.counts)} vs {len(other.counts)}"
+            )
+        if not np.array_equal(self.x, other.x):
+            raise ValueError("Spectra have mismatched x-axes and cannot be combined")
+
+    def __add__(self, other):
+        """
+        Add two spectra. Returns a new Spectrum object.
+        Livetimes and realtimes are summed if both are present.
+        """
+        self._check_compatible(other)
+        new_counts = self.counts + other.counts
+        new_livetime = self.livetime + other.livetime if (self.livetime is not None and other.livetime is not None) else None
+        new_realtime = self.realtime + other.realtime if (self.realtime is not None and other.realtime is not None) else None
+        return Spectrum(
+            counts=new_counts,
+            energies=self.energies.copy() if self.energies is not None else None,
+            e_units=self.e_units,
+            realtime=new_realtime,
+            livetime=new_livetime,
+            cps=self.cps,
+        )
+
+    def __sub__(self, other):
+        """
+        Subtract two spectra. Returns a new Spectrum object.
+        """
+        self._check_compatible(other)
+        new_counts = self.counts - other.counts
+        return Spectrum(
+            counts=new_counts,
+            energies=self.energies.copy() if self.energies is not None else None,
+            e_units=self.e_units,
+            cps=self.cps,
+        )
+
+    def __mul__(self, scalar_or_array):
+        """
+        Multiply spectrum counts by a scalar or numpy array. Returns a new Spectrum object.
+        """
+        new_counts = self.counts * scalar_or_array
+        return Spectrum(
+            counts=new_counts,
+            energies=self.energies.copy() if self.energies is not None else None,
+            e_units=self.e_units,
+            realtime=self.realtime,
+            livetime=self.livetime,
+            cps=self.cps,
+        )
+
+    def __rmul__(self, scalar_or_array):
+        """
+        Right multiply — allows expressions like 2 * spectrum.
+        """
+        return self.__mul__(scalar_or_array)
+
+    def __truediv__(self, scalar_or_array):
+        """
+        Divide spectrum counts by a scalar or numpy array. Returns a new Spectrum object.
+        """
+        new_counts = self.counts / scalar_or_array
+        return Spectrum(
+            counts=new_counts,
+            energies=self.energies.copy() if self.energies is not None else None,
+            e_units=self.e_units,
+            realtime=self.realtime,
+            livetime=self.livetime,
+            cps=self.cps,
+        )
+
+    def __radd__(self, other):
+        """
+        Right add — allows use of sum() on a list of Spectrum objects.
+        Handles the sum() initialization value of 0.
+        """
+        if other == 0:
+            return self.copy()
+        return self.__add__(other)
 
     def to_csv(self, fileName):
         """
@@ -310,7 +398,7 @@ class Spectrum:
             data = np.array((self.counts, self.x)).T
         else:
             cols = ["counts"]
-            data = self.counts
+            data = self.counts.reshape(-1, 1)
 
         df = pd.DataFrame(data=data, columns=cols)
         if fileName[-4:] == ".csv":
@@ -386,12 +474,58 @@ class Spectrum:
                 lt = "Livetime = N/A"
             else:
                 lt = f"Livetime = {self.livetime:.3E} s"
-            self.label = f"Total counts = {integral:.3E}\n{lt}"
-
+            label = f"Total counts = {integral:.3E}\n{lt}"
+        else:
+            label = self.label
+        
         ax.fill_between(self.x, 0, self.counts, alpha=0.2, color="C1", step="pre")
-        ax.plot(self.x, self.counts, drawstyle="steps", alpha=0.7, label=self.label)
+        ax.plot(self.x, self.counts, drawstyle="steps", alpha=0.7, label=label)
         ax.set_yscale(scale)
         ax.set_xlabel(self.x_units, fontsize=fontsize)
         ax.set_ylabel(self.y_label, fontsize=fontsize)
         ax.legend()
         plt.show()
+
+def plot_overlay(spectra, scale="log", fontsize=14, colors=None):
+    """
+    Plot multiple spectra on a shared axis.
+
+    Parameters
+    ----------
+    spectra : list of Spectrum
+        List of Spectrum objects to overlay.
+    scale : string, optional
+        Either 'linear' or 'log'. The default is 'log'.
+    fontsize : int, optional
+        Font size for axis labels and legend. The default is 14.
+    colors : list of strings, optional
+        List of colors for each spectrum. If None, matplotlib's
+        default color cycle is used. The default is None.
+
+    Returns
+    -------
+    ax : matplotlib Axes
+        The axes object for further customization.
+    """
+    if not spectra: 
+        raise ValueError("spectra list cannot be empty")
+    plt.rc("font", size=fontsize)
+    plt.style.use("seaborn-v0_8-darkgrid")
+
+    fig = plt.figure(figsize=(10, 6))
+    fig.patch.set_alpha(0.3)
+    ax = fig.add_subplot()
+
+    for i, spec in enumerate(spectra):
+        color = colors[i] if colors is not None else f"C{i}"
+        ax.fill_between(spec.x, 0, spec.counts, alpha=0.2, color=color, step="pre")
+        ax.plot(spec.x, spec.counts, drawstyle="steps", alpha=0.7,
+                label=spec.label, color=color)
+
+    ax.set_yscale(scale)
+    ax.set_xlabel(spectra[0].x_units, fontsize=fontsize)
+    ax.set_ylabel(spectra[0].y_label, fontsize=fontsize)
+    ax.legend()
+    plt.show()
+
+    return ax
