@@ -87,7 +87,29 @@ class Spectrum:
         else:
             self.y_label = "Cts"
         self.label = label
-        
+      
+    def metadata(self):
+        """
+        Return metadata of the Spectrum instance as a dictionary.
+    
+        Returns
+        -------
+        dict
+            Dictionary containing all metadata fields.
+        """
+        return {
+            "label": self.label,
+            "description": self.description,
+            "acq_date": self.acq_date,
+            "realtime": self.realtime,
+            "livetime": self.livetime,
+            "cps": self.cps,
+            "e_units": self.e_units,
+            "energy_cal": self.energy_cal,
+            "n_channels": len(self.counts),
+            "total_counts": self.counts.sum(),
+        }
+    
     def copy(self):
         """
         Return a deep copy of the Spectrum object.
@@ -225,13 +247,19 @@ class Spectrum:
 
             # Poisson sample the counts (simulate noise)
             sampled_count = np.random.poisson(count)
-
+            
             if sampled_count == 0:
                 continue
 
             E_i = x[i]
             fwhm = fwhm_func(E_i)
             sigma = fwhm / 2.355
+            
+            # if sigma is zero or negative, the counts stay in their original
+            # bin rather than being redistributed
+            if sigma <= 0:
+                broadened_counts[i] += sampled_count
+                continue
 
             # Energy window around E_i
             E_min = E_i - nsigmas * sigma
