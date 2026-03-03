@@ -3216,7 +3216,7 @@ class NasaGammaApp(QMainWindow):
             if self.w_peak_find.checkBox_km.isChecked():
                 method = "km"
             else:
-                method = "scipy"
+                method = "fast"
             self.min_snr = float(self.w_peak_find.edit_snr.text())
             self.ref_x = float(self.w_peak_find.edit_ref_ch.text())
             self.ref_fwhm = float(self.w_peak_find.edit_ref_fwhm.text())
@@ -3245,7 +3245,7 @@ class NasaGammaApp(QMainWindow):
                         min_snr=self.min_snr,
                         method=method,
                     )
-                elif method == "scipy":
+                elif method == "fast":
                     self.search = ps.PeakSearch(
                         self.spect,
                         self.ref_x,

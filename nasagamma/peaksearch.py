@@ -1,10 +1,10 @@
 """
+Allows to automatically find peaks in a spectrum object
 """
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import find_peaks
-
 from . import spectrum as sp
 
 
@@ -84,8 +84,8 @@ class PeakSearch:
         xrange : list or numpy array of shape (2,), optional
             specific x range for peak searching. The default is None.
         method : string, optional
-            peak searching method including kernel method (km) and scipy
-            peak finding method (scipy). The default is km.
+            peak searching method including kernel method (km), fast FFT-based
+            method (fast), and scipy peak finding method (scipy). The default is km.
 
         Raises
         ------
@@ -98,37 +98,61 @@ class PeakSearch:
 
         """
         if not isinstance(spectrum, sp.Spectrum):
-            print(f"File type: {type(spectrum)}")
-            raise Exception("spectrum must be a Spectrum object")
-        if xrange is None:
-            self.channel_idx = spectrum.channels
-            self.xrange = xrange
-        elif len(xrange) == 2 and spectrum.energies is not None:
-            ixe = (spectrum.energies >= xrange[0]) & (spectrum.energies <= xrange[1])
-            erange = spectrum.channels[ixe]
-            self.xrange = [erange[0], erange[-1]]
-        elif len(xrange) == 2 and spectrum.energies is None:
-            self.xrange = xrange
-        else:
-            print("ERROR: check that the length of xrange is 2")
-
+            raise TypeError(f"spectrum must be a Spectrum object, got {type(spectrum)} instead")
+            
+        self.xrange, self.channel_idx = self._parse_xrange(xrange, spectrum)
         self.ref_x = ref_x
         self.ref_fwhm = ref_fwhm
         self.fwhm_at_0 = fwhm_at_0
         self.spectrum = spectrum
         self.min_snr = min_snr
         self.method = method
-        self.snr = []
-        self.peak_plus_bkg = []
-        self.bkg = []
-        self.signal = []
-        self.noise = []
-        self.peaks_idx = []
-        self.fwhm_guess = []
+        self.snr = None
+        self.peak_plus_bkg = None
+        self.bkg = None
+        self.signal = None
+        self.noise = None
+        self.peaks_idx = None
+        self.fwhm_guess = None
+        self.edg = None
         if method == "km":
             self.calculate_km()
-        if method == "scipy":
+        elif method == "scipy":
             self.calculate_scipy()
+        elif method == "fast":
+            self.calculate_fast()
+        else:
+            raise ValueError(f"Unknown method '{method}'. Choose from 'km', 'scipy', or 'fast'")
+    
+    def _parse_xrange(self, xrange, spectrum):
+        """
+        Parse and validate the xrange parameter.
+    
+        Parameters
+        ----------
+        xrange : list or numpy array of shape (2,), or None
+            x range for peak searching.
+        spectrum : Spectrum object
+            previously initialized spectrum object.
+    
+        Returns
+        -------
+        xrange : list or None
+            parsed xrange.
+        channel_idx : numpy array of bool
+            boolean mask for the channel range.
+        """
+        if xrange is None:
+            return None, np.ones(len(spectrum.channels), dtype=bool)
+        elif len(xrange) == 2 and spectrum.energies is not None:
+            ixe = (spectrum.energies >= xrange[0]) & (spectrum.energies <= xrange[1])
+            erange = spectrum.channels[ixe]
+            return [erange[0], erange[-1]], ixe
+        elif len(xrange) == 2 and spectrum.energies is None:
+            channel_idx = (spectrum.channels >= xrange[0]) & (spectrum.channels <= xrange[1])
+            return xrange, channel_idx
+        else:
+            raise ValueError("xrange must have exactly 2 elements: [x_min, x_max]")
 
     def fwhm(self, x):
         """
@@ -207,11 +231,6 @@ class PeakSearch:
             # calculate the convolution
             peak_plus_bkg, bkg, signal, noise, snr = self.convolve(self.edg, spect_cts)
         else:
-            x0 = self.xrange[0]
-            x1 = self.xrange[1]
-            self.channel_idx = (self.spectrum.channels >= x0) & (
-                self.spectrum.channels <= x1
-            )
             new_ch = self.spectrum.channels[self.channel_idx]
             new_cts = spect_cts[self.channel_idx]
             self.edg = np.append(new_ch, new_ch[-1] + 1)
@@ -222,21 +241,13 @@ class PeakSearch:
         # find peak indices
         peaks_idx = find_peaks(clipped_snr, height=self.min_snr)[0]
 
-        # remove first and last index (not real peaks)
-        # only when restricting x-range
-        if self.xrange == None:
-            pass
-        else:
-            pass
-            # peaks_idx = peaks_idx[1:-1]
-
         self.fwhm_guess = self.fwhm(peaks_idx)
         self.peak_plus_bkg = peak_plus_bkg
         self.bkg = bkg
         self.signal = signal
         self.noise = noise
         self.snr = clipped_snr
-        if self.xrange == None:
+        if self.xrange is None:
             self.peaks_idx = peaks_idx
         else:
             self.peaks_idx = new_ch[peaks_idx]
@@ -247,31 +258,106 @@ class PeakSearch:
             peaks_idx, params = find_peaks(
                 self.spectrum.counts,
                 prominence=self.min_snr,
-                width=self.fwhm(self.spectrum.counts),
+                width=self.fwhm(self.spectrum.channels),
             )
             self.peaks_idx = peaks_idx
         else:
-            x0 = self.xrange[0]
-            x1 = self.xrange[1]
-            self.channel_idx = (self.spectrum.channels >= x0) & (
-                self.spectrum.channels <= x1
-            )
             new_ch = self.spectrum.channels[self.channel_idx]
             new_cts = self.spectrum.counts[self.channel_idx]
-            new_widths = self.fwhm(new_cts)
+            new_widths = self.fwhm(new_ch)
             peaks_idx, params = find_peaks(
                 new_cts, prominence=self.min_snr, width=new_widths
             )
             self.peaks_idx = new_ch[peaks_idx]
 
         self.fwhm_guess = self.fwhm(self.peaks_idx)
-        self.peak_plus_bkg = None
-        self.bkg = None
-        self.signal = None
-        self.noise = None
         self.snr = params["prominences"]
+    
+    def calculate_fast(self):
+        """
+        Fast peak finding using vectorized FFT convolution.
+        Uses a position-dependent Gaussian derivative kernel evaluated
+        at each channel, approximated via direct convolution.
+        Primary output is peaks_idx and snr. Decomposition components
+        are not computed.
+        """
+        from scipy.signal import fftconvolve
+    
+        if self.spectrum.cps and self.spectrum.livetime is not None:
+            spect_cts = self.spectrum.counts * self.spectrum.livetime
+        else:
+            spect_cts = self.spectrum.counts
+    
+        channels = self.spectrum.channels[self.channel_idx]
+        counts = spect_cts[self.channel_idx]
+        n = len(counts)
+        snr = np.zeros(n)
+    
+        # Evaluate sigma at each channel
+        fwhm_vals = self.fwhm(channels)
+        sigma_vals = fwhm_vals / 2.355
+    
+        # Get unique sigma values rounded to integers to avoid redundant convolutions
+        sigma_rounded = np.round(sigma_vals).astype(int)
+        unique_sigmas = np.unique(sigma_rounded)
+    
+        for sigma in unique_sigmas:
+            if sigma <= 0:
+                continue
+    
+            # Channels where this sigma applies
+            mask = sigma_rounded == sigma
+    
+            # Gaussian derivative kernel
+            kernel_half_width = int(3 * sigma)
+            kernel_x = np.arange(-kernel_half_width, kernel_half_width + 1)
+            kernel = -kernel_x * np.exp(-0.5 * (kernel_x / sigma) ** 2)
+            kernel /= np.abs(kernel).sum()
+    
+            # Noise kernel — moving average over 2*sigma width
+            noise_kernel = np.ones(max(1, int(2 * sigma))) / max(1, int(2 * sigma))
+    
+            # Convolve full spectrum with this kernel
+            conv = fftconvolve(counts, kernel, mode="same")
+            noise = np.sqrt(np.abs(fftconvolve(counts, noise_kernel, mode="same")))
+            noise[noise == 0] = 1
+    
+            # Only write SNR values for channels where this sigma applies
+            snr[mask] = (conv / noise)[mask]
+    
+        clipped_snr = snr.clip(0)
+        peaks_idx = find_peaks(clipped_snr, height=self.min_snr)[0]
+    
+        # Refine peak positions by finding the maximum counts within
+        # a window of fwhm_guess around each candidate peak
+        refined_peaks = []
+        for idx in peaks_idx:
+            fwhm_local = int(self.fwhm(channels[idx]))
+            i_start = max(0, idx - fwhm_local)
+            i_end = min(n, idx + fwhm_local)
+            local_max = np.argmax(counts[i_start:i_end]) + i_start
+            refined_peaks.append(local_max)
+        
+        refined_peaks = np.array(refined_peaks)
+        self.snr = clipped_snr
+        self.peaks_idx = channels[refined_peaks] if self.xrange is not None else refined_peaks
+        self.fwhm_guess = self.fwhm(self.peaks_idx)
+    
+    def _get_x(self):
+        """
+        Return the x-axis values for the current channel range.
+    
+        Returns
+        -------
+        numpy array
+            channels or energies depending on calibration.
+        """
+        if self.spectrum.energies is None:
+            return self.spectrum.channels[self.channel_idx]
+        else:
+            return self.spectrum.energies[self.channel_idx]
 
-    def plot_kernel(self):
+    def plot_kernel(self, ax=None):
         """Plot the 3D matrix of kernels evaluated across the x values."""
         # edges = self.spectrum.channels
         edges = self.edg
@@ -282,19 +368,20 @@ class PeakSearch:
         kern_min = min(kern_min, -1 * kern_max)
         kern_max = max(kern_max, -1 * kern_min)
 
-        plt.figure()
-        plt.imshow(
+        if ax is None:
+            fig = plt.figure(figsize=(10, 6))
+            ax = fig.add_subplot()
+        im = ax.imshow(
             kern_mat.T[::-1, :],
             cmap=plt.get_cmap("bwr"),
             vmin=kern_min,
             vmax=kern_max,
-            extent=[n_channels, 0, 0, n_channels],
-        )
-        plt.colorbar()
-        plt.xlabel("Input x")
-        plt.ylabel("Output x")
-        plt.gca().set_aspect("equal")
-        plt.title("Kernel Matrix")
+            extent=[n_channels, 0, 0, n_channels])
+        plt.colorbar(im, ax=ax)
+        ax.set_xlabel("Input x")
+        ax.set_ylabel("Output x")
+        ax.set_aspect("equal")
+        ax.set_title("Kernel Matrix")
 
     def plot_peaks(self, yscale="linear", snrs="on", ax=None):
         """
@@ -312,11 +399,7 @@ class PeakSearch:
         """
         plt.rc("font", size=12)
         plt.style.use("seaborn-v0_8-darkgrid")
-        if self.spectrum.energies is None:
-            # x = self.spectrum.channels[:-1]
-            x = self.spectrum.channels[self.channel_idx]
-        else:
-            x = self.spectrum.energies[self.channel_idx]
+        x = self._get_x()
         if ax is None:
             fig = plt.figure(figsize=(10, 6))
             ax = fig.add_subplot()
@@ -342,7 +425,7 @@ class PeakSearch:
         ax.set_xlabel(self.spectrum.x_units)
         # plt.style.use("default")
 
-    def plot_components(self, yscale="log"):
+    def plot_components(self, yscale="log", ax=None):
         """
         Plot spectrum components after decomposition.
 
@@ -356,25 +439,19 @@ class PeakSearch:
         None.
 
         """
-        if self.spectrum.energies is None:
-            x = self.spectrum.channels[self.channel_idx]
-        else:
-            x = self.spectrum.energies[self.channel_idx]
+        x = self._get_x()
         plt.rc("font", size=12)
         plt.style.use("seaborn-v0_8-darkgrid")
-        plt.figure(figsize=(10, 6))
-        plt.plot(x, self.spectrum.counts[self.channel_idx], label="Raw spectrum")
-        plt.plot(x, self.peak_plus_bkg.clip(1e-1), label="Peaks+Continuum")
-        plt.plot(x, self.bkg.clip(1e-1), label="Continuum")
-        plt.plot(x, self.signal.clip(1e-1), label="Peaks")
-        plt.plot(x, self.noise.clip(1e-1), label="noise")
-        if yscale == "log":
-            plt.yscale("log")
-        else:
-            plt.yscale("linear")
-        # plt.xlim(0, len(spec))
-        plt.ylim(3e-1)
-        plt.xlabel(self.spectrum.x_units)
-        plt.ylabel(self.spectrum.y_label)
-        plt.legend(loc=1)
-        plt.style.use("default")
+        if ax is None:
+            fig = plt.figure(figsize=(10, 6))
+            ax = fig.add_subplot()
+        ax.plot(x, self.spectrum.counts[self.channel_idx], label="Raw spectrum")
+        ax.plot(x, self.peak_plus_bkg.clip(1e-1), label="Peaks+Continuum")
+        ax.plot(x, self.bkg.clip(1e-1), label="Continuum")
+        ax.plot(x, self.signal.clip(1e-1), label="Peaks")
+        ax.plot(x, self.noise.clip(1e-1), label="noise")
+        ax.set_yscale(yscale)
+        ax.set_ylim(3e-1)
+        ax.set_xlabel(self.spectrum.x_units)
+        ax.set_ylabel(self.spectrum.y_label)
+        ax.legend(loc=1)

@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
 """
-Created on Tue Oct 27 14:24:22 2020
-
-@author: mauricio
 Example of peaksearch functionality
 """
 
