@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import find_peaks
 from . import spectrum as sp
+import pandas as pd
 
 
 def gaussian(x, mean, sigma):
@@ -99,6 +100,21 @@ class PeakSearch:
         """
         if not isinstance(spectrum, sp.Spectrum):
             raise TypeError(f"spectrum must be a Spectrum object, got {type(spectrum)} instead")
+        
+        if not isinstance(ref_x, (int, float)) or ref_x <= 0:
+            raise ValueError("ref_x must be a positive number")
+        
+        if not isinstance(ref_fwhm, (int, float)) or ref_fwhm <= 0:
+            raise ValueError("ref_fwhm must be a positive number")
+        
+        if not isinstance(fwhm_at_0, (int, float)) or fwhm_at_0 <= 0:
+            raise ValueError("fwhm_at_0 must be a positive number")
+        
+        if not isinstance(min_snr, (int, float)) or min_snr <= 0:
+            raise ValueError("min_snr must be a positive number")
+        
+        if method not in ("km", "fast", "scipy"):
+            raise ValueError(f"method must be one of 'km', 'fast', or 'scipy', got '{method}'")
             
         self.xrange, self.channel_idx = self._parse_xrange(xrange, spectrum)
         self.ref_x = ref_x
@@ -154,6 +170,47 @@ class PeakSearch:
         else:
             raise ValueError("xrange must have exactly 2 elements: [x_min, x_max]")
 
+    def metadata(self):
+        """
+        Return metadata of the PeakSearch instance as a dictionary.
+    
+        Returns
+        -------
+        dict
+            Dictionary containing search parameters and results.
+        """
+        return {
+            "ref_x": self.ref_x,
+            "ref_fwhm": self.ref_fwhm,
+            "fwhm_at_0": self.fwhm_at_0,
+            "min_snr": self.min_snr,
+            "method": self.method,
+            "xrange": self.xrange,
+            "n_peaks": len(self.peaks_idx) if self.peaks_idx is not None else 0,
+            "peak_positions": self.peaks_idx,
+            "fwhm_guess": self.fwhm_guess,
+        }
+    def peaks_in_range(self, x_min, x_max):
+        """
+        Return peak positions within a given range.
+    
+        Parameters
+        ----------
+        x_min : int or float
+            minimum x value (channel or energy).
+        x_max : int or float
+            maximum x value (channel or energy).
+    
+        Returns
+        -------
+        numpy array
+            peak positions within the specified range.
+        """
+        if self.peaks_idx is None:
+            raise ValueError("No peaks found. Run calculate_km, calculate_fast, or calculate_scipy first.")
+        mask = (self.peaks_idx >= x_min) & (self.peaks_idx <= x_max)
+        return self.peaks_idx[mask]
+    
     def fwhm(self, x):
         """
         Calculate the expected FWHM at the given x value
@@ -275,11 +332,10 @@ class PeakSearch:
     
     def calculate_fast(self):
         """
-        Fast peak finding using vectorized FFT convolution.
-        Uses a position-dependent Gaussian derivative kernel evaluated
-        at each channel, approximated via direct convolution.
-        Primary output is peaks_idx and snr. Decomposition components
-        are not computed.
+        Fast peak finding using segmented FFT convolution with km-style
+        normalization. Approximates calculate_km using overlapping segments
+        with locally constant sigma. Primary output is peaks_idx and snr.
+        Decomposition components are not computed.
         """
         from scipy.signal import fftconvolve
     
@@ -291,45 +347,46 @@ class PeakSearch:
         channels = self.spectrum.channels[self.channel_idx]
         counts = spect_cts[self.channel_idx]
         n = len(counts)
-        snr = np.zeros(n)
     
-        # Evaluate sigma at each channel
         fwhm_vals = self.fwhm(channels)
         sigma_vals = fwhm_vals / 2.355
+        sigma_min = 0.5
     
-        # Get unique sigma values rounded to integers to avoid redundant convolutions
-        sigma_rounded = np.round(sigma_vals).astype(int)
-        unique_sigmas = np.unique(sigma_rounded)
+        snr = np.zeros(n)
+        n_segments = 100
+        segment_size = n // n_segments
     
-        for sigma in unique_sigmas:
-            if sigma <= 0:
-                continue
+        for seg in range(n_segments):
+            i_start = seg * segment_size
+            i_end = min(n, (seg + 1) * segment_size)
+            mid = (i_start + i_end) // 2
+            sigma = max(sigma_min, sigma_vals[mid])
     
-            # Channels where this sigma applies
-            mask = sigma_rounded == sigma
+            kernel_half_width = max(3, int(4 * sigma))
+            kernel_x = np.arange(-kernel_half_width, kernel_half_width + 1, dtype=float)
     
-            # Gaussian derivative kernel
-            kernel_half_width = int(3 * sigma)
-            kernel_x = np.arange(-kernel_half_width, kernel_half_width + 1)
-            kernel = -kernel_x * np.exp(-0.5 * (kernel_x / sigma) ** 2)
-            kernel /= np.abs(kernel).sum()
+            # Match calculate_km normalization
+            kernel_raw = -kernel_x * np.exp(-0.5 * (kernel_x / sigma) ** 2)
+            kern_pos = kernel_raw.clip(0)
+            kern_neg = -kernel_raw.clip(-np.inf, 0)
+            if kern_neg.sum() > 0:
+                kern_neg *= kern_pos.sum() / kern_neg.sum()
+            kernel = kern_pos - kern_neg
     
-            # Noise kernel — moving average over 2*sigma width
-            noise_kernel = np.ones(max(1, int(2 * sigma))) / max(1, int(2 * sigma))
-    
-            # Convolve full spectrum with this kernel
+            # Convolve with full spectrum for correct boundary behavior
             conv = fftconvolve(counts, kernel, mode="same")
-            noise = np.sqrt(np.abs(fftconvolve(counts, noise_kernel, mode="same")))
+    
+            # Noise matching calculate_km: sqrt(kernel^2 @ counts)
+            noise_conv = fftconvolve(counts, kernel ** 2, mode="same")
+            noise = np.sqrt(np.abs(noise_conv))
             noise[noise == 0] = 1
     
-            # Only write SNR values for channels where this sigma applies
-            snr[mask] = (conv / noise)[mask]
+            snr[i_start:i_end] = (conv / noise)[i_start:i_end]
     
         clipped_snr = snr.clip(0)
         peaks_idx = find_peaks(clipped_snr, height=self.min_snr)[0]
     
-        # Refine peak positions by finding the maximum counts within
-        # a window of fwhm_guess around each candidate peak
+        # Refine peak positions using local argmax within fwhm window
         refined_peaks = []
         for idx in peaks_idx:
             fwhm_local = int(self.fwhm(channels[idx]))
@@ -337,8 +394,8 @@ class PeakSearch:
             i_end = min(n, idx + fwhm_local)
             local_max = np.argmax(counts[i_start:i_end]) + i_start
             refined_peaks.append(local_max)
-        
-        refined_peaks = np.array(refined_peaks)
+    
+        refined_peaks = np.array(refined_peaks) if refined_peaks else np.array([], dtype=int)
         self.snr = clipped_snr
         self.peaks_idx = channels[refined_peaks] if self.xrange is not None else refined_peaks
         self.fwhm_guess = self.fwhm(self.peaks_idx)
@@ -356,7 +413,41 @@ class PeakSearch:
             return self.spectrum.channels[self.channel_idx]
         else:
             return self.spectrum.energies[self.channel_idx]
-
+        
+    def to_csv(self, fileName):
+        """
+        Save peak positions, fwhm guesses, and SNR values at each peak
+        to a CSV file.
+    
+        Parameters
+        ----------
+        fileName : string
+            file name or path of where to save the file.
+    
+        Returns
+        -------
+        None.
+        """
+        if self.peaks_idx is None:
+            raise ValueError("No peaks found. Run calculate_km, calculate_fast, or calculate_scipy first.")
+        
+        if self.spectrum.energies is not None:
+            peak_energies = self.spectrum.energies[self.peaks_idx]
+            cols = {"channel": self.peaks_idx,
+                    f"energy ({self.spectrum.e_units})": peak_energies,
+                    "fwhm_guess": self.fwhm_guess,
+                    "snr": self.snr[self.peaks_idx]}
+        else:
+            cols = {"channel": self.peaks_idx,
+                    "fwhm_guess": self.fwhm_guess,
+                    "snr": self.snr[self.peaks_idx]}
+    
+        df = pd.DataFrame(data=cols)
+        if fileName[-4:] == ".csv":
+            df.to_csv(fileName, index=False)
+        else:
+            df.to_csv(f"{fileName}.csv", index=False)
+            
     def plot_kernel(self, ax=None):
         """Plot the 3D matrix of kernels evaluated across the x values."""
         # edges = self.spectrum.channels
