@@ -458,6 +458,28 @@ def plot_2Dposition(X, Y, pbins, Vmax=None):
     plt.title("Intensity Map")
     plt.show()
 
+def plot_intensity_map2D(H, xrange, yrange, interp="bilinear",
+                         title="Intensity Map", vmax=None):
+    """Plot 2D intensity map"""
+    if vmax is None:
+        vmax = H.max()
+    xmin = xrange[0]
+    xmax = xrange[1]
+    ymin = yrange[0]
+    ymax = yrange[1]
+    plt.figure()
+    plt.imshow(
+        H,
+        extent=[xmin, xmax, ymin, ymax],
+        interpolation=interp,
+        cmap="inferno",
+        vmax=vmax,
+        origin="lower",
+    )
+    
+    plt.title(title)
+    plt.show()
+
 
 def plot_2Dposition_hexbins(df, xkey, ykey, ax, colormap="Grays"):
     if ax is None:
