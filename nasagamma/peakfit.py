@@ -46,6 +46,7 @@ class PeakFit:
         self.search = search
         self.xrange = xrange
         self.continuum = None
+        self.bkg_key = None
         self.bkg = bkg
         self.x_data = None
         self.y_data = None
@@ -157,21 +158,25 @@ class PeakFit:
             lin_mod = lmfit.models.LinearModel(prefix="linear")
             pars = lin_mod.make_params(slope=m, intercept=b)
             model = lin_mod
+            self.bkg_key = "linear"
         elif self.bkg == "quadratic":
             quad_mod = lmfit.models.QuadraticModel(prefix="quadratic")
             pars = quad_mod.guess(y0, x=x0)
             model = quad_mod
+            self.bkg_key = "quadratic"
         elif self.bkg == "exp" or self.bkg == "exponential":
             exp_mod = lmfit.models.ExponentialModel()
             pars = exp_mod.guess(y0, x=x0)
             model = exp_mod
             self.bkg = "exponential"
+            self.bkg_key = "exponential"
         else:
             # assume polynomial of degree n
             n = [int(s) for s in list(self.bkg) if s.isdigit()][0]
             poly_mod = lmfit.models.PolynomialModel(degree=n)
             pars = poly_mod.guess(y0, x=x0)
             model = poly_mod
+            self.bkg_key = "polynomial"
 
         for i in range(npeaks):
             if skeweness:
@@ -192,8 +197,7 @@ class PeakFit:
 
         # save some extra info
         # such as mean, net area, fwhm, continuum, and corresponding errors
-        bkg_key = list(components.keys())[0]
-        self.continuum = components[bkg_key].sum()
+        self.continuum = components[self.bkg_key].sum()
         epar = fit0.params
         for i in range(npeaks):
             mean0 = fit0.best_values[f"g{i+1}_center"]
@@ -209,9 +213,9 @@ class PeakFit:
             area0 = fit0.best_values[f"g{i+1}_amplitude"] / correct_f
             fwhm0 = fit0.best_values[f"g{i+1}_sigma"] * 2.355
             dict_peak_info = {
-                f"mean{i+1}": mean0,
-                f"area{i+1}": area0,
-                f"fwhm{i+1}": fwhm0,
+                "mean": mean0,
+                "area": area0,
+                "fwhm": fwhm0,
             }
             self.peak_info.append(dict_peak_info)
             # errors
@@ -231,9 +235,9 @@ class PeakFit:
             fwhm_err = sig_err * 2.355
             
             dict_peak_err = {
-                f"mean_err{i+1}": mean_err,
-                f"area_err{i+1}": area_err,
-                f"fwhm_err{i+1}": fwhm_err,
+                "mean_err": mean_err,
+                "area_err": area_err,
+                "fwhm_err": fwhm_err,
             }
             self.peak_err.append(dict_peak_err)
 
@@ -285,13 +289,6 @@ class PeakFit:
         if self.search.spectrum.cps and self.search.spectrum.livetime is not None:
             res.redchi = res.redchi * self.search.spectrum.livetime
 
-        if "poly" in self.bkg:
-            n = [int(s) for s in list(self.bkg) if s.isdigit()][0]
-            bkg_label = "polynomial"
-        else:
-            n = "N/A"
-            bkg_label = self.bkg
-
         if plot_type == "simple":
             plt.rc("font", size=12)
             plt.style.use("seaborn-v0_8-darkgrid")
@@ -313,13 +310,13 @@ class PeakFit:
             ax_fit.plot(x, y, "bo", alpha=0.5, label="data")
             ax_fit.plot(x_pred, y_pred, "r", lw=3, alpha=0.5, label="Best fit")
             # ax_fit.set_xlim([x.min(), x.max()])
-            ax_fit.plot(x, comps[f"{bkg_label}"], "g--", lw=3, label=f"bkg: {self.bkg}")
+            ax_fit.plot(x, comps[self.bkg_key], "g--", lw=3, label=f"bkg: {self.bkg}")
             m = 1
             for cp in range(len(comps) - 1):
                 if m == 1:
                     ax_fit.plot(
                         x,
-                        comps[f"{bkg_label}"] + comps[f"g{cp+1}_"],
+                        comps[self.bkg_key] + comps[f"g{cp+1}_"],
                         "k--",
                         lw=2,
                         label="Components",
@@ -327,7 +324,7 @@ class PeakFit:
                     m = 0
                 else:
                     ax_fit.plot(
-                        x, comps[f"{bkg_label}"] + comps[f"g{cp+1}_"], "k--", lw=2
+                        x, comps[self.bkg_key] + comps[f"g{cp+1}_"], "k--", lw=2
                     )
 
             dely = res.eval_uncertainty(x=x_pred, sigma=3)
@@ -379,13 +376,13 @@ class PeakFit:
             ax_fit.plot(x, y, "bo", alpha=0.5, label="data")
             ax_fit.plot(x_pred, y_pred, "r", lw=3, alpha=0.5, label="Best fit")
             # ax_fit.set_xlim([x.min(), x.max()])
-            ax_fit.plot(x, comps[f"{bkg_label}"], "g--", lw=3, label=f"bkg: {self.bkg}")
+            ax_fit.plot(x, comps[self.bkg_key], "g--", lw=3, label=f"bkg: {self.bkg}")
             m = 1
             for cp in range(len(comps) - 1):
                 if m == 1:
                     ax_fit.plot(
                         x,
-                        comps[f"{bkg_label}"] + comps[f"g{cp+1}_"],
+                        comps[self.bkg_key] + comps[f"g{cp+1}_"],
                         "k--",
                         lw=2,
                         label="Components",
@@ -393,7 +390,7 @@ class PeakFit:
                     m = 0
                 else:
                     ax_fit.plot(
-                        x, comps[f"{bkg_label}"] + comps[f"g{cp+1}_"], "k--", lw=2
+                        x, comps[self.bkg_key] + comps[f"g{cp+1}_"], "k--", lw=2
                     )
 
             dely = res.eval_uncertainty(x=x_pred, sigma=3)
@@ -488,12 +485,9 @@ class GaussianComponents:
                 self.peak_err.append(fit_obj.peak_err[i])
                 x_data = fit_obj.x_data
                 self.x_data.append(x_data)
-                m = list(fit_obj.peak_info[i].keys())[0]
-                a = list(fit_obj.peak_info[i].keys())[1]
-                f = list(fit_obj.peak_info[i].keys())[2]
-                mean = fit_obj.peak_info[i][m]
-                area = fit_obj.peak_info[i][a]
-                fwhm = fit_obj.peak_info[i][f]
+                mean = fit_obj.peak_info[i]["mean"]
+                area = fit_obj.peak_info[i]["area"]
+                fwhm = fit_obj.peak_info[i]["fwhm"]
                 g = list(fit_obj.fit_result.eval_components().keys())[i + 1]
                 gauss = comps[g]
                 self.mean.append(mean)
@@ -692,12 +686,9 @@ class AddPeaks:
         for i in range(npeaks):
             self.df.loc[self.n, "x_data"] = x_data
             self.df.loc[self.n, "y_data"] = y_data
-            mean = list(fit_obj.peak_info[i].keys())[0]
-            self.df.loc[self.n, "mean"] = fit_obj.peak_info[i][mean]
-            area = list(fit_obj.peak_info[i].keys())[1]
-            self.df.loc[self.n, "area"] = fit_obj.peak_info[i][area]
-            fwhm = list(fit_obj.peak_info[i].keys())[2]
-            self.df.loc[self.n, "fwhm"] = fit_obj.peak_info[i][fwhm]
+            self.df.loc[self.n, "mean"] = fit_obj.peak_info[i]["mean"]
+            self.df.loc[self.n, "area"] = fit_obj.peak_info[i]["area"]
+            self.df.loc[self.n, "fwhm"] = fit_obj.peak_info[i]["fwhm"]
             self.df.loc[self.n, "best_fit"] = best_fit
             self.df.loc[self.n, "redchi"] = redchi
             self.df.loc[self.n, "bkg"] = comps[bkg]
@@ -705,12 +696,9 @@ class AddPeaks:
             self.df.loc[self.n, "gauss"] = comps[gauss]
             self.df.loc[self.n, "uncertainty"] = uncertainty
             self.df.loc[self.n, "bkg_type"] = bkg_type
-            mean_err = list(fit_obj.peak_err[i].keys())[0]
-            self.df.loc[self.n, "mean_err"] = fit_obj.peak_err[i][mean_err]
-            area_err = list(fit_obj.peak_err[i].keys())[1]
-            self.df.loc[self.n, "area_err"] = fit_obj.peak_err[i][area_err]
-            fwhm_err = list(fit_obj.peak_err[i].keys())[2]
-            self.df.loc[self.n, "fwhm_err"] = fit_obj.peak_err[i][fwhm_err]
+            self.df.loc[self.n, "mean_err"] = fit_obj.peak_err[i]["mean_err"]
+            self.df.loc[self.n, "area_err"] = fit_obj.peak_err[i]["area_err"]
+            self.df.loc[self.n, "fwhm_err"] = fit_obj.peak_err[i]["fwhm_err"]
             self.df.loc[self.n, "x_units"] = fit_obj.x_units
             self.n += 1
         self.df.to_hdf(f"{self.filename}.hdf", key="data")
