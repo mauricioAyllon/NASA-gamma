@@ -10,11 +10,11 @@ import numpy as np
 import pandas as pd
 from nasagamma import peaksearch as ps
 from nasagamma import peakfit as pf
+from nasagamma import file_reader
 
 
 # dataset 1
 file = "data/gui_test_data_cebr.csv"
-df = pd.read_csv(file)
 
 # Required input parameters (in channels)
 fwhm_at_0 = 1.0
@@ -23,7 +23,7 @@ ref_x = 1220
 min_snr = 5
 
 # instantiate a Spectrum object
-spect = sp.Spectrum(counts=df["counts"])
+spect = file_reader.read_csv_file(file)
 
 # peaksearch class
 search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
@@ -31,9 +31,9 @@ search.plot_peaks()
 
 # peakfit class
 bkg0 = "poly1"
-xrange = [1250, 1400]
+xrange = [1250, 1600]
 fit = pf.PeakFit(search, xrange, bkg=bkg0)
-
+print(fit.peak_info)
 res = fit.fit_result
 
 # print(res.fit_report())

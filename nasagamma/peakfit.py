@@ -42,16 +42,16 @@ class PeakFit:
         """
 
         if not isinstance(search, ps.PeakSearch):
-            raise Exception("search must be a PeakSearch object")
+            raise TypeError(f"search must be a PeakSearch object, got {type(search)} instead")
         self.search = search
         self.xrange = xrange
-        self.continuum = 0
+        self.continuum = None
         self.bkg = bkg
-        self.x_data = 0
-        self.y_data = 0
+        self.x_data = None
+        self.y_data = None
         self.peak_info = []
         self.peak_err = []
-        self.fit_result = 0
+        self.fit_result = None
         self.x_units = search.spectrum.x_units
         self.chan = search.spectrum.channels
         if search.spectrum.energies is None:
@@ -81,11 +81,10 @@ class PeakFit:
         )
 
         if sum(mask) == 0:
-            print(f"Found 0 peaks within range {self.xrange}")
-            print("Make sure the SNR is set low enough")
-        else:
-            pass
-            # print(f"Found {sum(mask)} peak(s) within range {self.xrange}")
+            raise ValueError(
+                f"No peaks found within range {self.xrange}. "
+                "Try lowering min_snr or adjusting the xrange."
+            )
         pidx = self.search.peaks_idx[mask]
         return mask, pidx
 
@@ -110,7 +109,13 @@ class PeakFit:
 
         """
         cts = self.search.spectrum.counts
-        m = np.polyfit(self.chan, self.x, 1)[0]  # energy/channel
+        maskx = (self.x > self.xrange[0]) & (self.x < self.xrange[1])
+        chan_range = self.chan[maskx]
+        x_range = self.x[maskx]
+        if len(chan_range) > 1 and self.search.spectrum.energies is not None:
+            m = np.polyfit(chan_range, x_range, 1)[0]  # energy/channel
+        else:
+            m = 1.0
         left = cts[np.where(self.x > self.xrange[0])[0][0]]
         right = cts[np.where(self.x > self.xrange[1])[0][0]]
 
@@ -150,7 +155,7 @@ class PeakFit:
         # guess for us
         if self.bkg == "linear":
             lin_mod = lmfit.models.LinearModel(prefix="linear")
-            pars = lin_mod.make_params(slope=m, itercept=b)
+            pars = lin_mod.make_params(slope=m, intercept=b)
             model = lin_mod
         elif self.bkg == "quadratic":
             quad_mod = lmfit.models.QuadraticModel(prefix="quadratic")
@@ -210,16 +215,21 @@ class PeakFit:
             }
             self.peak_info.append(dict_peak_info)
             # errors
+            
             mean_err = epar[f"g{i+1}_center"].stderr
-            # TODO
+            mean_err = mean_err if mean_err is not None else np.nan
+            
+            amp_err = epar[f"g{i+1}_amplitude"].stderr
+            amp_err = amp_err if amp_err is not None else np.nan
             if self.search.spectrum.livetime is None:
-                #area_err = np.sqrt(area0)
-                area_err = epar[f"g{i+1}_amplitude"].stderr / correct_f
+                area_err = amp_err / correct_f
             else:
-                #area_err = np.sqrt(area0 / self.search.spectrum.livetime)
-                area_err = epar[f"g{i+1}_amplitude"].stderr / correct_f / self.search.spectrum.livetime
-            # fwhm_err = epar[f"g{i+1}_fwhm"].stderr
-            fwhm_err = epar[f"g{i+1}_sigma"].stderr * 2.355
+                area_err = amp_err / correct_f / self.search.spectrum.livetime
+            
+            sig_err = epar[f"g{i+1}_sigma"].stderr
+            sig_err = sig_err if sig_err is not None else np.nan
+            fwhm_err = sig_err * 2.355
+            
             dict_peak_err = {
                 f"mean_err{i+1}": mean_err,
                 f"area_err{i+1}": area_err,
@@ -776,17 +786,15 @@ def auto_scan(search, xlst=None, bkglst=None, plot=False, save_to_hdf=False):
         bkgs = ["poly1", "poly2"]
         for rg in ranges:
             redchi = 1e10
+            fitx = None
             for bk in bkgs:
                 fit0 = PeakFit(search, rg, bkg=bk)
                 if "Fit succeeded." != fit0.fit_result.message:
-                    next
+                    continue
                 elif fit0.fit_result.redchi < redchi:
                     fitx = fit0
                     redchi = fitx.fit_result.redchi
-                else:
-                    fitx = 0
-
-            if plot and fitx != 0:
+            if plot and fitx is not None:
                 fitx.plot(plot_type="full")
             fits.append(fitx)
     elif xlst is not None and bkglst is not None:
