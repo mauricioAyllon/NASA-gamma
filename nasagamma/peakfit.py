@@ -243,9 +243,7 @@ class PeakFit:
 
     def plot(
         self,
-        plot_type="simple",
         legend="on",
-        table_scale=[2, 2.3],
         fig=None,
         ax_res=None,
         ax_fit=None,
@@ -253,16 +251,12 @@ class PeakFit:
     ):
         """
         Plot the data points, best fit, fit components, residual,
-        n-sigma band, and table with the means, net areas, and fwhms.
+        and n-sigma band.
 
         Parameters
         ----------
-        plot_type : string, optional
-            Either "simple" or "full". The default is "simple".
         legend : string, optional
             Either "on" or "off". The default is "on".
-        table_scale : list, optional
-            [length, width] of table. The default is [2,2.3].
         fig : matplotlib figure object, optional
             plotting figure. The default is None.
         ax_res : axis object, optional
@@ -279,8 +273,6 @@ class PeakFit:
         """
         x = self.x_data
         y = self.y_data
-        # init_fit = self.fit_result.init_fit
-        best_fit = self.fit_result.best_fit
         res = self.fit_result
         # predicted values
         x_pred = np.linspace(x[0], x[-1], num=500)
@@ -289,157 +281,56 @@ class PeakFit:
         if self.search.spectrum.cps and self.search.spectrum.livetime is not None:
             res.redchi = res.redchi * self.search.spectrum.livetime
 
-        if plot_type == "simple":
-            plt.rc("font", size=12)
-            plt.style.use("seaborn-v0_8-darkgrid")
-            if fig is None:
-                fig = plt.figure(constrained_layout=True, figsize=(8, 6))
-                gs = fig.add_gridspec(2, 1, height_ratios=[1, 4])
-            if ax_res is None:
-                ax_res = fig.add_subplot(gs[0, 0])
-            if ax_fit is None:
-                ax_fit = fig.add_subplot(gs[1, 0])
-            ax_res.plot(x, res.residual, ".", ms=10, alpha=0.5)
-            ax_res.hlines(y=0, xmin=x.min(), xmax=x.max(), lw=3)
-            ax_res.set_ylabel("Residual")
-            ax_res.set_xlim([x.min(), x.max()])
-            ax_res.set_xticks([])
-            fig.patch.set_alpha(0.3)
+        
+        plt.rc("font", size=12)
+        plt.style.use("seaborn-v0_8-darkgrid")
+        if fig is None:
+            fig = plt.figure(constrained_layout=True, figsize=(8, 6))
+            gs = fig.add_gridspec(2, 1, height_ratios=[1, 4])
+        if ax_res is None:
+            ax_res = fig.add_subplot(gs[0, 0])
+        if ax_fit is None:
+            ax_fit = fig.add_subplot(gs[1, 0])
+        fig.patch.set_alpha(0.3)
+        
+        ax_res.plot(x, res.residual, ".", ms=10, alpha=0.5)
+        ax_res.hlines(y=0, xmin=x.min(), xmax=x.max(), lw=3)
+        ax_res.set_ylabel("Residual")
+        ax_res.set_xlim([x.min(), x.max()])
+        ax_res.set_xticks([])
 
-            ax_fit.set_title(f"Reduced $\chi^2$ = {round(res.redchi,4)}")
-            ax_fit.plot(x, y, "bo", alpha=0.5, label="data")
-            ax_fit.plot(x_pred, y_pred, "r", lw=3, alpha=0.5, label="Best fit")
-            # ax_fit.set_xlim([x.min(), x.max()])
-            ax_fit.plot(x, comps[self.bkg_key], "g--", lw=3, label=f"bkg: {self.bkg}")
-            m = 1
-            for cp in range(len(comps) - 1):
-                if m == 1:
-                    ax_fit.plot(
-                        x,
-                        comps[self.bkg_key] + comps[f"g{cp+1}_"],
-                        "k--",
-                        lw=2,
-                        label="Components",
-                    )
-                    m = 0
-                else:
-                    ax_fit.plot(
-                        x, comps[self.bkg_key] + comps[f"g{cp+1}_"], "k--", lw=2
-                    )
+        ax_fit.set_title(rf"Reduced $\chi^2$ = {res.redchi:.4f}")
+        ax_fit.plot(x, y, "bo", alpha=0.5, label="data")
+        ax_fit.plot(x_pred, y_pred, "r", lw=3, alpha=0.5, label="Best fit")
+        # ax_fit.set_xlim([x.min(), x.max()])
+        ax_fit.plot(x, comps[self.bkg_key], "g--", lw=3, label=f"bkg: {self.bkg}")
+        m = 1
+        for cp in range(len(comps) - 1):
+            if m == 1:
+                ax_fit.plot(
+                    x,
+                    comps[self.bkg_key] + comps[f"g{cp+1}_"],
+                    "k--",
+                    lw=2,
+                    label="Components",
+                )
+                m = 0
+            else:
+                ax_fit.plot(
+                    x, comps[self.bkg_key] + comps[f"g{cp+1}_"], "k--", lw=2
+                )
 
-            dely = res.eval_uncertainty(x=x_pred, sigma=3)
-            ax_fit.fill_between(
-                x_pred,
-                y_pred - dely,
-                y_pred + dely,
-                color="#ABABAB",
-                label="3-$\sigma$ uncertainty band",
-            )
-            ax_fit.set_xlabel(self.x_units)
-            if legend == "on":
-                ax_fit.legend(loc="upper left", ncol=2)
-
-        elif plot_type == "full":
-            cols = ["Mean", "Net_area", "FWHM"]
-            mean = []
-            area = []
-            fwhm = []
-            for i in self.peak_info:
-                ls = list(i.values())
-                mean.append(round(ls[0], 3))
-                area.append(round(ls[1], 3))
-                fwhm.append(round(ls[2], 3))
-
-            rs = np.array([mean, area, fwhm]).T
-            colors = [["lightblue"] * len(cols)] * len(rs)
-            plt.rc("font", size=12)
-            plt.style.use("seaborn-v0_8-darkgrid")
-
-            if fig is None:
-                fig = plt.figure(constrained_layout=True, figsize=(16, 8))
-                gs = fig.add_gridspec(2, 2, width_ratios=[3, 1], height_ratios=[1, 4])
-            if ax_res is None:
-                ax_res = fig.add_subplot(gs[0, 0])
-            if ax_fit is None:
-                ax_fit = fig.add_subplot(gs[1, 0])
-            if ax_tab is None:
-                ax_tab = fig.add_subplot(gs[0:, 1:])
-
-            ax_res.plot(x, res.residual, ".", ms=10, alpha=0.5)
-            ax_res.hlines(y=0, xmin=x.min(), xmax=x.max(), lw=3)
-            ax_res.set_ylabel("Residual")
-            ax_res.set_xlim([x.min(), x.max()])
-            ax_res.set_xticks([])
-            fig.patch.set_alpha(0.3)
-
-            ax_fit.set_title(f"Reduced $\chi^2$ = {round(res.redchi,4)}")
-            ax_fit.plot(x, y, "bo", alpha=0.5, label="data")
-            ax_fit.plot(x_pred, y_pred, "r", lw=3, alpha=0.5, label="Best fit")
-            # ax_fit.set_xlim([x.min(), x.max()])
-            ax_fit.plot(x, comps[self.bkg_key], "g--", lw=3, label=f"bkg: {self.bkg}")
-            m = 1
-            for cp in range(len(comps) - 1):
-                if m == 1:
-                    ax_fit.plot(
-                        x,
-                        comps[self.bkg_key] + comps[f"g{cp+1}_"],
-                        "k--",
-                        lw=2,
-                        label="Components",
-                    )
-                    m = 0
-                else:
-                    ax_fit.plot(
-                        x, comps[self.bkg_key] + comps[f"g{cp+1}_"], "k--", lw=2
-                    )
-
-            dely = res.eval_uncertainty(x=x_pred, sigma=3)
-            ax_fit.fill_between(
-                x_pred,
-                y_pred - dely,
-                y_pred + dely,
-                color="#ABABAB",
-                label="3-$\sigma$ uncertainty band",
-            )
-            ax_fit.set_xlabel(self.x_units)
-            if legend == "on":
-                ax_fit.legend(loc="upper left", ncol=2)
-
-            # errors
-            vals_lst = []
-            for element in self.peak_err:
-                vals_lst.append(list(element.values()))
-            maf = [float(item) for sublist in vals_lst for item in sublist]
-
-            lst1 = []
-            n = 1
-            n2 = 0
-            for i in rs:
-                lst0 = []
-                for j in i:
-                    str0 = f"{round(j,2)} +/- {round(maf[n2],2)}"
-                    lst0.append(str0)
-                    n2 += 1
-                # lst0.insert(0,n)
-                lst1.append(lst0)
-                n += 1
-
-            df = pd.DataFrame(lst1, columns=cols)
-
-            t = ax_tab.table(
-                cellText=df.values,
-                colLabels=cols,
-                loc="center",
-                cellLoc="center",
-                colColours=["palegreen"] * len(cols),
-                cellColours=colors,
-            )
-            t.scale(table_scale[0], table_scale[1])
-            t.auto_set_font_size(False)
-            t.set_fontsize(12)
-            ax_tab.axis("off")
-            # plt.style.use("default")
-
+        dely = res.eval_uncertainty(x=x_pred, sigma=3)
+        ax_fit.fill_between(
+            x_pred,
+            y_pred - dely,
+            y_pred + dely,
+            color="#ABABAB",
+            label=r"3-$\sigma$ uncertainty band",
+        )
+        ax_fit.set_xlabel(self.x_units)
+        if legend == "on":
+            ax_fit.legend(loc="upper left", ncol=2)
 
 class GaussianComponents:
     def __init__(self, fit_obj_lst=None, df_peak=None):
@@ -509,108 +400,50 @@ class GaussianComponents:
             dict_err["fwhm_err"] = self.df_peak.loc[i, "fwhm_err"]
             self.peak_err.append(dict_err)
 
-    def plot_gauss(self, plot_type="simple", table_scale=[1, 3], fig=None, ax=None):
+    def plot_gauss(self, plot_type="simple", fig=None, ax=None):
+        """
+        Plot background subtracted Gaussian components.
+    
+        Parameters
+        ----------
+        plot_type : string, optional
+            Either "simple" or "fwhm". The default is "simple".
+        fig : matplotlib figure object, optional
+            plotting figure. The default is None.
+        ax : matplotlib Axes object, optional
+            axis for plotting. The default is None.
+    
+        Returns
+        -------
+        None.
+        """
+        plt.rc("font", size=12)
+        plt.style.use("seaborn-v0_8-darkgrid")
+        if fig is None:
+            fig = plt.figure(figsize=(12, 8))
+        if ax is None:
+            ax = fig.add_subplot()
+    
         if plot_type == "simple":
-            plt.rc("font", size=12)
-            plt.style.use("seaborn-v0_8-darkgrid")
-            plt.figure(figsize=(12, 8))
             for i in range(self.npeaks):
                 x = self.x_data[i]
                 y = self.gauss[i]
-                plt.fill_between(x, 0, y, alpha=0.2)
+                ax.fill_between(x, 0, y, alpha=0.2)
                 x0 = round(self.mean[i], 2)
                 y0 = y.max()
                 a = round(self.area[i], 2)
                 str0 = f"mean={x0} \narea={a}"
-                plt.text(x0, y0, str0)
-            plt.xlabel(self.x_units)
-            plt.ylabel("Cts")
-            plt.style.use("default")
-
-        elif plot_type == "full":
-            cols = ["Mean", "Net_Area", "FWHM"]
-            mean = self.mean
-            area = self.area
-            fwhm = self.fwhm
-            rs = np.array([mean, area, fwhm]).T
-            rs = np.round(rs, decimals=2)
-            plt.rc("font", size=12)
-            plt.style.use("seaborn-v0_8-darkgrid")
-            fig = plt.figure(constrained_layout=False, figsize=(18, 8))
-            gs = fig.add_gridspec(1, 2, width_ratios=[3, 2.5])  # 5 , 3
-            f_ax1 = fig.add_subplot(gs[0, 0])
-            for i in range(self.npeaks):
-                x = self.x_data[i]
-                y = self.gauss[i]
-                f_ax1.fill_between(x, 0, y, alpha=0.5)
-                x0 = mean[i]
-                y0 = y.max()
-                a = area[i]
-                f_ax1.text(
-                    x0,
-                    y0,
-                    int(i + 1),
-                    bbox=dict(facecolor="red", alpha=0.1),
-                    weight="bold",
-                )
-            f_ax1.set_xlabel(self.x_units)
-            f_ax1.set_ylabel("Cts")
-            f_ax1.set_title("Gaussian Components")
-
-            f_ax2 = fig.add_subplot(gs[0:, 1:])
-            cols.insert(0, "Peak_N")
-            colors = [["lightblue"] * len(cols)] * len(rs)
-
-            # errors
-            vals_lst = []
-            for element in self.peak_err:
-                vals_lst.append(list(element.values()))
-            maf = [float(item) for sublist in vals_lst for item in sublist]
-
-            lst1 = []
-            n = 1
-            n2 = 0
-            for i in rs:
-                lst0 = []
-                for j in i:
-                    str0 = f"{round(j,2)} +/- {round(maf[n2],2)}"
-                    lst0.append(str0)
-                    n2 += 1
-                lst0.insert(0, n)
-                lst1.append(lst0)
-                n += 1
-
-            df = pd.DataFrame(lst1, columns=cols)
-
-            t = f_ax2.table(
-                cellText=df.values,
-                colLabels=cols,
-                loc="center",
-                cellLoc="center",
-                colWidths=[1 / 8, 1 / 3, 1 / 3, 1 / 3],
-                colColours=["palegreen"] * len(cols),
-                cellColours=colors,
-            )
-            t.scale(table_scale[0], table_scale[1])
-            t.auto_set_font_size(False)
-            t.set_fontsize(12)
-            f_ax2.axis("off")
-            plt.style.use("default")
+                ax.text(x0, y0, str0)
+            ax.set_xlabel(self.x_units)
+            ax.set_ylabel("Cts")
+    
         elif plot_type == "fwhm":
-            if fig is None:
-                pass  # remove in later releases
-            if ax is None:
-                plt.rc("font", size=12)
-                plt.style.use("seaborn-v0_8-darkgrid")
-                fig = plt.figure(constrained_layout=False, figsize=(18, 8))
-                ax = fig.add_subplot()
             for i in range(self.npeaks):
                 x = self.x_data[i]
                 y = self.gauss[i]
                 ax.fill_between(x, 0, y, alpha=0.2)
                 x0 = self.mean[i]
                 y0 = y.max()
-                a = self.area[i]
                 ax.text(
                     x0,
                     y0,
@@ -740,7 +573,7 @@ def auto_range(search, fwhm_factor):
     return ranges
 
 
-def auto_scan(search, xlst=None, bkglst=None, plot=False, save_to_hdf=False):
+def auto_scan(search, xlst=None, bkglst=None, plot=False):
     """
     scan a PeakSearch object either automatically or with given xrange and bkg
     lists
@@ -757,8 +590,6 @@ def auto_scan(search, xlst=None, bkglst=None, plot=False, save_to_hdf=False):
         xlst (e.g. poly3). The default is None.
     plot : bool, optional
         plot each PeakFit object. The default is False.
-    save_to_hdf : bool, optional
-        Save to an hdf file (not yet implemented). The default is False.
 
     Returns
     -------
@@ -784,6 +615,13 @@ def auto_scan(search, xlst=None, bkglst=None, plot=False, save_to_hdf=False):
                     redchi = fitx.fit_result.redchi
             if plot and fitx is not None:
                 fitx.plot(plot_type="full")
+            if fitx is None:
+                import warnings
+                warnings.warn(
+                    f"No successful fit found for range {rg}. "
+                    "None appended to fits list.",
+                    UserWarning,
+                )
             fits.append(fitx)
     elif xlst is not None and bkglst is not None:
         ranges = xlst

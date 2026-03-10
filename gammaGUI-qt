@@ -1017,7 +1017,6 @@ class NasaGammaApp(QMainWindow):
                 self.ax_res.clear()
                 self.ax_fit.clear()
                 self.fit.plot(
-                    plot_type="simple",
                     fig=self.fig_fit,
                     ax_res=self.ax_res,
                     ax_fit=self.ax_fit,
@@ -1039,7 +1038,6 @@ class NasaGammaApp(QMainWindow):
                 self.ax_res.clear()
                 self.ax_fit.clear()
                 self.fit.plot(
-                    plot_type="simple",
                     fig=self.fig,
                     ax_res=self.ax_res,
                     ax_fit=self.ax_fit,
@@ -1080,7 +1078,6 @@ class NasaGammaApp(QMainWindow):
         self.fit = pf.PeakFit(self.search, xrange, bkg=self.bg, skew=self.sk_gauss)
         # plot_fit(fit)
         self.fit.plot(
-            plot_type="simple",
             fig=self.fig_fit,
             ax_res=self.ax_res,
             ax_fit=self.ax_fit,

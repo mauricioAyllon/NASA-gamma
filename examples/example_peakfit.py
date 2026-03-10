@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu Oct 15 14:49:45 2020
-
-@author: mauricio
-Example using the peakfit class
+Example usage of the peakfit class
 """
 from nasagamma import spectrum as sp
 import numpy as np
@@ -40,7 +36,7 @@ res = fit.fit_result
 
 # search.plot_peaks()
 
-fit.plot(plot_type="full", legend="on", table_scale=[2, 2.3])
+fit.plot()
 
 
 ## check area under the curve
