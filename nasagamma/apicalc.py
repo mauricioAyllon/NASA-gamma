@@ -488,11 +488,13 @@ def plot_2Dposition_hexbins(df, xkey, ykey, ax, colormap="Grays"):
     df.plot.hexbin(x=xkey, y=ykey, gridsize=80, cmap=colormap, colorbar=None, ax=ax)
 
 
-def plot_energy(en, ebins, erange=[0, 10], ax=None, log=True, **kwargs):
+def plot_energy(en, ebins, erange=None, ax=None, log=True, **kwargs):
     """Plot energy histogram"""
     if ax is None:
         fig = plt.figure(figsize=(10, 6))
         ax = fig.add_subplot()
+    if erange is None:
+        erange = [en.min(), en.max()]
     ax.hist(en, bins=ebins, range=erange, **kwargs)
     if log:
         ax.set_yscale("log")
