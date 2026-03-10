@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu Oct 29 12:14:38 2020
-
-@author: mauricio
 Example using auto_scan
 """
 from nasagamma import spectrum as sp
@@ -10,30 +6,21 @@ import numpy as np
 import pandas as pd
 from nasagamma import peaksearch as ps
 from nasagamma import peakfit as pf
-
-# dataset 1
-file = "data/SSR-mcnp.hdf"
-df = pd.read_hdf(file, key="data")
-df = df.iloc[1:, :]
-
-cts_np = df.cts.to_numpy() * 1e8
-erg = np.array(df.index)
-chan = np.arange(0, len(cts_np), 1)
+from nasagamma import file_reader
 
 # Required input parameters (in channels)
-fwhm_at_0 = 1.0
-ref_fwhm = 31
-ref_x = 1220
-min_snr = 1
+ref_fwhm = 3
+ref_x = 420
+min_snr = 15
 
 # instantiate a Spectrum object
-spect = sp.Spectrum(counts=cts_np)
+file = "Data/gui_test_data_hpge_NH3.txt"
+spect = file_reader.read_txt(file)
 
 # peaksearch class
-search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
+search = ps.PeakSearch(spect, ref_x, ref_fwhm, min_snr=min_snr, method="fast")
 
-
-## plot peak positions (channels)
+## plot peak positions
 search.plot_peaks()
 
 ## auto_scan
@@ -54,4 +41,5 @@ ranges_m = [
     [1086, 1450],
 ]
 
-peak_lst = pf.auto_scan(search, xlst=ranges_m, plot=False, save_to_hdf=False)
+ranges_m = [0,16000]
+peak_lst = pf.auto_scan(search, plot=False)
