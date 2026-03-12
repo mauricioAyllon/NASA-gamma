@@ -812,7 +812,7 @@ class NasaGammaApp(QMainWindow):
         x2 = self.w_adv_fit.edit_x2.text()
         if self.isevaluable(x1) and self.isevaluable(x2) and self.parea is not None:
             peak_range = [eval(x1), eval(x2)]
-            self.parea.calculate_peak_area(prange=peak_range)
+            self.parea.calculate_peak_area(x1=peak_range[0], x2=peak_range[1])
             self.reset_plot_area()
             self.plot_area(bool_area=True)
 
