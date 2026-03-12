@@ -48,4 +48,9 @@ xg = fit.x_data
 Ag = res.best_values["g1_amplitude"]  # should also be the area under the curve!
 mug = res.best_values["g1_center"]
 sigg = res.best_values["g1_sigma"]
+
 gauss = gaussian(xg, Ag, mug, sigg)
+
+print(f"Area using peakfit = {Ag}")
+print(f"Area using independent Gaussian = {gauss.sum()}")
+
