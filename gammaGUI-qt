@@ -2231,7 +2231,7 @@ class NasaGammaApp(QMainWindow):
         try:
             self.reset_spect_params()
             if self.sims_flag or self.calibrated_flag:
-                self.e_units = "Mev"
+                self.e_units = "MeV"
                 self.spect = sp.Spectrum(
                     counts=self.api_gam, energies=self.api_gam_x, e_units=self.e_units
                 )
