@@ -27,12 +27,12 @@ search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=4)
 xrange = [1250, 1600]
 bkg = "poly2"
 fit = pf.PeakFit(search, xrange=xrange, bkg=bkg)
-fit.plot(plot_type="full")
+fit.plot()
 
 # energy calibration
 ch = spect.channels
 peak_info = fit.peak_info
-mean_values = [peak_info[0]["mean1"], peak_info[1]["mean2"]]
+mean_values = [peak_info[0]["mean"], peak_info[1]["mean"]]
 mean_values.insert(0, 0)  # add the origin
 erg = [0, 1173.2, 1332.5]  # in keV
 
