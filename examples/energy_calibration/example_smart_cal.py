@@ -10,7 +10,7 @@ from nasagamma import energy_calibration as ecal
 import matplotlib.pyplot as plt
 import numpy as np
 
-file_hpge = "data/gui_test_data_hpge_NH3.txt"
+file_hpge = "../data/gui_test_data_hpge_NH3.txt"
 
 ## HPGe
 spe_hpge = file_reader.read_txt(file_hpge)

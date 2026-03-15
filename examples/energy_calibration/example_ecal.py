@@ -11,14 +11,12 @@ from nasagamma import spectrum as sp
 from nasagamma import peaksearch as ps
 from nasagamma import peakfit as pf
 from nasagamma import energy_calibration as ecal
+from nasagamma import file_reader
 import matplotlib.pyplot as plt
 import numpy as np
 
-file = "data/gui_test_data_cebr.csv"
-
-df = pd.read_csv(file)
-
-spect = sp.Spectrum(counts=df.counts)
+file = "../data/gui_test_data_cebr.csv"
+spect = file_reader.read_csv(file)
 fwhm_at_0 = 1.0
 ref_x = 1315
 ref_fwhm = 42
@@ -36,19 +34,13 @@ mean_values = [peak_info[0]["mean"], peak_info[1]["mean"]]
 mean_values.insert(0, 0)  # add the origin
 erg = [0, 1173.2, 1332.5]  # in keV
 
-pred_erg, efit = ecal.ecalibration(
-    mean_vals=mean_values, erg=erg, channels=ch, n=1, plot=True, residual=True
-)
+cal = ecal.EnergyCalibration(mean_vals=mean_values, erg=erg, channels=ch,
+                             n=1, e_units="keV")
 
-spect2 = sp.Spectrum(counts=df.counts, energies=pred_erg, e_units="keV")
-spect2.plot()
+cal.plot()
+predicted_energies = cal.predicted
 
-## test table
-# def cal_table(ch_lst, e_lst, sig_lst, e_units=None, ax=None, fig=None):
+spect_cal = sp.Spectrum(counts=spect.counts, energies=predicted_energies, e_units="keV")
+spect_cal.plot()
+plt.title("Calibrated spectrum")
 
-ergs = efit.data
-chs = mean_values
-sigs = efit.eval_uncertainty()
-ecal.cal_table(
-    ch_lst=chs, e_lst=ergs, sig_lst=sigs, t_scale=[1, 1.8], decimals=3, e_units="keV"
-)

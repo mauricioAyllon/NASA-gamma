@@ -291,7 +291,7 @@ def get_channel_data(f, offs_param, offs_chan):
     """Read channel data."""
 
     # Total number of channels
-    n_channels = uint8_at(f, offs_param + 0x00BA) * 256
+    n_channels = int(uint8_at(f, offs_param + 0x00BA)) * 256
     # Data in each channel
     f.seek(offs_chan + 0x200)
     chan_data = np.fromfile(f, dtype="<u4", count=n_channels)
@@ -367,7 +367,7 @@ def markers_integration(dic):
     chan_data = dic["Channels data"]
     l_marker = dic["Left marker"]
     r_marker = dic["Right marker"]
-    marker_counts = np.sum(chan_data[l_marker - 1 : r_marker - 1])
+    marker_counts = np.sum(chan_data[int(l_marker) - 1 : int(r_marker) - 1])
 
     out_dic = {"Counts in markers": marker_counts}
 
