@@ -1194,20 +1194,14 @@ class NasaGammaApp(QMainWindow):
     def perform_cal(self, df):
         self.ax_cal_res.clear()
         self.ax_cal.clear()
-        self.pred_erg, self.efit = ecal.ecalibration(
-            mean_vals=df["Centroid"],
-            erg=df[f"Energy ({self.cal_e_units})"],
-            channels=self.spect.channels,
-            n=self.n,
-            e_units=self.e_units,
-            plot=True,
-            residual=True,
-            fig=self.fig_cal,
-            ax_fit=self.ax_cal,
-            ax_res=self.ax_cal_res,
-        )
+        self.cal = ecal.EnergyCalibration(mean_vals=df["Centroid"],
+                                          erg=df[f"Energy ({self.cal_e_units})"],
+                                          channels=self.spect.channels,
+                                          n=self.n,
+                                          e_units=self.e_units)
+        self.cal.plot(residual=True, ax_fit=self.ax_cal, ax_res=self.ax_cal_res)
         # C0, C1,...
-        coeffs = list(self.efit.best_values.values())
+        coeffs = list(self.cal.fit.best_values.values())
         coeffs_str = []
         for i, c in enumerate(coeffs):
             coeffs_str.append(f"{c:.4E}ch^{i}")
@@ -1262,7 +1256,7 @@ class NasaGammaApp(QMainWindow):
             self.df_ecal_fit[f"Sigma ({self.cal_e_units})"] = [0] * len(self.mean_vals)
             self.perform_cal(self.df_ecal_fit)
             self.df_ecal_fit[f"Sigma ({self.cal_e_units})"] = list(
-                self.efit.eval_uncertainty()
+                self.cal.fit.eval_uncertainty()
             )
             if self.df_ecal_not_fit is not None:
                 self.df_ecal = pd.concat(
@@ -1451,7 +1445,7 @@ class NasaGammaApp(QMainWindow):
             if self.isevaluable(d_txt):
                 erg = erg + eval(d_txt) * ch**3
                 self.ecal_eqn = self.ecal_eqn + f" + {eval(d_txt)}x^3"
-            self.pred_erg = erg
+            self.cal.predicted = erg
             self.which_button_cal_eqn()
             self.plot_cal_eqns(self.ecal_eqn)
         except Exception as e:
@@ -1461,7 +1455,7 @@ class NasaGammaApp(QMainWindow):
     def plot_cal_eqns(self, label):
         self.reset_cal()
         self.ax_cal.clear()
-        self.ax_cal.plot(self.spect.channels, self.pred_erg, lw=3, label=label)
+        self.ax_cal.plot(self.spect.channels, self.cal.predicted, lw=3, label=label)
         self.ax_cal.set_xlabel("Channels")
         self.ax_cal.set_ylabel("Energy (keV)")
         self.ax_cal.legend(fontsize=16)
@@ -1503,7 +1497,7 @@ class NasaGammaApp(QMainWindow):
 
             self.spect = sp.Spectrum(
                 counts=self.spect.counts,
-                energies=self.pred_erg,
+                energies=self.cal.predicted,
                 e_units=e_units,
                 realtime=self.spect.realtime,
                 livetime=self.spect.livetime,
