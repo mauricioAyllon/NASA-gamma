@@ -10,7 +10,7 @@ from nasagamma import file_reader
 
 
 # dataset 1
-file = "data/gui_test_data_cebr.csv"
+file = "../data/gui_test_data_cebr.csv"
 
 # Required input parameters (in channels)
 fwhm_at_0 = 1.0
@@ -19,7 +19,7 @@ ref_x = 1220
 min_snr = 5
 
 # instantiate a Spectrum object
-spect = file_reader.read_csv_file(file)
+spect = file_reader.read_csv(file)
 
 # peaksearch class
 search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)

@@ -3,6 +3,7 @@ Minimum working example of the Spectrum class
 Plus rebinning and smoothing features
 """
 from nasagamma import spectrum as sp
+from nasagamma import file_reader
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd

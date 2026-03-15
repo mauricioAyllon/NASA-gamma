@@ -8,7 +8,7 @@ from nasagamma import file_reader
 # dataset
 file = "../data/gui_test_data_cebr.csv"
 # instantiate a Spectrum object
-spect = file_reader.read_csv_file(file)
+spect = file_reader.read_csv(file)
 
 # Required input parameters (in channels)
 fwhm_at_0 = 1
