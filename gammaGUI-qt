@@ -3717,7 +3717,7 @@ class NasaGammaApp(QMainWindow):
                 fileName_lc = fileName.lower()
                 if fileName_lc[-4:] == ".csv":
                     try:
-                        spect = file_reader.read_csv_file(fileName)
+                        spect = file_reader.read_csv(fileName)
                         e_units = spect.e_units
                     except:
                         self.lynxcsv = file_reader.ReadLynxCsv(fileName)
@@ -3725,16 +3725,14 @@ class NasaGammaApp(QMainWindow):
                         e_units = spect.e_units
 
                 elif fileName_lc[-4:] == ".cnf":
-                    spect = file_reader.read_cnf_to_spect(fileName)
+                    spect = file_reader.read_cnf(fileName)
                     e_units = spect.e_units
                 elif fileName_lc[-4:] == ".mca":
-                    mca = file_reader.ReadMCA(fileName)
-                    spect = mca.spect
+                    spect = file_reader.read_mca(fileName)
                     e_units = "channels"
                 elif fileName_lc[-4:] == ".spe":
-                    spe = file_reader.ReadSPE(fileName)
+                    spect = file_reader.read_spe(fileName)
                     e_units = "channels"
-                    spect = spe.spect
                 elif fileName_lc[-8:] == ".pha.txt":
                     spect = file_reader.read_multiscan(fileName)
                     e_units = spect.e_units
