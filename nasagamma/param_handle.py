@@ -3,11 +3,7 @@ Initial parameter settings for GUI. It is used only when parameters are
 passed directly in the command line.
 """
 
-import pandas as pd
-from nasagamma import spectrum as sp
 from nasagamma import peaksearch as ps
-from nasagamma import read_cnf
-import re
 from nasagamma import file_reader
 
 
@@ -43,7 +39,7 @@ def get_spect_search(commands):
     if file_name[-4:] == ".csv":
         spect = file_reader.read_csv_file(file_name)
     elif file_name[-4:] == ".cnf":
-        spect = file_reader.read_cnf.read_cnf_to_spect(file_name)
+        spect = file_reader.read_cnf.read_cnf(file_name)
     elif file_name[-4:] == ".txt":
         spect = file_reader.read_txt(file_name)
     # peaksearch class
