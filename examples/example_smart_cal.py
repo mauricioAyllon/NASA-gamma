@@ -10,25 +10,45 @@ from nasagamma import energy_calibration as ecal
 import matplotlib.pyplot as plt
 import numpy as np
 
-file_cebr = "data/gui_test_data_cebr.csv"
 file_hpge = "data/gui_test_data_hpge_NH3.txt"
 
-spe_cebr = file_reader.read_csv_file(file_cebr)
+## HPGe
+spe_hpge = file_reader.read_txt(file_hpge)
+energies_orig = spe_hpge.energies
+spe_hpge.remove_calibration()
+spe_hpge.plot()
+plt.title("Spectrum before calibration")
 fwhm_at_0 = 1.0
 ref_x = 420
-ref_fwhm = 20
-search_cebr = ps.PeakSearch(spe_cebr, ref_x, ref_fwhm, fwhm_at_0, min_snr=4)
+ref_fwhm = 3
+search_hpge = ps.PeakSearch(spe_hpge, ref_x, ref_fwhm, fwhm_at_0, min_snr=100,
+                            xrange=[2500,9000])
 
-# list of possible energies
-pos_ergs = [661.7, 1173.2, 1332.5] # common lab sources
-peak_chan = search_cebr.peaks_idx
+pos_ergs = [2223.248, 3853.51, 6129.89-2*511, 6129.89-511, 6129.89]
+peak_chan = search_hpge.peaks_idx
 
-efit = ecal.smart_calibration(channels=peak_chan, set_ergs=pos_ergs)
+result = ecal.smart_calibration(channels=peak_chan, energies=pos_ergs) 
+print(result)
 
-c0 = efit.best_values["c0"]
-c1 = efit.best_values["c1"]
+ch = spe_hpge.channels
+energies_calc = result["c1"]*ch + result["c0"]
 
-energy = c0 + spe_cebr.channels*c1
+vals = result["channels"]
+ergs = result["energies"]
+
+cal = ecal.EnergyCalibration(mean_vals=vals, erg=ergs,
+                             channels=spe_hpge.channels, n=1, e_units="keV")
+cal.plot()
 
 plt.figure()
-plt.plot(energy, spe_cebr.counts)
+plt.plot(energies_orig, energies_calc, "--")
+plt.xlabel("Original energy (keV)")
+plt.ylabel("Calculated energy (keV)")
+
+spe_hpge2 = sp.Spectrum(counts=spe_hpge.counts, energies=energies_calc, e_units="keV")
+spe_hpge2.plot()
+plt.title("Spectrum after calibration")
+
+
+
+
