@@ -202,7 +202,7 @@ class Spectrum:
             self.counts = np.roll(self.counts, shift=by)
             self.counts[by:] = self.counts[by - 1]
         else:
-            print(f"No shift applied")
+            print("No shift applied")
 
     def replace_neg_vals(self):
         """
