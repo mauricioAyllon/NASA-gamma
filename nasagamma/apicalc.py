@@ -426,7 +426,7 @@ def plot_2D_alphas(
     **kwargs,
 ):
     if ax is None:
-        fig = plt.figure(figsize=(10, 6))
+        fig = plt.figure(figsize=(12, 12))
         ax = fig.add_subplot()
     df.plot.hexbin(
         x=xkey,
@@ -434,7 +434,7 @@ def plot_2D_alphas(
         gridsize=hexbins,
         cmap=colormap,
         ax=ax,
-        colorbar=True,
+        colorbar=False,
         extent=xyplane,
         **kwargs,
     )  # , bins="log")
@@ -459,7 +459,7 @@ def plot_2Dposition(X, Y, pbins, Vmax=None):
     plt.show()
 
 def plot_intensity_map2D(H, xrange, yrange, interp="bilinear",
-                         title="Intensity Map", vmax=None):
+                         title="Intensity Map", colormap="plasma", vmax=None):
     """Plot 2D intensity map"""
     if vmax is None:
         vmax = H.max()
@@ -467,12 +467,12 @@ def plot_intensity_map2D(H, xrange, yrange, interp="bilinear",
     xmax = xrange[1]
     ymin = yrange[0]
     ymax = yrange[1]
-    plt.figure()
+    plt.figure(figsize=(12, 12))
     plt.imshow(
         H,
         extent=[xmin, xmax, ymin, ymax],
         interpolation=interp,
-        cmap="inferno",
+        cmap=colormap,
         vmax=vmax,
         origin="lower",
     )
