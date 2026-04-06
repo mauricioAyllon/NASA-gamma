@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
 """
-Created on Wed Nov 18 11:04:27 2020
-
-@author: mauricio
 energy calibration example
 """
 
