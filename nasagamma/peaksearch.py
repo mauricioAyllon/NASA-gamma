@@ -474,7 +474,7 @@ class PeakSearch:
         ax.set_aspect("equal")
         ax.set_title("Kernel Matrix")
 
-    def plot_peaks(self, yscale="linear", snrs="on", ax=None):
+    def plot(self, yscale="linear", snrs="on", ax=None):
         """
         Plot spectrum and their found peak positions.
 

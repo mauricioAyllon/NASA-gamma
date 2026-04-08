@@ -56,17 +56,15 @@ class PeakFit:
         self.x_units = search.spectrum.x_units
         self.chan = search.spectrum.channels
         if search.spectrum.energies is None:
-            # print("Working with channel numbers")
             self.x = search.spectrum.channels
         else:
-            # print("Working with energy values")
             self.x = search.spectrum.energies
         self.gaussians_bkg(skew)
 
     def find_peaks_range(self):
         """
         Find data points within xrange where peaks were found
-        with peaksearch
+        with peaksearch.
 
         Returns
         -------
@@ -133,6 +131,12 @@ class PeakFit:
         """
         Fit one or multiple Gaussians with a given background.
 
+        Weights are derived from the spectrum's counts_err attribute, which
+        carries fully propagated uncertainties (e.g. after background
+        subtraction with livetime scaling). For a plain spectrum this
+        defaults to Poisson sqrt(N), which is identical to the previous
+        sqrt(1/y) formulation.
+
         Returns
         -------
         None.
@@ -140,20 +144,25 @@ class PeakFit:
         """
         maskx = (self.x > self.xrange[0]) * (self.x < self.xrange[1])
         m, b, amp, erg, sig = self.init_values()
-        # number of peaks detected in range
         npeaks = len(erg)
 
         y0 = self.search.spectrum.counts[maskx]
         x0 = self.x[maskx]
-        # zeroes in the data can cause fitting problems
-        y0_min = np.amin(y0[y0 != 0.0])  # find min other than zero
-        y0[y0 == 0.0] = y0_min * 1e-1  # replace zeros by 1/10th of the minimum
+
+        # Use propagated per-bin uncertainties from the Spectrum object.
+        # Guard against any zero errors to avoid infinite weights.
+        err0 = self.search.spectrum.counts_err[maskx].copy()
+        err0[err0 <= 0] = 1.0
+
+        # zeroes in the data can cause fitting problems with some backgrounds;
+        # replace them with a small positive value.
+        y0_min = np.amin(y0[y0 != 0.0]) if np.any(y0 != 0.0) else 1.0
+        y0[y0 == 0.0] = y0_min * 1e-1
+
         self.y_data = y0
         self.x_data = x0
 
-        # For the linear model below, we manually guess
-        # the initial parameters. For the others, we have LMfit
-        # guess for us
+        # Build background model
         if self.bkg == "linear":
             lin_mod = lmfit.models.LinearModel(prefix="linear")
             pars = lin_mod.make_params(slope=m, intercept=b)
@@ -190,26 +199,25 @@ class PeakFit:
             if skeweness:
                 pars[f"g{i+1}_gamma"].set(value=-1)
             model += gauss0
-        fit0 = model.fit(y0, pars, x=x0, weights=np.sqrt(1.0 / y0))
-        # print(fit0.message)
+
+        # weights = 1/σ so that χ² = Σ [(y - f) / σ]²
+        # Using counts_err gives correct weights even for background-subtracted
+        # spectra where the per-bin uncertainty is no longer simply sqrt(N).
+        fit0 = model.fit(y0, pars, x=x0, weights=1.0 / err0)
         components = fit0.eval_components()
         self.fit_result = fit0
 
-        # save some extra info
-        # such as mean, net area, fwhm, continuum, and corresponding errors
+        # Save peak info: mean, net area, fwhm, and corresponding errors
         self.continuum = components[self.bkg_key].sum()
         epar = fit0.params
         for i in range(npeaks):
             mean0 = fit0.best_values[f"g{i+1}_center"]
-            # g0 = components[f"g{i+1}_"]
-            # area0 = g0.sum()
             if self.search.spectrum.energies is None:
                 correct_f = 1
             else:
                 che = self.chan[maskx]
                 correct_f = np.diff(self.search.spectrum.energies[che]).mean()
-            # Correction factor needed for units to be consistent
-            # A = (counts/ch) * keV, so we need to multiply by ch/keV
+            # Correction factor: A = (counts/ch) * keV → multiply by ch/keV
             area0 = fit0.best_values[f"g{i+1}_amplitude"] / correct_f
             fwhm0 = fit0.best_values[f"g{i+1}_sigma"] * 2.355
             dict_peak_info = {
@@ -218,22 +226,22 @@ class PeakFit:
                 "fwhm": fwhm0,
             }
             self.peak_info.append(dict_peak_info)
-            # errors
-            
+
+            # Errors
             mean_err = epar[f"g{i+1}_center"].stderr
             mean_err = mean_err if mean_err is not None else np.nan
-            
+
             amp_err = epar[f"g{i+1}_amplitude"].stderr
             amp_err = amp_err if amp_err is not None else np.nan
             if self.search.spectrum.livetime is None:
                 area_err = amp_err / correct_f
             else:
                 area_err = amp_err / correct_f / self.search.spectrum.livetime
-            
+
             sig_err = epar[f"g{i+1}_sigma"].stderr
             sig_err = sig_err if sig_err is not None else np.nan
             fwhm_err = sig_err * 2.355
-            
+
             dict_peak_err = {
                 "mean_err": mean_err,
                 "area_err": area_err,
@@ -260,7 +268,7 @@ class PeakFit:
         fig : matplotlib figure object, optional
             plotting figure. The default is None.
         ax_res : axis object, optional
-            axis or residual plot. The default is None.
+            axis for residual plot. The default is None.
         ax_fit : axis object, optional
             axis for the best-fit plot. The default is None.
         ax_tab : axis object, optional
@@ -274,14 +282,12 @@ class PeakFit:
         x = self.x_data
         y = self.y_data
         res = self.fit_result
-        # predicted values
         x_pred = np.linspace(x[0], x[-1], num=500)
         y_pred = res.eval(x=x_pred)
         comps = res.eval_components()
         if self.search.spectrum.cps and self.search.spectrum.livetime is not None:
             res.redchi = res.redchi * self.search.spectrum.livetime
 
-        
         plt.rc("font", size=12)
         plt.style.use("seaborn-v0_8-darkgrid")
         if fig is None:
@@ -292,7 +298,7 @@ class PeakFit:
         if ax_fit is None:
             ax_fit = fig.add_subplot(gs[1, 0])
         fig.patch.set_alpha(0.3)
-        
+
         ax_res.plot(x, res.residual, ".", ms=10, alpha=0.5)
         ax_res.hlines(y=0, xmin=x.min(), xmax=x.max(), lw=3)
         ax_res.set_ylabel("Residual")
@@ -302,7 +308,6 @@ class PeakFit:
         ax_fit.set_title(rf"Reduced $\chi^2$ = {res.redchi:.4f}")
         ax_fit.plot(x, y, "bo", alpha=0.5, label="data")
         ax_fit.plot(x_pred, y_pred, "r", lw=3, alpha=0.5, label="Best fit")
-        # ax_fit.set_xlim([x.min(), x.max()])
         ax_fit.plot(x, comps[self.bkg_key], "g--", lw=3, label=f"bkg: {self.bkg}")
         m = 1
         for cp in range(len(comps) - 1):
@@ -332,6 +337,115 @@ class PeakFit:
         if legend == "on":
             ax_fit.legend(loc="upper left", ncol=2)
 
+    def optimize_xrange(self, max_extend=2.0, n_steps=20, verbose=False):
+        """
+        Optimize the fit range by varying the left and right edges symmetrically
+        and selecting the range whose reduced chi-squared is closest to 1.
+
+        The search spans from shrinking the current range inward (to the minimum
+        viable window enclosing all peaks) to expanding it outward by
+        `max_extend` FWHMs beyond each original edge.  A single offset `δ` is
+        applied to both edges simultaneously:
+            tested range = [x0 - δ, x1 + δ]
+        so negative δ shrinks and positive δ expands.
+
+        The objective is min |redchi - 1|, which penalises both under-fitting
+        (redchi >> 1, range too narrow to constrain the background) and
+        over-fitting / noise inclusion (redchi << 1).
+
+        After the search the instance is updated in-place with the best fit.
+
+        Parameters
+        ----------
+        max_extend : float, optional
+            Maximum number of FWHMs by which each edge may be moved outward
+            beyond the original xrange. The default is 2.0.
+        n_steps : int, optional
+            Number of candidate offsets to try. The default is 20.
+        verbose : bool, optional
+            If True, print a summary table of all trials. The default is False.
+
+        Returns
+        -------
+        best_xrange : list
+            The [left, right] range that produced the best fit.
+        best_redchi : float
+            The reduced chi-squared of the best fit.
+        """
+        x0_orig, x1_orig = self.xrange
+
+        # --- Estimate average FWHM in the fit region as the natural step unit ---
+        _, pidx = self.find_peaks_range()
+        mask_peaks = (self.search.peaks_idx >= pidx[0]) & (self.search.peaks_idx <= pidx[-1])
+        avg_fwhm = float(np.mean(self.search.fwhm_guess[mask_peaks]))
+
+        # --- Lower bound on δ: range must keep at least 1σ clearance around
+        #     the outermost peak centres so the Gaussians are never clipped. ---
+        sigma_approx = avg_fwhm / 2.355
+        peak_x = self.x[pidx]
+        inner_left  = float(peak_x[0]  - sigma_approx)   # leftmost allowed left edge
+        inner_right = float(peak_x[-1] + sigma_approx)   # rightmost allowed right edge
+
+        # Start exactly at the original xrange and only widen from there
+        delta_min = 0.0
+        delta_max = max_extend * avg_fwhm
+
+        deltas = np.linspace(delta_min, delta_max, n_steps)
+
+        # --- Grid search ---
+        best_delta   = 0.0
+        best_redchi  = self.fit_result.redchi
+        best_obj     = abs(best_redchi - 1.0)
+        best_fit_obj = None   # will hold the winning lmfit result
+
+        results = []  # for verbose output
+
+        for delta in deltas:
+            trial_range = [x0_orig - delta, x1_orig + delta]
+            try:
+                trial = PeakFit(
+                    self.search,
+                    trial_range,
+                    bkg=self.bkg,
+                    skew=False,
+                )
+                rc = trial.fit_result.redchi
+                obj = abs(rc - 1.0)
+                results.append((delta, trial_range, rc, obj))
+                if obj < best_obj:
+                    best_obj      = obj
+                    best_delta    = delta
+                    best_redchi   = rc
+                    best_fit_obj  = trial
+            except Exception:
+                # range may be invalid (too few points, no peaks, etc.)
+                results.append((delta, trial_range, None, None))
+
+        if verbose:
+            print(f"\n{'δ':>10}  {'left':>10}  {'right':>10}  {'redchi':>10}  {'|χ²-1|':>10}")
+            print("-" * 56)
+            for delta, rng, rc, obj in results:
+                rc_str  = f"{rc:.4f}"  if rc  is not None else "   failed"
+                obj_str = f"{obj:.4f}" if obj is not None else "        "
+                print(f"{delta:10.4f}  {rng[0]:10.4f}  {rng[1]:10.4f}  {rc_str:>10}  {obj_str:>10}")
+            print(f"\nBest δ = {best_delta:.4f}  →  xrange = "
+                  f"[{x0_orig - best_delta:.4f}, {x1_orig + best_delta:.4f}]  "
+                  f"redchi = {best_redchi:.4f}")
+
+        # --- Update instance with best fit ---
+        if best_fit_obj is not None:
+            self.xrange     = best_fit_obj.xrange
+            self.x_data     = best_fit_obj.x_data
+            self.y_data     = best_fit_obj.y_data
+            self.fit_result = best_fit_obj.fit_result
+            self.peak_info  = best_fit_obj.peak_info
+            self.peak_err   = best_fit_obj.peak_err
+            self.continuum  = best_fit_obj.continuum
+            self.bkg_key    = best_fit_obj.bkg_key
+
+        return self.xrange, best_redchi
+
+
 class GaussianComponents:
     def __init__(self, fit_obj_lst=None, df_peak=None):
         """
@@ -343,7 +457,7 @@ class GaussianComponents:
         fit_obj_lst : list, optional
             list of FitPeak objects. The default is None.
         df_peak : pandas dataframe, optional
-            dataframe of peak info as saved by using the class AddPEaks.
+            dataframe of peak info as saved by using the class AddPeaks.
             The default is None.
 
         Returns
@@ -403,7 +517,7 @@ class GaussianComponents:
     def plot_gauss(self, plot_type="simple", fig=None, ax=None):
         """
         Plot background subtracted Gaussian components.
-    
+
         Parameters
         ----------
         plot_type : string, optional
@@ -412,7 +526,7 @@ class GaussianComponents:
             plotting figure. The default is None.
         ax : matplotlib Axes object, optional
             axis for plotting. The default is None.
-    
+
         Returns
         -------
         None.
@@ -423,7 +537,7 @@ class GaussianComponents:
             fig = plt.figure(figsize=(12, 8))
         if ax is None:
             ax = fig.add_subplot()
-    
+
         if plot_type == "simple":
             for i in range(self.npeaks):
                 x = self.x_data[i]
@@ -436,7 +550,7 @@ class GaussianComponents:
                 ax.text(x0, y0, str0)
             ax.set_xlabel(self.x_units)
             ax.set_ylabel("Cts")
-    
+
         elif plot_type == "fwhm":
             for i in range(self.npeaks):
                 x = self.x_data[i]
@@ -503,11 +617,9 @@ class AddPeaks:
             self.df = pd.read_hdf(f"{filename}.hdf", key="data")
 
     def add_peak(self, fit_obj):
-        # need to check it is a fit object
         self.all_peaks.append(fit_obj)
         npeaks = len(fit_obj.peak_info)
 
-        # save to pandas dataframe
         x_data = fit_obj.x_data
         y_data = fit_obj.y_data
         best_fit = fit_obj.fit_result.best_fit
@@ -597,8 +709,6 @@ def auto_scan(search, xlst=None, bkglst=None, plot=False):
         PeakFit objects.
 
     """
-    # TODO: optimize bkg, save to hdf (using AddPeaks),
-    # add checks (fit message, positive area, etc)
     fits = []
     if xlst is None and bkglst is None:
         ranges = auto_range(search, 2)
@@ -628,7 +738,6 @@ def auto_scan(search, xlst=None, bkglst=None, plot=False):
         bkgs = bkglst
         for rg, bk in zip(ranges, bkgs):
             fit0 = PeakFit(search, rg, bkg=bk)
-
             if plot:
                 fit0.plot(plot_type="full")
             fits.append(fit0)
