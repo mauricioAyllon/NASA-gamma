@@ -447,25 +447,24 @@ class TestToCsv:
 
 # ---------------------------------------------------------------------------
 # Plotting
-# ---------------------------------------------------------------------------
 @pytest.mark.filterwarnings("ignore::UserWarning")
 class TestPlotPeaks:
     def test_plot_peaks_runs_without_error(self, ps_hpge_km):
-        ps_hpge_km.plot_peaks()
+        ps_hpge_km.plot()
         plt.close("all")
 
     def test_plot_peaks_returns_none(self, ps_hpge_km):
-        result = ps_hpge_km.plot_peaks()
+        result = ps_hpge_km.plot()
         assert result is None
         plt.close("all")
 
     def test_plot_peaks_with_ax(self, ps_hpge_km):
         fig, ax = plt.subplots()
-        ps_hpge_km.plot_peaks(ax=ax)
+        ps_hpge_km.plot(ax=ax)
         plt.close("all")
 
     def test_plot_peaks_snr_off(self, ps_hpge_km):
-        ps_hpge_km.plot_peaks(snrs="off")
+        ps_hpge_km.plot(snrs="off")
         plt.close("all")
 
 @pytest.mark.filterwarnings("ignore::UserWarning")

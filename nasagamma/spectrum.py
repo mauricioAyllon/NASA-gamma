@@ -548,7 +548,7 @@ class Spectrum:
             ax.legend(fontsize=fontsize)
 
 
-def plot_overlay(spectra, scale="log", fontsize=14, ax=None):
+def plot_overlay(spectra, scale="log", fontsize=14, ax=None, colors=None):
     """
     Plot multiple Spectrum objects on the same axes.
 
@@ -562,13 +562,25 @@ def plot_overlay(spectra, scale="log", fontsize=14, ax=None):
         Font size. The default is 14.
     ax : matplotlib Axes, optional
         Axes to plot on. The default is None.
+    colors : list of str, optional
+        Colors for each spectrum. The default is None (uses matplotlib defaults).
 
     Returns
     -------
-    None.
+    matplotlib Axes
 
     """
+    if not spectra:
+        raise ValueError("spectra list cannot be empty")
     if ax is None:
         fig, ax = plt.subplots()
-    for sp in spectra:
-        sp.plot(ax=ax, scale=scale, fontsize=fontsize)
+    for i, sp in enumerate(spectra):
+        label = sp.label if sp.label is not None else ""
+        color = colors[i] if colors is not None else None
+        ax.plot(sp.x, sp.counts, label=label, ds="steps-mid", color=color)
+        ax.set_xlabel(sp.x_units, fontsize=fontsize)
+        ax.set_ylabel(sp.y_label, fontsize=fontsize)
+        ax.set_yscale(scale)
+        if label:
+            ax.legend(fontsize=fontsize)
+    return ax

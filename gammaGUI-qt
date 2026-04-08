@@ -678,7 +678,7 @@ class NasaGammaApp(QMainWindow):
             self.remove_ticks_fit()
             self.reset_span()
         if fit:
-            self.search.plot_peaks(
+            self.search.plot(
                 yscale=self.scale, snrs=self.snr_state, ax=self.ax_main
             )
             self.span_select()
@@ -2034,7 +2034,7 @@ class NasaGammaApp(QMainWindow):
             self.diag_data.calculate_integral(xmid=xmid, width=width)
         else:
             self.diag_data.fit_peaks(xmid=xmid, width=width)
-        self.diag_data.plot_peaks(ax=self.ax10)
+        self.diag_data.plot(ax=self.ax10)
         self.diag_data.plot_fit_counts(time=False, ax=self.ax11)
         self.diag_data.plot_centroid(time=False, ax=self.ax12)
         self.diag_data.plot_fwhm(time=False, ax=self.ax13)

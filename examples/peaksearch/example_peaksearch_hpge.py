@@ -23,7 +23,7 @@ search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=20, method="km
 t1 = time.time() - t0
 print(f"Kernel method: {t1} s")
 
-search.plot_peaks()
+search.plot()
 
 # instantiate a peaksearch object with fast method
 t2 = time.time()
@@ -33,7 +33,7 @@ search1 = ps.PeakSearch(
 t3 = time.time()-t2
 print(f"Fast method: {t3} s")
 
-search1.plot_peaks()
+search1.plot()
 
 
 

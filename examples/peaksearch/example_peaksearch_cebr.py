@@ -19,14 +19,14 @@ ref_x = 420
 search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=5, method="km")
 # plot kernel, peaks, and components
 search.plot_kernel()
-search.plot_peaks()
+search.plot()
 search.plot_components()
 
 # instantiate a peaksearch object with predetermined range
 search1 = ps.PeakSearch(
     spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=5, xrange=[1200, 1600], method="km"
 )
-search1.plot_peaks(snrs="off")
+search1.plot(snrs="off")
 
 # Print parameters/metadata
 print(search1.metadata())

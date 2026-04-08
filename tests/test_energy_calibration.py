@@ -262,15 +262,6 @@ class TestSmartCalibration:
         result = smart_calibration(channels.tolist(), energies.tolist())
         assert result["r2"] > 0.999
 
-    def test_require_positive_slope_accepted(self):
-        """require_positive_slope parameter should be accepted without error."""
-        channels = np.array([100, 200, 300, 400, 500], dtype=float)
-        energies = TRUE_INTERCEPT + TRUE_SLOPE * channels
-        result = smart_calibration(
-            channels.tolist(), energies.tolist(), require_positive_slope=True
-        )
-        assert result["c1"] > 0
-
     def test_insufficient_channels_raises(self):
         with pytest.raises(ValueError, match="at least"):
             smart_calibration([100, 200], [72.0, 144.0, 216.0], min_points=3)

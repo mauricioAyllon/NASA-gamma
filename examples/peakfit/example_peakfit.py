@@ -23,7 +23,7 @@ spect = file_reader.read_csv(file)
 
 # peaksearch class
 search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr=min_snr)
-search.plot_peaks()
+search.plot()
 
 # peakfit class
 bkg0 = "poly1"
