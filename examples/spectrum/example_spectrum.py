@@ -12,10 +12,13 @@ import pandas as pd
 file = "../data/gui_test_data_cebr_cal.csv"
 df = pd.read_csv(file)
 
-# instantiate a Spectrum object
+# Instantiate a Spectrum object
 spect = sp.Spectrum(counts=df["counts"], energies=df["Energy [keV]"], e_units="keV")
 
-# Print spectrum metadata
+# Print some useful info
+print(spect)
+
+# Print more details (spectrum metadata)
 print(spect.metadata())
 
 fig = plt.figure(figsize=(10, 6))

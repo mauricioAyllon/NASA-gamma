@@ -98,6 +98,17 @@ class Spectrum:
         else:
             self.y_label = "Cts"
         self.label = label
+        
+    def __repr__(self):
+        lt = f"{self.livetime:.3E} s" if self.livetime is not None else "N/A"
+        return (
+            f"Spectrum("
+            f"label={self.label!r}, "
+            f"channels={len(self.counts)}, "
+            f"counts={self.counts.sum():.3E}, "
+            f"livetime={lt}, "
+            f"calibrated={self.energies is not None})"
+        )
 
     def metadata(self):
         """
@@ -163,7 +174,6 @@ class Spectrum:
         counts_mav = np.array(mav)
         counts_mav_scaled = counts_mav / counts_mav.sum() * self.counts.sum()
         self.counts = counts_mav_scaled
-        self.channels = np.arange(0, len(counts_mav_scaled), 1)
         # Recompute default Poisson errors after smoothing
         self.counts_err = np.sqrt(np.maximum(self.counts, 1.0))
 
@@ -223,6 +233,70 @@ class Spectrum:
             self.counts_err[by:] = self.counts_err[by - 1]
         else:
             print("No shift applied")
+            
+    def normalize(self, by="counts"):
+        """
+        Normalize spectrum in place.
+ 
+        Parameters
+        ----------
+        by : str, optional
+            Normalization method. Either 'counts' to divide by total counts,
+            or 'livetime' to divide by livetime. The default is 'counts'.
+ 
+        Returns
+        -------
+        None.
+ 
+        """
+        if by == "counts":
+            total = self.counts.sum()
+            if total == 0:
+                raise ValueError("Cannot normalize: total counts is zero.")
+            self.counts = self.counts / total
+            self.counts_err = self.counts_err / total
+        elif by == "livetime":
+            if self.livetime is None:
+                raise ValueError("Cannot normalize by livetime: livetime is not set.")
+            self.counts = self.counts / self.livetime
+            self.counts_err = self.counts_err / self.livetime
+        else:
+            raise ValueError(f"Unknown normalization method '{by}'. Use 'counts' or 'livetime'.")
+            
+    def roi_counts(self, x1, x2):
+        """
+        Sum counts between two x values (channels or energies).
+ 
+        Parameters
+        ----------
+        x1 : float
+            Lower bound of the region of interest.
+        x2 : float
+            Upper bound of the region of interest.
+ 
+        Returns
+        -------
+        dict with keys:
+            'sum'         : total counts in the ROI.
+            'uncertainty' : 1-sigma uncertainty propagated in quadrature.
+            'n_bins'      : number of bins in the ROI.
+            'x1'          : actual lower bound used.
+            'x2'          : actual upper bound used.
+        """
+        if x1 >= x2:
+            raise ValueError("x1 must be less than x2.")
+        mask = (self.x >= x1) & (self.x <= x2)
+        if not mask.any():
+            raise ValueError(f"No bins found in range [{x1}, {x2}].")
+        roi_counts = self.counts[mask]
+        roi_err = self.counts_err[mask]
+        return {
+            "sum": roi_counts.sum(),
+            "uncertainty": np.sqrt((roi_err**2).sum()),
+            "n_bins": int(mask.sum()),
+            "x1": self.x[mask][0],
+            "x2": self.x[mask][-1],
+        }
 
     def replace_neg_vals(self):
         """
@@ -238,51 +312,50 @@ class Spectrum:
         self.counts[self.counts < 0.0] = y0_min * 1e-1
 
     def gaussian_energy_broadening(self, fwhm_func, nsigmas=3, random_seed=None):
-        """
-        Apply Gaussian energy broadening with preserved Poisson noise characteristics.
-
-        Parameters
-        ----------
-        fwhm_func : callable
-            Function taking energy and returning FWHM at that energy.
-        nsigmas : int, optional
-            Number of sigma to span in the Gaussian kernel. The default is 3.
-        random_seed : int or None
-            Optional seed for reproducibility.
-
-        Returns
-        -------
-        None.
-
-        """
-        if random_seed is not None:
-            np.random.seed(random_seed)
-        counts = self.counts
-        x = self.x
-        broadened_counts = np.zeros_like(counts, dtype=float)
-        for i, count in enumerate(counts):
-            if count <= 0:
-                continue
-            sampled_count = np.random.poisson(count)
-            if sampled_count == 0:
-                continue
-            E_i = x[i]
-            fwhm = fwhm_func(E_i)
-            sigma = fwhm / 2.355
-            if sigma <= 0:
-                broadened_counts[i] += sampled_count
-                continue
-            E_min = E_i - nsigmas * sigma
-            E_max = E_i + nsigmas * sigma
-            mask = (x >= E_min) & (x <= E_max)
-            E_window = x[mask]
-            idx_window = np.where(mask)[0]
-            kernel = np.exp(-0.5 * ((E_window - E_i) / sigma) ** 2)
-            kernel /= kernel.sum()
-            redistributed = np.random.multinomial(sampled_count, kernel)
-            broadened_counts[idx_window] += redistributed
-        self.counts = broadened_counts
-        self.counts_err = np.sqrt(np.maximum(self.counts, 1.0))
+          """
+          Apply Gaussian energy broadening with preserved Poisson noise characteristics.
+     
+          Parameters
+          ----------
+          fwhm_func : callable
+              Function taking energy and returning FWHM at that energy.
+          nsigmas : int, optional
+              Number of sigma to span in the Gaussian kernel. The default is 3.
+          random_seed : int or None
+              Optional seed for reproducibility.
+     
+          Returns
+          -------
+          None.
+     
+          """
+          rng = np.random.default_rng(random_seed)
+          counts = self.counts
+          x = self.x
+          broadened_counts = np.zeros_like(counts, dtype=float)
+          for i, count in enumerate(counts):
+              if count <= 0:
+                  continue
+              sampled_count = rng.poisson(count)
+              if sampled_count == 0:
+                  continue
+              E_i = x[i]
+              fwhm = fwhm_func(E_i)
+              sigma = fwhm / 2.355
+              if sigma <= 0:
+                  broadened_counts[i] += sampled_count
+                  continue
+              E_min = E_i - nsigmas * sigma
+              E_max = E_i + nsigmas * sigma
+              mask = (x >= E_min) & (x <= E_max)
+              E_window = x[mask]
+              idx_window = np.where(mask)[0]
+              kernel = np.exp(-0.5 * ((E_window - E_i) / sigma) ** 2)
+              kernel /= kernel.sum()
+              redistributed = rng.multinomial(sampled_count, kernel)
+              broadened_counts[idx_window] += redistributed
+          self.counts = broadened_counts
+          self.counts_err = np.sqrt(np.maximum(self.counts, 1.0))
 
     @staticmethod
     def fwhm_HPGe_example(E):
@@ -522,7 +595,7 @@ class Spectrum:
     def plot(self, ax=None, scale="log", fontsize=14):
         """
         Plot spectrum object using channels and energies (if not None).
-
+ 
         Parameters
         ----------
         scale : string, optional
@@ -531,20 +604,20 @@ class Spectrum:
             Axes to plot on. The default is None (creates new figure).
         fontsize : int, optional
             Font size. The default is 14.
-
+ 
         Returns
         -------
-        None.
-
+        matplotlib Axes
+ 
         """
         plt.rc("font", size=fontsize)
         plt.style.use("seaborn-v0_8-darkgrid")
-
+ 
         if ax is None:
            fig = plt.figure(figsize=(10, 6))
            fig.patch.set_alpha(0.3)  # set background transparent
            ax = fig.add_subplot()
-
+ 
         integral = round(self.counts.sum())
         if self.label is None:
              if self.livetime is None:
@@ -561,7 +634,7 @@ class Spectrum:
         ax.set_xlabel(self.x_units, fontsize=fontsize)
         ax.set_ylabel(self.y_label, fontsize=fontsize)
         ax.legend()
-        plt.show()
+        return ax
 
 
 def plot_overlay(spectra, scale="log", fontsize=14, ax=None, colors=None):
@@ -603,6 +676,5 @@ def plot_overlay(spectra, scale="log", fontsize=14, ax=None, colors=None):
     ax.set_yscale(scale)
     ax.set_xlabel(spectra[0].x_units, fontsize=fontsize)
     ax.set_ylabel(spectra[0].y_label, fontsize=fontsize)
-    ax.legend()
-    plt.show()    
+    ax.legend()  
     return ax

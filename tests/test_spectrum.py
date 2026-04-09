@@ -366,9 +366,9 @@ class TestPlot:
         assert spec_no_cal.label is None
         plt.close("all")
 
-    def test_plot_returns_none(self, spec_no_cal):
+    def test_plot_returns_ax(self, spec_no_cal):
         result = spec_no_cal.plot()
-        assert result is None
+        assert isinstance(result, plt.Axes)
         plt.close("all")
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
