@@ -537,21 +537,37 @@ class Spectrum:
         None.
 
         """
+        plt.rc("font", size=fontsize)
+        plt.style.use("seaborn-v0_8-darkgrid")
+
         if ax is None:
-            fig, ax = plt.subplots()
-        label = self.label if self.label is not None else ""
-        ax.plot(self.x, self.counts, label=label, ds="steps-mid")
+           fig = plt.figure(figsize=(10, 6))
+           fig.patch.set_alpha(0.3)  # set background transparent
+           ax = fig.add_subplot()
+
+        integral = round(self.counts.sum())
+        if self.label is None:
+             if self.livetime is None:
+                 lt = "Livetime = N/A"
+             else:
+                 lt = f"Livetime = {self.livetime:.3E} s"
+             label = f"Total counts = {integral:.3E}\n{lt}"
+        else:
+             label = self.label
+       
+        ax.fill_between(self.x, 0, self.counts, alpha=0.2, color="C1", step="pre")
+        ax.plot(self.x, self.counts, drawstyle="steps", alpha=0.7, label=label)
+        ax.set_yscale(scale)
         ax.set_xlabel(self.x_units, fontsize=fontsize)
         ax.set_ylabel(self.y_label, fontsize=fontsize)
-        ax.set_yscale(scale)
-        if label:
-            ax.legend(fontsize=fontsize)
+        ax.legend()
+        plt.show()
 
 
 def plot_overlay(spectra, scale="log", fontsize=14, ax=None, colors=None):
     """
     Plot multiple Spectrum objects on the same axes.
-
+ 
     Parameters
     ----------
     spectra : list of Spectrum
@@ -564,23 +580,29 @@ def plot_overlay(spectra, scale="log", fontsize=14, ax=None, colors=None):
         Axes to plot on. The default is None.
     colors : list of str, optional
         Colors for each spectrum. The default is None (uses matplotlib defaults).
-
+ 
     Returns
     -------
     matplotlib Axes
-
+ 
     """
     if not spectra:
         raise ValueError("spectra list cannot be empty")
+    plt.rc("font", size=fontsize)
+    plt.style.use("seaborn-v0_8-darkgrid")
     if ax is None:
-        fig, ax = plt.subplots()
-    for i, sp in enumerate(spectra):
-        label = sp.label if sp.label is not None else ""
-        color = colors[i] if colors is not None else None
-        ax.plot(sp.x, sp.counts, label=label, ds="steps-mid", color=color)
-        ax.set_xlabel(sp.x_units, fontsize=fontsize)
-        ax.set_ylabel(sp.y_label, fontsize=fontsize)
-        ax.set_yscale(scale)
-        if label:
-            ax.legend(fontsize=fontsize)
+        fig = plt.figure(figsize=(10, 6))
+        fig.patch.set_alpha(0.3)
+        ax = fig.add_subplot()
+    for i, spec in enumerate(spectra):
+        color = colors[i] if colors is not None else f"C{i}"
+        label = spec.label if spec.label is not None else f"Spectrum {i + 1}"
+        ax.fill_between(spec.x, 0, spec.counts, alpha=0.2, color=color, step="pre")
+        ax.plot(spec.x, spec.counts, drawstyle="steps", alpha=0.7,
+                label=label, color=color)
+    ax.set_yscale(scale)
+    ax.set_xlabel(spectra[0].x_units, fontsize=fontsize)
+    ax.set_ylabel(spectra[0].y_label, fontsize=fontsize)
+    ax.legend()
+    plt.show()    
     return ax
