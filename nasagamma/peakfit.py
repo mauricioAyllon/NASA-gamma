@@ -255,7 +255,6 @@ class PeakFit:
         fig=None,
         ax_res=None,
         ax_fit=None,
-        ax_tab=None,
     ):
         """
         Plot the data points, best fit, fit components, residual,
@@ -271,8 +270,6 @@ class PeakFit:
             axis for residual plot. The default is None.
         ax_fit : axis object, optional
             axis for the best-fit plot. The default is None.
-        ax_tab : axis object, optional
-            axis for the table plot. The default is None.
 
         Returns
         -------
