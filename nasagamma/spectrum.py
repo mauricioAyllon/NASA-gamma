@@ -370,6 +370,78 @@ class Spectrum:
         c = 0.117
         return a + b * np.sqrt(E + c * E ** 2)
 
+    def apply_calibration(self, cal):
+        """
+        Apply an energy calibration to the spectrum in place.
+
+        Evaluates the calibration at this spectrum's channel positions and
+        updates ``energies``, ``x``, ``x_units``, ``e_units``, and
+        ``energy_cal``.  Compatible with both ``EnergyCalibration`` (lmfit
+        polynomial) and ``PiecewiseLinearCalibration``.
+
+        Parameters
+        ----------
+        cal : EnergyCalibration or PiecewiseLinearCalibration
+            A fitted calibration object that exposes either:
+
+            * a ``channel_to_energy(channels)`` method
+              (``PiecewiseLinearCalibration``), or
+            * an lmfit ``fit`` attribute with an ``eval(x=channels)`` method
+              (``EnergyCalibration``).
+
+        Returns
+        -------
+        None.
+
+        Raises
+        ------
+        TypeError
+            If ``cal`` is not a recognised calibration object.
+
+        Examples
+        --------
+        >>> from nasagamma.energy_calibration import EnergyCalibration
+        >>> cal = EnergyCalibration(mean_vals, erg, spectrum.channels, n=1)
+        >>> spectrum.apply_calibration(cal)
+        """
+        ch = self.channels.astype(float)
+
+        # --- evaluate energies at this spectrum's channel positions ----------
+        if hasattr(cal, "channel_to_energy"):
+            # PiecewiseLinearCalibration
+            energies = cal.channel_to_energy(ch)
+        elif hasattr(cal, "fit") and hasattr(cal.fit, "eval"):
+            # EnergyCalibration (lmfit-based polynomial)
+            energies = cal.fit.eval(x=ch)
+        else:
+            raise TypeError(
+                "cal must be an EnergyCalibration or PiecewiseLinearCalibration "
+                "instance."
+            )
+
+        # --- energy units ----------------------------------------------------
+        e_units = getattr(cal, "e_units", None)
+
+        # --- human-readable equation string for record keeping ---------------
+        if hasattr(cal, "_build_equation"):
+            # EnergyCalibration: single polynomial equation
+            energy_cal_str = cal._build_equation()
+        elif hasattr(cal, "_build_equations"):
+            # PiecewiseLinearCalibration: returns a (eq1, eq2) tuple
+            eq1, eq2 = cal._build_equations()
+            energy_cal_str = f"Seg1: {eq1}  |  Seg2: {eq2}"
+        elif hasattr(cal, "metadata"):
+            energy_cal_str = str(cal.metadata())
+        else:
+            energy_cal_str = repr(cal)
+
+        # --- update spectrum attributes in place -----------------------------
+        self.energies = energies
+        self.x = energies
+        self.e_units = e_units
+        self.x_units = f"Energy ({e_units})" if e_units is not None else "Energy"
+        self.energy_cal = energy_cal_str
+
     def remove_calibration(self):
         """
         Remove energy calibration and reinitialize Spectrum object.
