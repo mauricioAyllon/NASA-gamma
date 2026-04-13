@@ -70,7 +70,7 @@ def dfe(df, erange, ekey="energy"):
     return dfenergy
 
 
-def dfxy(df, xrange, yrange, xkey="X", ykey="X"):
+def dfxy(df, xrange, yrange, xkey="X", ykey="Y"):
     """Return a pandas data frame filtered in x-y"""
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a pandas dataframe")
@@ -82,6 +82,17 @@ def dfxy(df, xrange, yrange, xkey="X", ykey="X"):
     ]
     return df_xy
 
+def dfxy_exclude(df, xrange, yrange, xkey="X", ykey="Y"):
+    """Return a pandas DataFrame with rows inside the x-y range excluded (only edges remain)."""
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a pandas DataFrame")
+    df_xy = df[
+        (df[xkey] <= xrange[0])
+        | (df[xkey] >= xrange[1])
+        | (df[ykey] <= yrange[0])
+        | (df[ykey] >= yrange[1])
+    ]
+    return df_xy
 
 def dfxye(df, xrange, yrange, erange, xkey="X", ykey="Y", ekey="energy"):
     """Return a pandas data frame filtered in x-y and energy"""
