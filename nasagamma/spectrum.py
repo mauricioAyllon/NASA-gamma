@@ -522,6 +522,8 @@ class Spectrum:
         """
         Subtract two spectra. Returns a new Spectrum object.
         Errors are propagated in quadrature: σ₃ = sqrt(σ₁² + σ₂²).
+        The livetime and realtime of the left-hand spectrum are preserved so
+        that peak areas and their errors remain in consistent units (counts/s).
 
         For background subtraction with different livetimes, scale the
         background first:
@@ -538,6 +540,8 @@ class Spectrum:
             counts_err=new_err,
             energies=self.energies.copy() if self.energies is not None else None,
             e_units=self.e_units,
+            realtime=self.realtime,
+            livetime=self.livetime,
             cps=self.cps,
         )
 

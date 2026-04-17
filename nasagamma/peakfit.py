@@ -203,7 +203,13 @@ class PeakFit:
         # weights = 1/σ so that χ² = Σ [(y - f) / σ]²
         # Using counts_err gives correct weights even for background-subtracted
         # spectra where the per-bin uncertainty is no longer simply sqrt(N).
-        fit0 = model.fit(y0, pars, x=x0, weights=1.0 / err0)
+        # scale_covar=False: treat the provided weights as absolute (known)
+        # uncertainties — do NOT rescale the covariance matrix by chi²_reduced.
+        # With scale_covar=True (lmfit default), over-fitted spectra (e.g. after
+        # background subtraction) get chi²_red < 1 and their errors are
+        # artificially deflated, breaking the expected propagation relationship
+        # err_net ≈ sqrt(err1² + err2²).
+        fit0 = model.fit(y0, pars, x=x0, weights=1.0 / err0, scale_covar=False)
         components = fit0.eval_components()
         self.fit_result = fit0
 
