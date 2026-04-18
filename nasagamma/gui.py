@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Usage:
   gammaGUI-qt <file_name> [options]
@@ -3750,7 +3749,7 @@ class NasaGammaApp(QMainWindow):
         return fileName, e_units, spect
 
 
-if __name__ == "__main__":
+def main():
     commands = docopt.docopt(__doc__)
     print(commands)
 
@@ -3763,3 +3762,7 @@ if __name__ == "__main__":
     window = NasaGammaApp(commands)
     window.show()
     app.exec_()
+
+
+if __name__ == "__main__":
+    main()

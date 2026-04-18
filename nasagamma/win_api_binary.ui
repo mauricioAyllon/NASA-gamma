@@ -930,7 +930,7 @@
   <customwidget>
    <class>MplWidget</class>
    <extends>QWidget</extends>
-   <header>mplwidget.h</header>
+   <header>nasagamma/mplwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

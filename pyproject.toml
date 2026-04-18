@@ -1,23 +1,48 @@
 [build-system]
-module = "nasagamma"
-author = "Mauricio Ayllon Unzueta"
-author-email = "mauri.ayllon12@gmail.com"
-home-page = "https://github.com/mauricioAyllon/NASA-gamma"
-requires = [
-    "pandas",
-    "numpy",
-    "matplotlib",
-    "scipy",
-    "lmfit",
-    "setuptools>=42",
-    "wheel",
-    "setuptools_scm[toml]>=3.4"
+requires = ["setuptools>=64", "setuptools_scm[toml]>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nasagamma"
+dynamic = ["version"]
+description = "Gamma spectroscopy tools"
+readme = "README.md"
+authors = [
+    {name = "Mauricio Ayllon Unzueta", email = "mauri.ayllon12@gmail.com"},
 ]
-description-file="README.md"
-classifiers=[
+classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+requires-python = ">=3.8"
+dependencies = [
+    "docopt >= 0.6.2",
+    "lmfit > 1.0.2",
+    "dateparser >= 1.1.1",
+    "pandas > 1.4.2",
+    "matplotlib >= 3.6.3",
+    "mplcursors >= 0.5.2",
+    "pyarrow >= 11.0.0",
+    "natsort >= 7.1.1",
+    "plotly >= 5.22.0",
+    "scipy >= 1.9.3",
+    "PyQtWebEngine",
+    "msgspec",
+    "bitstruct",
+]
+
+[project.urls]
+Homepage = "https://github.com/mauricioAyllon/NASA-gamma"
+
+[project.scripts]
+gammaGUI-qt = "nasagamma.gui:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nasagamma*"]
+
+[tool.setuptools.package-data]
+nasagamma = ["data/*.txt", "data/*.csv", "*.ui"]
 
 [tool.setuptools_scm]
 write_to = "nasagamma/version.py"
