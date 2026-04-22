@@ -1,3 +1,9 @@
+> [!WARNING]
+> **This repository is legacy and no longer actively maintained.**
+> Development has moved to the official NASA Planetary Science package:
+> **[NASA-Planetary-Science/wara](https://github.com/NASA-Planetary-Science/wara)**
+> Please use `wara` for all new work.
+
 # NASA-gamma
 Gamma spectrocopy tools and visualizations. Some of its capabilitis include:
 
